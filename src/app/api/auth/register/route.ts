@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
@@ -46,7 +47,9 @@ export async function POST(request: Request) {
       { message: "تم إنشاء الحساب بنجاح، الحساب في انتظار التفعيل." },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
+    console.error("REGISTER_ERROR:", error);
+
     return NextResponse.json(
       { message: "حدث خطأ أثناء إنشاء الحساب." },
       { status: 500 }
