@@ -31,12 +31,14 @@ export async function POST(request: Request) {
 
     const passwordHash = await hash(password, 12);
 
+    const userStatus = role === "CUSTOMER" ? "ACTIVE" : "PENDING";
+
     await prisma.user.create({
       data: {
         email,
         passwordHash,
         role,
-        status: "PENDING",
+        status: userStatus,
         profile: {
           create: { displayName }
         }
@@ -44,7 +46,12 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { message: "تم إنشاء الحساب بنجاح، الحساب في انتظار التفعيل." },
+      {
+        message:
+          role === "CUSTOMER"
+            ? "تم إنشاء حسابك بنجاح، يمكنك تسجيل الدخول الآن."
+            : "تم إنشاء حساب مقدم الخدمة بنجاح، حسابك في انتظار موافقة الإدارة."
+      },
       { status: 201 }
     );
   } catch (error) {
