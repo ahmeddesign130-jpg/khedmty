@@ -1,13 +1,12 @@
-import { z } from "zod";
+import { PrismaClient } from "@prisma/client";
 
-export const registerSchema = z.object({
-  email: z.email().max(254),
-  password: z.string().min(10).max(72),
-  role: z.enum(["CUSTOMER", "PROVIDER"]).default("CUSTOMER"),
-  displayName: z.string().trim().min(2).max(70)
-});
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-export const loginSchema = z.object({
-  email: z.email().max(254),
-  password: z.string().min(1).max(72)
-});
+export const prisma =
+  globalForPrisma.prisma ?? new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
