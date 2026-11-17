@@ -1,0 +1,209 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+
+export default async function ServiceDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const service = await prisma.service.findUnique({
+    where: { id },
+    include: {
+      provider: {
+        select: {
+          displayName: true,
+        },
+      },
+    },
+  });
+
+  if (!service || service.status !== "APPROVED") {
+    notFound();
+  }
+
+  async function createOrder() {
+    "use server";
+
+    const user = await getCurrentUser();
+
+    if (!user) redirect("/login");
+
+    if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
+      redirect("/account");
+    }
+
+    const currentService = await prisma.service.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        price: true,
+        providerId: true,
+        status: true,
+      },
+    });
+
+    if (!currentService || currentService.status !== "APPROVED") {
+      redirect("/services");
+    }
+
+    if (currentService.providerId === user.id) {
+      redirect("/services");
+    }
+
+    const provider = await prisma.user.findUnique({
+      where: { id: currentService.providerId },
+      select: { status: true },
+    });
+
+    if (!provider || provider.status !== "ACTIVE") {
+      redirect("/services");
+    }
+
+    const settings = await prisma.platformSettings.findUnique({
+      where: { id: "main" },
+    });
+
+    const commissionRate = settings?.commissionRate ?? 10;
+    const servicePrice = currentService.price;
+    const commission = Math.round(
+      (servicePrice * commissionRate) / 100
+    );
+
+    const order = await prisma.order.create({
+      data: {
+        orderNo: `KH-${Date.now()}-${crypto.randomUUID()
+          .slice(0, 6)
+          .toUpperCase()}`,
+        serviceId: currentService.id,
+        customerId: user.id,
+        providerId: currentService.providerId,
+        servicePrice,
+        commissionRate,
+        commission,
+        total: servicePrice + commission,
+        status: "PENDING_PAYMENT",
+      },
+    });
+
+    redirect(`/orders/${order.id}`);
+  }
+
+  const commissionRateSetting = await prisma.platformSettings.findUnique({
+    where: { id: "main" },
+    select: { commissionRate: true },
+  });
+
+  const commissionRate = commissionRateSetting?.commissionRate ?? 10;
+  const commission = Math.round((service.price * commissionRate) / 100);
+  const total = service.price + commission;
+
+  return (
+    <main dir="rtl" className="min-h-screen bg-[#f5f6f8]">
+      <header className="bg-[#14213d] px-5 py-5 text-white">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
+          <Link href="/" className="text-2xl font-black text-orange-400">
+            خِدمتي
+          </Link>
+          <Link href="/services" className="font-bold">
+            جميع الخدمات
+          </Link>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-5xl px-5 py-10">
+        <Link
+          href="/services"
+          className="font-bold text-orange-600"
+        >
+          ← العودة للخدمات
+        </Link>
+
+        <article className="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm">
+          <div className="flex h-44 items-center justify-center bg-gradient-to-br from-orange-100 to-orange-50">
+            <span className="text-7xl font-black text-orange-500">خ</span>
+          </div>
+
+          <div className="p-6 md:p-10">
+            <span className="rounded-lg bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700">
+              رقم الخدمة: {service.serviceNo}
+            </span>
+
+            <h1 className="mt-5 text-3xl font-black text-[#14213d]">
+              {service.title}
+            </h1>
+
+            <div className="mt-6 rounded-2xl bg-slate-50 p-5">
+              <p className="font-bold text-slate-700">
+                وصف الخدمة
+              </p>
+              <p className="mt-3 whitespace-pre-wrap leading-8 text-slate-600">
+                {service.description}
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-100 p-5">
+              <p className="text-sm text-slate-500">
+                مقدم الخدمة
+              </p>
+              <p className="mt-2 text-lg font-black text-[#14213d]">
+                {service.provider.displayName}
+              </p>
+            </div>
+
+            <div className="mt-6 rounded-2xl bg-[#14213d] p-6 text-white">
+              <h2 className="text-xl font-black">
+                تفاصيل السعر
+              </h2>
+
+              <div className="mt-5 space-y-3 text-sm">
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-300">سعر الخدمة</span>
+                  <span className="font-bold">
+                    {service.price.toLocaleString("en-US")} EG
+                  </span>
+                </div>
+
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-300">
+                    عمولة المنصة ({commissionRate}%)
+                  </span>
+                  <span className="font-bold">
+                    {commission.toLocaleString("en-US")} EG
+                  </span>
+                </div>
+
+                <div className="border-t border-white/20 pt-4">
+                  <div className="flex justify-between gap-3">
+                    <span className="font-bold">الإجمالي المطلوب</span>
+                    <span className="text-2xl font-black text-orange-400">
+                      {total.toLocaleString("en-US")} EG
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <form action={createOrder}>
+                <button
+                  type="submit"
+                  className="mt-7 w-full rounded-xl bg-orange-500 px-6 py-4 font-black text-white transition hover:bg-orange-600"
+                >
+                  اطلب الخدمة الآن
+                </button>
+              </form>
+
+              <p className="mt-4 text-center text-xs leading-6 text-slate-300">
+                لن يتم اعتماد الدفع إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ.
+              </p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  );
+        }
