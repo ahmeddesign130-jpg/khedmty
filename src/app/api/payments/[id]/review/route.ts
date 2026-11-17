@@ -1,47 +1,43 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const reviewSchema = z.object({
-  action: z.enum(["APPROVE", "REJECT"]),
-  reason: z.string().trim().max(1000).optional(),
+  status: z.enum(["APPROVED", "REJECTED"]),
+  reviewNote: z.string().max(1000).optional(),
 });
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
-export async function POST(
-  request: Request,
-  context: RouteContext
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await getCurrentUser();
+    const user = await getCurrentUser();
 
-    if (!admin || admin.role !== "SUPER_ADMIN") {
+    if (!user || user.role !== "SUPER_ADMIN") {
       return NextResponse.json(
-        { success: false, message: "غير مسموح لك بمراجعة المدفوعات" },
+        { message: "هذه العملية متاحة للإدارة فقط." },
         { status: 403 }
       );
     }
 
-    const { id } = await context.params;
+    const { id } = await params;
     const body = await request.json();
-    const validation = reviewSchema.safeParse(body);
+    const parsed = reviewSchema.safeParse(body);
 
-    if (!validation.success) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, message: "بيانات المراجعة غير صحيحة" },
+        { message: "بيانات المراجعة غير صحيحة." },
         { status: 400 }
       );
     }
 
-    const { action, reason } = validation.data;
+    const { status, reviewNote } = parsed.data;
 
-    if (action === "REJECT" && !reason) {
+    if (status === "REJECTED" && !reviewNote?.trim()) {
       return NextResponse.json(
-        { success: false, message: "يجب كتابة سبب رفض الدفع" },
+        { message: "يرجى كتابة سبب رفض الدفع." },
         { status: 400 }
       );
     }
@@ -53,21 +49,21 @@ export async function POST(
 
     if (!payment) {
       return NextResponse.json(
-        { success: false, message: "عملية الدفع غير موجودة" },
+        { message: "عملية الدفع غير موجودة." },
         { status: 404 }
       );
     }
 
     if (payment.status !== "PENDING_REVIEW") {
       return NextResponse.json(
-        { success: false, message: "تمت مراجعة عملية الدفع من قبل" },
+        { message: "تمت مراجعة عملية الدفع من قبل." },
         { status: 409 }
       );
     }
 
-    if (payment.amountMinor !== payment.order.totalMinor) {
+    if (status === "APPROVED" && payment.amount !== payment.order.total) {
       return NextResponse.json(
-        { success: false, message: "المبلغ لا يطابق إجمالي الطلب" },
+        { message: "المبلغ لا يطابق إجمالي الطلب، لا يمكن اعتماد الدفع." },
         { status: 400 }
       );
     }
@@ -76,50 +72,48 @@ export async function POST(
       const updatedPayment = await tx.payment.update({
         where: { id },
         data: {
-          status: action === "APPROVE" ? "APPROVED" : "REJECTED",
+          status,
+          reviewNote: reviewNote?.trim() || null,
+          reviewedAt: new Date(),
         },
       });
 
       const updatedOrder = await tx.order.update({
         where: { id: payment.orderId },
         data: {
-          status: action === "APPROVE" ? "PAID" : "PENDING_PAYMENT",
+          status: status === "APPROVED" ? "PAID" : "PENDING_PAYMENT",
         },
       });
 
       await tx.auditLog.create({
         data: {
-          actorId: admin.id,
+          actorId: user.id,
           action:
-            action === "APPROVE"
+            status === "APPROVED"
               ? "PAYMENT_APPROVED"
               : "PAYMENT_REJECTED",
-          entityType: "Payment",
-          entityId: payment.id,
-          details: JSON.stringify({
-            orderId: payment.orderId,
-            amountMinor: payment.amountMinor,
-            reason: action === "REJECT" ? reason : null,
-          }),
+          targetId: payment.id,
+          details:
+            reviewNote?.trim() ||
+            `تمت مراجعة الدفع للطلب ${payment.order.orderNo}`,
         },
       });
 
-      return { updatedPayment, updatedOrder };
+      return { payment: updatedPayment, order: updatedOrder };
     });
 
     return NextResponse.json({
-      success: true,
       message:
-        action === "APPROVE"
-          ? "تم اعتماد الدفع وتحديث الطلب"
-          : "تم رفض الدفع وإعادة الطلب لانتظار الدفع",
+        status === "APPROVED"
+          ? "تم اعتماد الدفع وتأكيد استلام المبلغ."
+          : "تم رفض الدفع وإعادة الطلب إلى انتظار الدفع.",
       ...result,
     });
   } catch (error) {
-    console.error("PAYMENT_REVIEW_ERROR:", error);
+    console.error("Payment review error:", error);
 
     return NextResponse.json(
-      { success: false, message: "حدث خطأ أثناء مراجعة الدفع" },
+      { message: "حدث خطأ أثناء مراجعة الدفع." },
       { status: 500 }
     );
   }
