@@ -15,7 +15,7 @@ async function updateOrder(formData:FormData) {
  if(!["CANCELLED","REVISION_REQUESTED","COMPLETED"].includes(next)) return;
  const order=await prisma.order.findUnique({where:{id}});
  if(!order||order.customerId!==user.id) redirect("/account");
- const allowed=order.status==="PENDING_PAYMENT"&&next==="CANCELLED"||order.status==="PAYMENT_REVIEW"&&next==="CANCELLED"||order.status==="DELIVERED"&&["REVISION_REQUESTED","COMPLETED"].includes(next);
+ const allowed=order.status==="PENDING_PAYMENT"&&next==="CANCELLED"||order.status==="DELIVERED"&&["REVISION_REQUESTED","COMPLETED"].includes(next);
  if(!allowed) return;
  await prisma.$transaction([
   prisma.order.update({where:{id},data:{status:next as "CANCELLED"|"REVISION_REQUESTED"|"COMPLETED"}}),
