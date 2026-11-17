@@ -1,15 +1,16 @@
+
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
 const orderSchema = z.object({
-  serviceId: z.string().min(1, "رقم الخدمة مطلوب"),
+  serviceId: z.string().min(1),
 });
 
-// عرض طلبات المستخدم الحالي
+// عرض الطلبات
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -21,20 +22,29 @@ export async function GET() {
       );
     }
 
+    const where =
+      user.role === "SUPER_ADMIN"
+        ? {}
+        : user.role === "PROVIDER"
+          ? { providerId: user.id }
+          : { customerId: user.id };
+
     const orders = await prisma.order.findMany({
-      where:
-        user.role === "SUPER_ADMIN"
-          ? {}
-          : user.role === "PROVIDER"
-            ? { providerId: user.id }
-            : { customerId: user.id },
+      where,
       include: {
-        service: true,
         customer: {
-          select: { id: true, email: true },
+          select: {
+            id: true,
+            displayName: true,
+            email: true,
+          },
         },
         provider: {
-          select: { id: true, email: true },
+          select: {
+            id: true,
+            displayName: true,
+            email: true,
+          },
         },
         payments: true,
       },
@@ -57,7 +67,7 @@ export async function GET() {
   }
 }
 
-// إنشاء طلب شراء جديد
+// إنشاء طلب جديد
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
 
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
       return NextResponse.json(
-        { success: false, message: "هذه الخاصية متاحة للعملاء النشطين فقط" },
+        { success: false, message: "هذه الخاصية للعملاء النشطين فقط" },
         { status: 403 }
       );
     }
@@ -81,18 +91,20 @@ export async function POST(request: Request) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { success: false, message: "بيانات الطلب غير صحيحة" },
+        { success: false, message: "رقم الخدمة غير صحيح" },
         { status: 400 }
       );
     }
 
     const service = await prisma.service.findUnique({
-      where: { id: validation.data.serviceId },
+      where: {
+        id: validation.data.serviceId,
+      },
     });
 
     if (!service || service.status !== "APPROVED") {
       return NextResponse.json(
-        { success: false, message: "الخدمة غير موجودة أو غير متاحة للشراء" },
+        { success: false, message: "الخدمة غير موجودة أو غير متاحة" },
         { status: 404 }
       );
     }
@@ -105,53 +117,53 @@ export async function POST(request: Request) {
     }
 
     const provider = await prisma.user.findUnique({
-      where: { id: service.providerId },
+      where: {
+        id: service.providerId,
+      },
     });
 
     if (!provider || provider.status !== "ACTIVE") {
       return NextResponse.json(
-        { success: false, message: "مقدم الخدمة غير متاح حالياً" },
+        { success: false, message: "مقدم الخدمة غير متاح" },
         { status: 400 }
       );
     }
 
-    // العمولة الافتراضية 10%، ويمكن ربطها بإعدادات الإدارة لاحقاً.
-    const commissionRateBps = 1000;
-    const servicePriceMinor = service.priceMinor;
+    const settings = await prisma.platformSettings.findUnique({
+      where: {
+        id: "main",
+      },
+    });
 
-    const commissionMinor = Math.round(
-      (servicePriceMinor * commissionRateBps) / 10000
+    const commissionRate = settings?.commissionRate ?? 10;
+    const servicePrice = service.price;
+
+    const commission = Math.round(
+      (servicePrice * commissionRate) / 100
     );
 
-    const totalMinor = servicePriceMinor + commissionMinor;
-
-    const dueAt = new Date();
-    dueAt.setDate(dueAt.getDate() + service.deliveryDays);
+    const total = servicePrice + commission;
 
     const order = await prisma.order.create({
       data: {
-        publicCode: `KH-${Date.now()}-${crypto.randomUUID()
+        orderNo: `KH-${Date.now()}-${crypto.randomUUID()
           .slice(0, 6)
           .toUpperCase()}`,
         serviceId: service.id,
         customerId: user.id,
         providerId: service.providerId,
+        servicePrice,
+        commissionRate,
+        commission,
+        total,
         status: "PENDING_PAYMENT",
-        servicePriceMinor,
-        commissionRateBps,
-        commissionMinor,
-        totalMinor,
-        dueAt,
-      },
-      include: {
-        service: true,
       },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "تم إنشاء الطلب. أكمل خطوات الدفع اليدوي.",
+        message: "تم إنشاء الطلب بنجاح. أكمل الدفع اليدوي.",
         order,
       },
       { status: 201 }
