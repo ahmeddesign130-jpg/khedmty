@@ -1,9 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-
-export const dynamic = "force-dynamic";
+import { prisma } from "@/lib/prisma";
 
 const paymentSchema = z.object({
   orderId: z.string().min(1),
@@ -13,25 +11,17 @@ const paymentSchema = z.object({
     "ETISALAT_CASH",
     "OTHER",
   ]),
-  amountMinor: z.number().int().positive(),
-  receiptUrl: z.string().url().max(2000),
-  transactionReference: z.string().trim().max(150).optional(),
+  receiptUrl: z.string().url().optional(),
+  amount: z.number().int().positive(),
 });
 
 export async function GET() {
   try {
     const user = await getCurrentUser();
 
-    if (!user) {
+    if (!user || user.role !== "SUPER_ADMIN") {
       return NextResponse.json(
-        { success: false, message: "يجب تسجيل الدخول أولاً" },
-        { status: 401 }
-      );
-    }
-
-    if (user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, message: "غير مسموح بعرض جميع المدفوعات" },
+        { message: "غير مسموح لك بعرض المدفوعات." },
         { status: 403 }
       );
     }
@@ -41,135 +31,143 @@ export async function GET() {
         order: {
           include: {
             customer: {
-              select: { id: true, email: true },
+              select: { id: true, displayName: true, email: true },
             },
             provider: {
-              select: { id: true, email: true },
+              select: { id: true, displayName: true, email: true },
             },
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({
-      success: true,
-      payments,
-    });
+    return NextResponse.json({ payments });
   } catch (error) {
-    console.error("GET_PAYMENTS_ERROR:", error);
+    console.error("Payments GET error:", error);
 
     return NextResponse.json(
-      { success: false, message: "حدث خطأ أثناء تحميل المدفوعات" },
+      { message: "حدث خطأ أثناء تحميل المدفوعات." },
       { status: 500 }
     );
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "يجب تسجيل الدخول أولاً" },
+        { message: "يجب تسجيل الدخول أولاً." },
         { status: 401 }
       );
     }
 
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
       return NextResponse.json(
-        { success: false, message: "هذه الخاصية متاحة للعملاء النشطين فقط" },
+        { message: "هذه الخدمة متاحة لحسابات العملاء المفعلة فقط." },
         { status: 403 }
       );
     }
 
     const body = await request.json();
-    const validation = paymentSchema.safeParse(body);
+    const parsed = paymentSchema.safeParse(body);
 
-    if (!validation.success) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, message: "بيانات الدفع غير صحيحة" },
+        { message: "بيانات الدفع غير صحيحة." },
         { status: 400 }
       );
     }
 
-    const data = validation.data;
+    const { orderId, method, receiptUrl, amount } = parsed.data;
 
     const order = await prisma.order.findUnique({
-      where: { id: data.orderId },
+      where: { id: orderId },
+      include: { payments: true },
     });
 
-    if (!order || order.customerId !== user.id) {
+    if (!order) {
       return NextResponse.json(
-        { success: false, message: "الطلب غير موجود" },
+        { message: "الطلب غير موجود." },
         { status: 404 }
       );
     }
 
-    if (
-      order.status !== "PENDING_PAYMENT" &&
-      order.status !== "PAYMENT_REVIEW"
-    ) {
+    if (order.customerId !== user.id) {
       return NextResponse.json(
-        { success: false, message: "الطلب لا يحتاج إلى دفع حالياً" },
-        { status: 409 }
+        { message: "هذا الطلب لا يخص حسابك." },
+        { status: 403 }
       );
     }
 
-    if (data.amountMinor !== order.totalMinor) {
+    if (order.status !== "PENDING_PAYMENT") {
       return NextResponse.json(
-        { success: false, message: "المبلغ لا يطابق إجمالي الطلب" },
+        { message: "هذا الطلب لا ينتظر تسجيل دفعة جديدة." },
         { status: 400 }
       );
     }
 
-    const existingPayment = await prisma.payment.findFirst({
-      where: {
-        orderId: order.id,
-        status: "PENDING_REVIEW",
-      },
-    });
+    const pendingPayment = order.payments.some(
+      (payment) => payment.status === "PENDING_REVIEW"
+    );
 
-    if (existingPayment) {
+    if (pendingPayment) {
       return NextResponse.json(
-        { success: false, message: "يوجد إيصال قيد المراجعة لهذا الطلب بالفعل" },
+        { message: "توجد دفعة قيد المراجعة لهذا الطلب بالفعل." },
         { status: 409 }
       );
     }
 
-    const payment = await prisma.payment.create({
-      data: {
-        orderId: order.id,
-        method: data.method,
-        amountMinor: data.amountMinor,
-        receiptUrl: data.receiptUrl,
-        transactionReference: data.transactionReference,
-        status: "PENDING_REVIEW",
-      },
-    });
+    if (amount !== order.total) {
+      return NextResponse.json(
+        { message: "المبلغ المرسل لا يطابق إجمالي الطلب." },
+        { status: 400 }
+      );
+    }
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { status: "PAYMENT_REVIEW" },
+    const payment = await prisma.$transaction(async (tx) => {
+      const created = await tx.payment.create({
+        data: {
+          orderId,
+          method,
+          receiptUrl,
+          amount,
+          status: "PENDING_REVIEW",
+        },
+      });
+
+      await tx.order.update({
+        where: { id: orderId },
+        data: { status: "PAYMENT_REVIEW" },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: user.id,
+          action: "PAYMENT_SUBMITTED",
+          targetId: created.id,
+          details: `تم إرسال دفعة للطلب ${order.orderNo} بمبلغ ${amount}`,
+        },
+      });
+
+      return created;
     });
 
     return NextResponse.json(
       {
-        success: true,
-        message: "تم إرسال بيانات الدفع إلى الإدارة للمراجعة",
+        message: "تم إرسال بيانات الدفع، وهي الآن قيد مراجعة الإدارة.",
         payment,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("CREATE_PAYMENT_ERROR:", error);
+    console.error("Payments POST error:", error);
 
     return NextResponse.json(
-      { success: false, message: "حدث خطأ أثناء تسجيل الدفع" },
+      { message: "حدث خطأ أثناء إرسال بيانات الدفع." },
       { status: 500 }
     );
   }
-      }
+}
