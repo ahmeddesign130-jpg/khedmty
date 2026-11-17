@@ -35,10 +35,6 @@ export default async function PaymentPage({
     redirect(`/orders/${order.id}`);
   }
 
-  const settings = await prisma.platformSettings.findUnique({
-    where: { id: "main" },
-  });
-
   const latestPayment = order.payments[0];
 
   return (
@@ -61,7 +57,7 @@ export default async function PaymentPage({
           </h1>
 
           <p className="mt-3 leading-7 text-slate-600">
-            استخدم إحدى وسائل الدفع الموضحة أدناه، ثم احتفظ بإثبات التحويل.
+            استخدم إحدى وسائل الدفع المتاحة، واحتفظ بإثبات التحويل.
             لن يتم اعتماد طلبك إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ.
           </p>
 
@@ -70,7 +66,9 @@ export default async function PaymentPage({
             <p className="mt-2 text-xl font-black">{order.orderNo}</p>
 
             <div className="mt-6 border-t border-white/20 pt-5">
-              <p className="text-sm text-slate-300">المبلغ المطلوب تحويله</p>
+              <p className="text-sm text-slate-300">
+                المبلغ المطلوب تحويله
+              </p>
               <p className="mt-2 text-3xl font-black text-orange-400">
                 {order.total.toLocaleString("en-US")} EG
               </p>
@@ -83,33 +81,24 @@ export default async function PaymentPage({
             </h2>
 
             <div className="mt-4 grid gap-3">
-              <div className="rounded-xl border border-slate-200 p-4">
-                <p className="font-black text-[#14213d]">InstaPay</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  استخدم بيانات التحويل الرسمية التي توفرها إدارة خِدمتي.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 p-4">
-                <p className="font-black text-[#14213d]">e& money</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  استخدم بيانات المحفظة الرسمية التي توفرها إدارة خِدمتي.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 p-4">
-                <p className="font-black text-[#14213d]">Etisalat Cash</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  استخدم بيانات المحفظة الرسمية التي توفرها إدارة خِدمتي.
-                </p>
-              </div>
+              {["InstaPay", "e& money", "Etisalat Cash"].map((method) => (
+                <div
+                  key={method}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <p className="font-black text-[#14213d]">{method}</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    استخدم بيانات التحويل الرسمية التي توفرها إدارة خِدمتي.
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="mt-7 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm leading-7 text-orange-900">
             <strong>تنبيه مهم:</strong>
             لا تحوّل أي مبلغ قبل الحصول على بيانات الدفع الرسمية من الإدارة.
-            لا توجد بيانات تحويل أو أرقام محافظ مضافة في هذه الصفحة حتى الآن.
+            بيانات التحويل لم تتم إضافتها إلى الموقع بعد.
           </div>
 
           <div className="mt-7">
