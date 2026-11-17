@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -22,7 +21,7 @@ export async function POST(
 
     if (!admin || admin.role !== "SUPER_ADMIN") {
       return NextResponse.json(
-        { success: false, message: "غير مسموح لك بتنفيذ هذا الإجراء" },
+        { success: false, message: "غير مسموح لك بمراجعة الخدمات" },
         { status: 403 }
       );
     }
@@ -42,7 +41,7 @@ export async function POST(
 
     if (action === "REJECT" && !reason) {
       return NextResponse.json(
-        { success: false, message: "يجب كتابة سبب رفض الخدمة" },
+        { success: false, message: "اكتب سبب رفض الخدمة" },
         { status: 400 }
       );
     }
@@ -60,33 +59,35 @@ export async function POST(
 
     if (service.status !== "PENDING_REVIEW") {
       return NextResponse.json(
-        { success: false, message: "هذه الخدمة ليست قيد المراجعة" },
+        { success: false, message: "الخدمة ليست قيد المراجعة" },
         { status: 409 }
       );
     }
 
-    const updatedService = await prisma.service.update({
-      where: { id },
-      data: {
-        status: action === "APPROVE" ? "APPROVED" : "REJECTED",
-        rejectionReason: action === "REJECT" ? reason : null,
-      },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedService = await tx.service.update({
+        where: { id },
+        data: {
+          status: action === "APPROVE" ? "APPROVED" : "REJECTED",
+        },
+      });
 
-    await prisma.auditLog.create({
-      data: {
-        actorId: admin.id,
-        action:
-          action === "APPROVE"
-            ? "SERVICE_APPROVED"
-            : "SERVICE_REJECTED",
-        entityType: "Service",
-        entityId: service.id,
-        details: JSON.stringify({
-          serviceTitle: service.title,
-          reason: action === "REJECT" ? reason : null,
-        }),
-      },
+      await tx.auditLog.create({
+        data: {
+          actorId: admin.id,
+          action:
+            action === "APPROVE"
+              ? "SERVICE_APPROVED"
+              : "SERVICE_REJECTED",
+          targetId: service.id,
+          details: JSON.stringify({
+            title: service.title,
+            reason: action === "REJECT" ? reason : null,
+          }),
+        },
+      });
+
+      return updatedService;
     });
 
     return NextResponse.json({
@@ -95,7 +96,7 @@ export async function POST(
         action === "APPROVE"
           ? "تمت الموافقة على الخدمة"
           : "تم رفض الخدمة",
-      service: updatedService,
+      service: result,
     });
   } catch (error) {
     console.error("SERVICE_REVIEW_ERROR:", error);
