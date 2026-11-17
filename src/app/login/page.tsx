@@ -1,63 +1,95 @@
+import Link from "next/link";
+
 export default function LoginPage() {
   return (
-    <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#f7f8fa] px-5 py-12">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-lg">
-        <a href="/" className="text-3xl font-black text-orange-500">
+    <main
+      dir="rtl"
+      className="flex min-h-screen items-center justify-center bg-[#f5f6f8] px-5 py-10"
+    >
+      <section className="w-full max-w-md rounded-3xl bg-white p-7 shadow-lg md:p-10">
+        <Link
+          href="/"
+          className="block text-center text-3xl font-black text-orange-500"
+        >
           خِدمتي
-        </a>
+        </Link>
 
-        <h1 className="mt-8 text-3xl font-black text-[#14213d]">
-          أهلاً بعودتك
+        <h1 className="mt-8 text-center text-2xl font-black text-[#14213d]">
+          تسجيل الدخول
         </h1>
 
-        <p className="mt-3 text-gray-500">
-          سجّل دخولك للوصول إلى حسابك ومتابعة خدماتك.
+        <p className="mt-3 text-center text-sm text-slate-500">
+          سجّل دخولك للوصول إلى حسابك ومتابعة طلباتك.
         </p>
 
-        <form action="/api/auth/login" method="POST" className="mt-8 space-y-5">
+        <form
+          action="/api/auth/login"
+          method="POST"
+          className="mt-8 space-y-5"
+        >
           <div>
-            <label className="mb-2 block font-bold">البريد الإلكتروني</label>
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-bold text-slate-700"
+            >
+              البريد الإلكتروني
+            </label>
             <input
-              type="email"
+              id="email"
               name="email"
-              required
+              type="email"
               autoComplete="email"
-              placeholder="example@email.com"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+              required
+              placeholder="name@example.com"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-left outline-none transition focus:border-orange-500"
+              dir="ltr"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-bold">كلمة المرور</label>
+            <label
+              htmlFor="password"
+              className="mb-2 block text-sm font-bold text-slate-700"
+            >
+              كلمة المرور
+            </label>
             <input
-              type="password"
+              id="password"
               name="password"
-              required
+              type="password"
               autoComplete="current-password"
-              placeholder="اكتب كلمة المرور"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+              required
+              placeholder="أدخل كلمة المرور"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-left outline-none transition focus:border-orange-500"
+              dir="ltr"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white transition hover:bg-orange-600"
+            className="w-full rounded-xl bg-orange-500 px-5 py-4 font-black text-white transition hover:bg-orange-600"
           >
-            تسجيل الدخول
+            دخول
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
+        <p className="mt-7 text-center text-sm text-slate-600">
           ليس لديك حساب؟{" "}
-          <a href="/register" className="font-bold text-orange-500">
-            إنشاء حساب جديد
-          </a>
+          <Link
+            href="/register"
+            className="font-black text-orange-600 hover:text-orange-700"
+          >
+            إنشاء حساب
+          </Link>
         </p>
 
-        <a href="/" className="mt-6 block text-center text-sm text-gray-500">
+        <Link
+          href="/"
+          className="mt-5 block text-center text-sm font-bold text-slate-500"
+        >
           العودة للرئيسية
-        </a>
-      </div>
+        </Link>
+      </section>
     </main>
   );
 }
