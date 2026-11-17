@@ -1,31 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createSession } from "@/lib/auth";
 
-const schema = z.object({
-  displayName: z.string().trim().min(2).max(70),
-  email: z.string().trim().email().max(254).transform(v => v.toLowerCase()),
-  password: z.string().min(10).max(72),
-  role: z.enum(["CUSTOMER", "PROVIDER"]).default("CUSTOMER"),
-});
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
-    const data = schema.parse(Object.fromEntries(await req.formData()));
-    const exists = await prisma.user.findUnique({ where: { email: data.email } });
-    if (exists) return NextResponse.redirect(new URL("/register?error=email_exists", req.url), 303);
-    const user = await prisma.user.create({ data: {
-      displayName: data.displayName, email: data.email,
-      passwordHash: await bcrypt.hash(data.password, 12),
-      role: data.role, status: data.role === "CUSTOMER" ? "ACTIVE" : "PENDING",
-    }});
-    if (user.role === "CUSTOMER") {
-      await createSession({ id: user.id, role: "CUSTOMER", status: "ACTIVE" });
-      return NextResponse.redirect(new URL("/account", req.url), 303);
+    const form = await req.formData();
+
+    const displayName = String(form.get("displayName") || "").trim();
+    const email = String(form.get("email") || "")
+      .trim()
+      .toLowerCase();
+    const password = String(form.get("password") || "");
+    const requestedRole = String(form.get("role") || "CUSTOMER");
+
+    if (
+      displayName.length < 2 ||
+      displayName.length > 70 ||
+      email.length < 5 ||
+      email.length > 254 ||
+      password.length < 10 ||
+      password.length > 72
+    ) {
+      return NextResponse.redirect(
+        new URL("/register?error=invalid", req.url)
+      );
     }
-    return NextResponse.redirect(new URL("/pending", req.url), 303);
-  } catch {
-    return NextResponse.redirect(new URL("/register?error=registration_failed", req.url), 303);
+
+    if (!["CUSTOMER", "PROVIDER"].includes(requestedRole)) {
+      return NextResponse.redirect(
+        new URL("/register?error=role", req.url)
+      );
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (existingUser) {
+      return NextResponse.redirect(
+        new URL("/register?error=exists", req.url)
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const role = requestedRole as "CUSTOMER" | "PROVIDER";
+    const status = role === "CUSTOMER" ? "ACTIVE" : "PENDING";
+
+    await prisma.user.create({
+      data: {
+        displayName,
+        email,
+        passwordHash,
+        role,
+        status,
+      },
+    });
+
+    if (role === "CUSTOMER") {
+      return NextResponse.redirect(
+        new URL("/login?registered=1", req.url)
+      );
+    }
+
+    return NextResponse.redirect(
+      new URL("/pending?registered=1", req.url)
+    );
+  } catch (error) {
+    console.error("Registration error:", error);
+
+    return NextResponse.redirect(
+      new URL("/register?error=server", req.url)
+    );
   }
-}
+      }
