@@ -5,26 +5,33 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-const createServiceSchema = z.object({
-  categoryId: z.string().min(1, "يجب اختيار القسم"),
+const serviceSchema = z.object({
   title: z.string().trim().min(5).max(120),
   description: z.string().trim().min(20).max(5000),
-  priceMinor: z.number().int().positive(),
-  deliveryDays: z.number().int().min(1).max(90),
-  revisions: z.number().int().min(0).max(20).default(1),
+  price: z.number().int().positive(),
 });
 
-function generateServiceCode() {
-  const random = crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase();
-  return `KH-SRV-${random}`;
+function generateServiceNo() {
+  return `KH-SRV-${crypto.randomUUID()
+    .replace(/-/g, "")
+    .slice(0, 12)
+    .toUpperCase()}`;
 }
 
-// عرض الخدمات المعتمدة للعملاء
+// عرض الخدمات المعتمدة
 export async function GET() {
   try {
     const services = await prisma.service.findMany({
       where: {
         status: "APPROVED",
+      },
+      include: {
+        provider: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -35,7 +42,9 @@ export async function GET() {
       success: true,
       services,
     });
-  } catch {
+  } catch (error) {
+    console.error("GET_SERVICES_ERROR:", error);
+
     return NextResponse.json(
       { success: false, message: "حدث خطأ أثناء تحميل الخدمات" },
       { status: 500 }
@@ -43,7 +52,7 @@ export async function GET() {
   }
 }
 
-// إضافة خدمة جديدة
+// إنشاء خدمة جديدة
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -70,7 +79,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const validation = createServiceSchema.safeParse(body);
+    const validation = serviceSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json(
@@ -83,29 +92,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = validation.data;
-
-    const category = await prisma.category.findUnique({
-      where: { id: data.categoryId },
-    });
-
-    if (!category) {
-      return NextResponse.json(
-        { success: false, message: "القسم المحدد غير موجود" },
-        { status: 400 }
-      );
-    }
-
     const service = await prisma.service.create({
       data: {
-        publicCode: generateServiceCode(),
+        serviceNo: generateServiceNo(),
+        title: validation.data.title,
+        description: validation.data.description,
+        price: validation.data.price,
         providerId: user.id,
-        categoryId: data.categoryId,
-        title: data.title,
-        description: data.description,
-        priceMinor: data.priceMinor,
-        deliveryDays: data.deliveryDays,
-        revisions: data.revisions,
         status: "PENDING_REVIEW",
       },
     });
@@ -126,4 +119,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
+        }
