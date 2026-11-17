@@ -1,49 +1,79 @@
-import { NextResponse } from "next/server";
+
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const statusSchema = z.object({
   status: z.enum([
+    "PENDING_PAYMENT",
+    "PAYMENT_REVIEW",
+    "PAID",
     "IN_PROGRESS",
     "DELIVERED",
     "REVISION_REQUESTED",
     "COMPLETED",
     "CANCELLED",
+    "REJECTED",
   ]),
-  note: z.string().trim().max(1000).optional(),
 });
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
+type OrderStatus =
+  | "PENDING_PAYMENT"
+  | "PAYMENT_REVIEW"
+  | "PAID"
+  | "IN_PROGRESS"
+  | "DELIVERED"
+  | "REVISION_REQUESTED"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "REJECTED";
+
+const transitions: Record<OrderStatus, OrderStatus[]> = {
+  PENDING_PAYMENT: ["PAYMENT_REVIEW", "CANCELLED"],
+  PAYMENT_REVIEW: ["CANCELLED"],
+  PAID: ["IN_PROGRESS"],
+  IN_PROGRESS: ["DELIVERED"],
+  DELIVERED: ["REVISION_REQUESTED", "COMPLETED"],
+  REVISION_REQUESTED: ["IN_PROGRESS", "DELIVERED"],
+  COMPLETED: [],
+  CANCELLED: [],
+  REJECTED: [],
 };
 
 export async function PATCH(
-  request: Request,
-  context: RouteContext
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "يجب تسجيل الدخول أولاً" },
+        { message: "يجب تسجيل الدخول أولاً." },
         { status: 401 }
       );
     }
 
-    const { id } = await context.params;
-    const body = await request.json();
-    const validation = statusSchema.safeParse(body);
-
-    if (!validation.success) {
+    if (user.status !== "ACTIVE") {
       return NextResponse.json(
-        { success: false, message: "حالة الطلب غير صحيحة" },
+        { message: "حسابك غير مفعل." },
+        { status: 403 }
+      );
+    }
+
+    const { id } = await params;
+    const body = await request.json();
+    const parsed = statusSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { message: "حالة الطلب غير صحيحة." },
         { status: 400 }
       );
     }
 
-    const { status, note } = validation.data;
+    const newStatus = parsed.data.status as OrderStatus;
 
     const order = await prisma.order.findUnique({
       where: { id },
@@ -51,103 +81,87 @@ export async function PATCH(
 
     if (!order) {
       return NextResponse.json(
-        { success: false, message: "الطلب غير موجود" },
+        { message: "الطلب غير موجود." },
         { status: 404 }
       );
     }
 
     const isAdmin = user.role === "SUPER_ADMIN";
-    const isCustomer = user.id === order.customerId;
-    const isProvider = user.id === order.providerId;
+    const isCustomer = order.customerId === user.id;
+    const isProvider = order.providerId === user.id;
 
     if (!isAdmin && !isCustomer && !isProvider) {
       return NextResponse.json(
-        { success: false, message: "غير مسموح لك بتعديل هذا الطلب" },
+        { message: "ليس لديك صلاحية تعديل هذا الطلب." },
         { status: 403 }
       );
     }
 
-    if (
-      status === "IN_PROGRESS" &&
-      !isAdmin
-    ) {
+    if (!isAdmin) {
+      if (!transitions[order.status as OrderStatus].includes(newStatus)) {
+        return NextResponse.json(
+          { message: "لا يمكن تغيير الطلب إلى هذه الحالة." },
+          { status: 400 }
+        );
+      }
+
+      if (isCustomer && ![
+        "CANCELLED",
+        "REVISION_REQUESTED",
+        "COMPLETED",
+      ].includes(newStatus)) {
+        return NextResponse.json(
+          { message: "لا يمكنك تنفيذ هذا الإجراء." },
+          { status: 403 }
+        );
+      }
+
+      if (isProvider && ![
+        "IN_PROGRESS",
+        "DELIVERED",
+      ].includes(newStatus)) {
+        return NextResponse.json(
+          { message: "لا يمكنك تنفيذ هذا الإجراء." },
+          { status: 403 }
+        );
+      }
+    }
+
+    if (order.status === newStatus) {
       return NextResponse.json(
-        { success: false, message: "بدء العمل يحتاج إلى إجراء إداري" },
-        { status: 403 }
+        { message: "الطلب بالفعل في هذه الحالة." },
+        { status: 400 }
       );
     }
 
-    if (status === "DELIVERED" && !isProvider && !isAdmin) {
-      return NextResponse.json(
-        { success: false, message: "مقدم الخدمة فقط يمكنه تسليم العمل" },
-        { status: 403 }
-      );
-    }
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id },
+        data: { status: newStatus },
+      });
 
-    if (
-      (status === "REVISION_REQUESTED" || status === "COMPLETED") &&
-      !isCustomer &&
-      !isAdmin
-    ) {
-      return NextResponse.json(
-        { success: false, message: "هذا الإجراء متاح للعميل فقط" },
-        { status: 403 }
-      );
-    }
+      await tx.auditLog.create({
+        data: {
+          actorId: user.id,
+          action: "ORDER_STATUS_UPDATED",
+          targetId: order.id,
+          details: `تغيير حالة الطلب من ${order.status} إلى ${newStatus}`,
+        },
+      });
 
-    if (
-      status === "CANCELLED" &&
-      !isAdmin &&
-      !isCustomer
-    ) {
-      return NextResponse.json(
-        { success: false, message: "لا تملك صلاحية إلغاء الطلب" },
-        { status: 403 }
-      );
-    }
-
-    const allowedTransitions: Record<string, string[]> = {
-      PENDING_PAYMENT: ["CANCELLED"],
-      PAYMENT_REVIEW: ["CANCELLED"],
-      PAID: ["IN_PROGRESS", "CANCELLED"],
-      IN_PROGRESS: ["DELIVERED", "CANCELLED"],
-      DELIVERED: ["REVISION_REQUESTED", "COMPLETED"],
-      REVISION_REQUESTED: ["IN_PROGRESS", "DELIVERED", "CANCELLED"],
-    };
-
-    if (
-      !isAdmin &&
-      !(allowedTransitions[order.status] || []).includes(status)
-    ) {
-      return NextResponse.json(
-        { success: false, message: "لا يمكن الانتقال إلى هذه الحالة من الحالة الحالية" },
-        { status: 409 }
-      );
-    }
-
-    if (isAdmin && order.status === "COMPLETED") {
-      return NextResponse.json(
-        { success: false, message: "الطلب مكتمل بالفعل" },
-        { status: 409 }
-      );
-    }
-
-    const updatedOrder = await prisma.order.update({
-      where: { id },
-      data: { status },
+      return updated;
     });
 
     return NextResponse.json({
-      success: true,
-      message: "تم تحديث حالة الطلب",
+      message: "تم تحديث حالة الطلب بنجاح.",
       order: updatedOrder,
     });
   } catch (error) {
-    console.error("UPDATE_ORDER_STATUS_ERROR:", error);
+    console.error("Order status update error:", error);
 
     return NextResponse.json(
-      { success: false, message: "حدث خطأ أثناء تحديث الطلب" },
+      { message: "حدث خطأ أثناء تحديث حالة الطلب." },
       { status: 500 }
     );
   }
-        }
+          }
