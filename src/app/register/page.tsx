@@ -1,66 +1,105 @@
+import Link from "next/link";
+
 export default function RegisterPage() {
   return (
-    <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#f7f8fa] px-5 py-12">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-lg">
-        <a href="/" className="text-3xl font-black text-orange-500">
+    <main
+      dir="rtl"
+      className="flex min-h-screen items-center justify-center bg-[#f5f6f8] px-5 py-10"
+    >
+      <section className="w-full max-w-md rounded-3xl bg-white p-7 shadow-lg md:p-10">
+        <Link
+          href="/"
+          className="block text-center text-3xl font-black text-orange-500"
+        >
           خِدمتي
-        </a>
+        </Link>
 
-        <h1 className="mt-8 text-3xl font-black text-[#14213d]">
+        <h1 className="mt-8 text-center text-2xl font-black text-[#14213d]">
           إنشاء حساب جديد
         </h1>
 
-        <p className="mt-3 text-gray-500">
-          انضم إلى خِدمتي وابدأ رحلتك.
+        <p className="mt-3 text-center text-sm text-slate-500">
+          انضم إلى خِدمتي وابدأ رحلتك معنا.
         </p>
 
-        <form action="/api/auth/register" method="POST" className="mt-8 space-y-5">
+        <form
+          action="/api/auth/register"
+          method="POST"
+          className="mt-8 space-y-5"
+        >
           <div>
-            <label className="mb-2 block font-bold">الاسم</label>
+            <label
+              htmlFor="displayName"
+              className="mb-2 block text-sm font-bold text-slate-700"
+            >
+              الاسم
+            </label>
             <input
-              type="text"
+              id="displayName"
               name="displayName"
-              required
+              type="text"
+              autoComplete="name"
               minLength={2}
               maxLength={70}
+              required
               placeholder="اكتب اسمك"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-orange-500"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-bold">البريد الإلكتروني</label>
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-bold text-slate-700"
+            >
+              البريد الإلكتروني
+            </label>
             <input
-              type="email"
+              id="email"
               name="email"
-              required
+              type="email"
               autoComplete="email"
-              placeholder="example@email.com"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+              required
+              placeholder="name@example.com"
+              dir="ltr"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-left outline-none transition focus:border-orange-500"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-bold">كلمة المرور</label>
+            <label
+              htmlFor="password"
+              className="mb-2 block text-sm font-bold text-slate-700"
+            >
+              كلمة المرور
+            </label>
             <input
-              type="password"
+              id="password"
               name="password"
-              required
+              type="password"
+              autoComplete="new-password"
               minLength={10}
               maxLength={72}
-              autoComplete="new-password"
+              required
               placeholder="10 أحرف على الأقل"
-              className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-orange-500"
+              dir="ltr"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-left outline-none transition focus:border-orange-500"
             />
           </div>
 
           <div>
-            <label className="mb-2 block font-bold">نوع الحساب</label>
+            <label
+              htmlFor="role"
+              className="mb-2 block text-sm font-bold text-slate-700"
+            >
+              نوع الحساب
+            </label>
             <select
+              id="role"
               name="role"
-              required
               defaultValue="CUSTOMER"
-              className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none focus:border-orange-500"
+              required
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-orange-500"
             >
               <option value="CUSTOMER">عميل - أريد شراء الخدمات</option>
               <option value="PROVIDER">مقدم خدمة - أريد عرض خدماتي</option>
@@ -69,19 +108,29 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-orange-500 py-4 font-bold text-white hover:bg-orange-600"
+            className="w-full rounded-xl bg-orange-500 px-5 py-4 font-black text-white transition hover:bg-orange-600"
           >
             إنشاء الحساب
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
+        <p className="mt-7 text-center text-sm text-slate-600">
           لديك حساب بالفعل؟{" "}
-          <a href="/login" className="font-bold text-orange-500">
+          <Link
+            href="/login"
+            className="font-black text-orange-600 hover:text-orange-700"
+          >
             تسجيل الدخول
-          </a>
+          </Link>
         </p>
-      </div>
+
+        <Link
+          href="/"
+          className="mt-5 block text-center text-sm font-bold text-slate-500"
+        >
+          العودة للرئيسية
+        </Link>
+      </section>
     </main>
   );
 }
