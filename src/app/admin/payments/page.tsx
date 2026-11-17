@@ -13,7 +13,7 @@ async function reviewPayment(formData:FormData) {
  const id=String(formData.get("id")||""); const status=String(formData.get("status")||""); const reviewNote=String(formData.get("reviewNote")||"").trim();
  if(!id||!["APPROVED","REJECTED"].includes(status)||status==="REJECTED"&&!reviewNote) return;
  const payment=await prisma.payment.findUnique({where:{id},include:{order:true}});
- if(!payment||payment.status!=="PENDING_REVIEW"||payment.amount!==payment.order.total) return;
+ if(!payment||payment.status!=="PENDING_REVIEW"||payment.order.status!=="PAYMENT_REVIEW"||payment.amount!==payment.order.total) return;
  await prisma.$transaction(async tx=>{
   await tx.payment.update({where:{id},data:{status:status as "APPROVED"|"REJECTED",reviewNote:reviewNote||null,reviewedAt:new Date()}});
   await tx.order.update({where:{id:payment.orderId},data:{status:status==="APPROVED"?"PAID":"PENDING_PAYMENT"}});
