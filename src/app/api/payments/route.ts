@@ -11,7 +11,7 @@ const paymentSchema = z.object({
     "ETISALAT_CASH",
     "OTHER",
   ]),
-  receiptUrl: z.string().url().optional(),
+  receiptUrl: z.string().url(),
   amount: z.number().int().positive(),
 });
 
