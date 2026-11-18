@@ -20,7 +20,7 @@ export default async function AdminPage() {
     <aside className="bg-[#14213d] text-white"><div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6">
       <Link href="/" className="text-3xl font-black text-orange-400">خِدمتي</Link>
       <span className="hidden items-center gap-2 text-sm text-slate-300 sm:inline-flex"><UiIcon name="shield" size={18}/> تحكم الإدارة</span>
-      <form action="/api/auth/logout" method="POST"><button className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-4 py-2 text-sm font-bold"><UiIcon name="log-out" size={17}/> تسجيل الخروج</button></form>
+      <div className="flex items-center gap-2"><Link href="/settings" aria-label="الإعدادات" title="الإعدادات" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 font-bold text-[#14213d] hover:bg-orange-50"><UiIcon name="settings" size={19}/><span className="hidden sm:inline">الإعدادات</span></Link><form action="/api/auth/logout" method="POST"><button className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-4 py-2 text-sm font-bold"><UiIcon name="log-out" size={17}/> تسجيل الخروج</button></form>
     </div></aside>
     <section className="mx-auto max-w-7xl px-5 py-10">
       <div className="rounded-3xl bg-white p-8 shadow-sm"><span className="ui-icon-tile"><UiIcon name="shield" size={28}/></span>
