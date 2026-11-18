@@ -23,6 +23,28 @@ async function ensureCompatibilitySchema() {
       );
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Service"
+         ADD COLUMN IF NOT EXISTS "price" INTEGER NOT NULL DEFAULT 0`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ADD COLUMN IF NOT EXISTS "orderNo" TEXT`
+      );
+      // Backfill order numbers for legacy rows without changing existing values.
+      await basePrisma.$executeRawUnsafe(
+        `UPDATE public."Order"
+         SET "orderNo" = 'KH-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 16))
+         WHERE "orderNo" IS NULL`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Order_orderNo_key"
+         ON public."Order" ("orderNo")`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ALTER COLUMN "orderNo" SET NOT NULL`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "mediaUrls" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`
       );
       await basePrisma.$executeRawUnsafe(
