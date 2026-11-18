@@ -5,8 +5,9 @@ import { canTransitionOrder } from "../src/lib/order-workflow.mjs";
 test("customer can cancel an unpaid order", () => {
   assert.equal(canTransitionOrder("PENDING_PAYMENT", "CANCELLED", "CUSTOMER"), true);
 });
-test("customer can request a revision after delivery", () => {
-  assert.equal(canTransitionOrder("DELIVERED", "REVISION_REQUESTED", "CUSTOMER"), true);
+test("customer confirms receipt after delivery and cannot request revisions", () => {
+  assert.equal(canTransitionOrder("DELIVERED", "COMPLETED", "CUSTOMER"), true);
+  assert.equal(canTransitionOrder("DELIVERED", "REVISION_REQUESTED", "CUSTOMER"), false);
 });
 test("customer cannot mark an order delivered", () => {
   assert.equal(canTransitionOrder("IN_PROGRESS", "DELIVERED", "CUSTOMER"), false);
