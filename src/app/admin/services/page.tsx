@@ -66,6 +66,7 @@ export default async function AdminServicesPage() {
       title: true,
       description: true,
       price: true,
+      mediaUrls: true,
       createdAt: true,
       provider: {
         select: {
@@ -126,6 +127,7 @@ export default async function AdminServicesPage() {
                 <p className="mt-4 leading-8 text-gray-600">
                   {service.description}
                 </p>
+                {service.mediaUrls.length>0&&<div className="mt-4 grid gap-3 sm:grid-cols-2">{service.mediaUrls.map((url,index)=> /\\.(mp4|webm|mov)(\\?|$)/i.test(url)?<video key={url} src={url} controls className="max-h-72 w-full rounded-xl bg-black object-contain"/>:<img key={url} src={url} alt={`${service.title} - ${index+1}`} className="max-h-72 w-full rounded-xl object-contain"/>)}</div>}
 
                 <div className="mt-4 grid gap-2 rounded-xl bg-gray-50 p-4 text-sm">
                   <p>مقدم الخدمة: {service.provider.displayName}</p>
