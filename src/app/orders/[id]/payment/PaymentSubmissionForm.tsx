@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 export default function PaymentSubmissionForm({orderId,amount}:{orderId:string;amount:number}){
  const router=useRouter();const [file,setFile]=useState<File|null>(null);const [method,setMethod]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
- async function submit(e:React.FormEvent<HTMLFormElement>){
+ async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();setError("");if(!file){setError("اختَر صورة إيصال التحويل أولاً.");return;}if(!method){setError("اختر وسيلة الدفع.");return;}setBusy(true);
   try{
    const signResponse=await fetch("/api/uploads/sign",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({kind:"receipt",name:file.name,mimeType:file.type,size:file.size})});
