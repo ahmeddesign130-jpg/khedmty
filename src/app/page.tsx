@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { UiIcon } from "@/components/ui-icon";
 
 const steps = [
-  { number: "01", title: "أنشئ حسابك", description: "سجّل كعميل أو مقدم خدمة في خطوات بسيطة." },
-  { number: "02", title: "ابدأ بثقة", description: "تابع طلباتك وخدماتك من لوحة حسابك." },
-  { number: "03", title: "أنجز واستلم", description: "تابع التنفيذ حتى استلام الخدمة." },
+  { number: "01", title: "أنشئ حسابك", description: "سجّل كعميل أو مقدم خدمة في خطوات بسيطة.", icon: "user" as const },
+  { number: "02", title: "ابدأ بثقة", description: "تابع طلباتك وخدماتك من لوحة حسابك.", icon: "shield" as const },
+  { number: "03", title: "أنجز واستلم", description: "تابع التنفيذ حتى استلام الخدمة.", icon: "badge-check" as const },
 ];
 
 export default function HomePage() {
@@ -64,7 +65,7 @@ export default function HomePage() {
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {steps.map((step) => (
             <article key={step.number} className="rounded-3xl border border-slate-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-lg font-black text-orange-600">{step.number}</span>
+              <span className="ui-icon-tile"><UiIcon name={step.icon} size={27}/></span><span className="mr-3 text-xs font-black text-orange-500">{step.number}</span>
               <h3 className="mt-5 text-xl font-black">{step.title}</h3>
               <p className="mt-3 text-sm leading-8 text-slate-500">{step.description}</p>
             </article>
