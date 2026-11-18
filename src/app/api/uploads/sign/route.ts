@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { createStorageUpload, storageReady } from "@/lib/storage";
+import { createStorageUpload, serviceMediaPublicUrl, storageReady } from "@/lib/storage";
 export const dynamic = "force-dynamic";
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 40 * 1024 * 1024;
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const extension = mimeType === "image/jpeg" ? "jpg" : mimeType === "video/quicktime" ? "mov" : mimeType.split("/")[1];
     const objectPath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
     const signed = await createStorageUpload(bucket, objectPath);
-    return NextResponse.json({ ...signed, bucket, mimeType, maxSize });
+    return NextResponse.json({ ...signed, bucket, mimeType, maxSize, publicUrl: kind === "service" ? serviceMediaPublicUrl(objectPath) : null });
   } catch (error) {
     console.error("UPLOAD_SIGN_ERROR", error);
     return NextResponse.json({ message: "تعذر تجهيز رفع الملف. تحقق من إعدادات التخزين." }, { status: 500 });
