@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 const COOKIE_NAME = "khedmty_session";
 const SESSION_DURATION = 60 * 60 * 24 * 7;
@@ -21,11 +22,7 @@ function getSecret() {
 }
 
 export async function createSession(user: SessionUser) {
-  const token = await new SignJWT({
-    id: user.id,
-    role: user.role,
-    status: user.status,
-  })
+  const token = await new SignJWT({ id: user.id })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -51,23 +48,17 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 
     const { payload } = await jwtVerify(token, getSecret());
 
-    if (
-      typeof payload.id !== "string" ||
-      !["CUSTOMER", "PROVIDER", "SUPER_ADMIN"].includes(
-        String(payload.role)
-      ) ||
-      !["ACTIVE", "PENDING", "SUSPENDED"].includes(
-        String(payload.status)
-      )
-    ) {
-      return null;
-    }
+    if (typeof payload.id !== "string") return null;
 
-    return {
-      id: payload.id,
-      role: payload.role as SessionUser["role"],
-      status: payload.status as SessionUser["status"],
-    };
+    // Always read role/status from the database so admin changes take effect immediately.
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: { id: true, role: true, status: true },
+    });
+
+    if (!user || user.status === "SUSPENDED") return null;
+
+    return user;
   } catch {
     return null;
   }
