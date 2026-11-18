@@ -9,3 +9,4 @@ WHERE "serviceNo" IS NULL;
 
 CREATE UNIQUE INDEX IF NOT EXISTS "Service_serviceNo_key"
   ON public."Service" ("serviceNo");
+ALTER TABLE public."Service" ALTER COLUMN "serviceNo" SET NOT NULL;

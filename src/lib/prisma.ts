@@ -47,6 +47,10 @@ async function ensureCompatibilitySchema() {
         `CREATE UNIQUE INDEX IF NOT EXISTS "Service_serviceNo_key"
          ON public."Service" ("serviceNo")`
       );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Service"
+         ALTER COLUMN "serviceNo" SET NOT NULL`
+      );
     })().catch((error) => {
       compatibilitySchemaPromise = undefined;
       throw error;
