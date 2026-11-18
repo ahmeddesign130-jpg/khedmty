@@ -30,7 +30,7 @@ export async function createStorageDownload(bucket: string, objectPath: string) 
   const response = await fetch(`${url}/storage/v1/object/sign/${bucket}/${encoded}`, {
     method: "POST",
     headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ expiresIn: 300 }),
+    body: JSON.stringify({ expiresIn: 3600 }),
     cache: "no-store",
   });
   const data = await response.json().catch(() => ({}));
