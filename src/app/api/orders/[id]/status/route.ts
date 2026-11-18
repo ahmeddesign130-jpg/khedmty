@@ -31,7 +31,7 @@ type OrderStatus =
 
 const transitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING_PAYMENT: ["PAYMENT_REVIEW", "CANCELLED"],
-  PAYMENT_REVIEW: ["CANCELLED"],
+  PAYMENT_REVIEW: [],
   PAID: ["IN_PROGRESS"],
   IN_PROGRESS: ["DELIVERED"],
   DELIVERED: ["REVISION_REQUESTED", "COMPLETED"],

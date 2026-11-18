@@ -12,6 +12,7 @@ export default async function ServicesPage() {
       title: true,
       description: true,
       price: true,
+      mediaUrls: true,
       provider: {
         select: {
           displayName: true,
@@ -88,10 +89,8 @@ export default async function ServicesPage() {
                 key={service.id}
                 className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="flex h-32 items-center justify-center bg-gradient-to-br from-orange-100 to-orange-50">
-                  <span className="text-5xl font-black text-orange-500">
-                    خ
-                  </span>
+                <div className="h-48 overflow-hidden bg-slate-100">
+                  {service.mediaUrls[0] ? ( /\.(mp4|webm|mov)(\?|$)/i.test(service.mediaUrls[0]) ? <video src={service.mediaUrls[0]} controls className="h-full w-full object-cover"/> : <img src={service.mediaUrls[0]} alt={service.title} className="h-full w-full object-cover"/>) : <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400">لا توجد صورة للخدمة</div>}
                 </div>
 
                 <div className="p-5">

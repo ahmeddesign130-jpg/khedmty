@@ -5,73 +5,33 @@ import { createSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+function redirect303(req: NextRequest, path: string) {
+  return NextResponse.redirect(new URL(path, req.url), 303);
+}
+
 export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
-
-    const email = String(form.get("email") || "")
-      .trim()
-      .toLowerCase();
-
+    const email = String(form.get("email") || "").trim().toLowerCase();
     const password = String(form.get("password") || "");
 
-    if (!email || !password) {
-      return NextResponse.redirect(
-        new URL("/login?error=missing", req.url)
-      );
-    }
+    if (!email || !password) return redirect303(req, "/login?error=missing");
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return redirect303(req, "/login?error=invalid");
 
-    if (!user) {
-      return NextResponse.redirect(
-        new URL("/login?error=invalid", req.url)
-      );
-    }
+    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+    if (!passwordMatches) return redirect303(req, "/login?error=invalid");
+    if (user.status === "SUSPENDED") return redirect303(req, "/login?error=suspended");
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
+    await createSession({ id: user.id, role: user.role, status: user.status });
 
-    if (!passwordMatches) {
-      return NextResponse.redirect(
-        new URL("/login?error=invalid", req.url)
-      );
-    }
-
-    if (user.status === "SUSPENDED") {
-      return NextResponse.redirect(
-        new URL("/login?error=suspended", req.url)
-      );
-    }
-
-    await createSession({
-      id: user.id,
-      role: user.role,
-      status: user.status,
-    });
-
-    if (user.role === "SUPER_ADMIN") {
-      return NextResponse.redirect(new URL("/admin", req.url));
-    }
-
-    if (user.role === "PROVIDER" && user.status === "PENDING") {
-      return NextResponse.redirect(new URL("/pending", req.url));
-    }
-
-    if (user.role === "PROVIDER") {
-      return NextResponse.redirect(new URL("/provider", req.url));
-    }
-
-    return NextResponse.redirect(new URL("/account", req.url));
+    if (user.role === "SUPER_ADMIN") return redirect303(req, "/admin");
+    if (user.role === "PROVIDER" && user.status === "PENDING") return redirect303(req, "/pending");
+    if (user.role === "PROVIDER") return redirect303(req, "/provider");
+    return redirect303(req, "/account");
   } catch (error) {
     console.error("Login error:", error);
-
-    return NextResponse.redirect(
-      new URL("/login?error=server", req.url)
-    );
+    return redirect303(req, "/login?error=server");
   }
 }

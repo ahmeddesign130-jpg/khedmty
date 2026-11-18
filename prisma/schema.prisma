@@ -81,6 +81,8 @@ model Service {
   title       String
   description String
   price       Int
+  mediaUrls   String[]      @default([])
+  reviewNote  String?       @db.Text
   status      ServiceStatus @default(DRAFT)
   providerId  String
   provider    User          @relation("ProviderServices", fields: [providerId], references: [id])
@@ -99,10 +101,11 @@ model Order {
   commission     Int
   total          Int
   status         OrderStatus @default(PENDING_PAYMENT)
-  customer       User        @relation("CustomerOrders", fields: [customerId], references: [id])
-  provider       User        @relation("ProviderOrders", fields: [providerId], references: [id])
-  payments       Payment[]
-  createdAt      DateTime    @default(now())
+
+  customer  User      @relation("CustomerOrders", fields: [customerId], references: [id])
+  provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
+  payments  Payment[]
+  createdAt DateTime  @default(now())
 }
 
 model Payment {
@@ -114,13 +117,14 @@ model Payment {
   status      PaymentStatus @default(PENDING_REVIEW)
   reviewNote  String?
   reviewedAt  DateTime?
-  order       Order         @relation(fields: [orderId], references: [id])
-  createdAt   DateTime      @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model PlatformSettings {
-  id             String @id @default("main")
-  commissionRate Int    @default(10)
+  id             String   @id @default("main")
+  commissionRate Int      @default(10)
   updatedAt      DateTime @updatedAt
 }
 

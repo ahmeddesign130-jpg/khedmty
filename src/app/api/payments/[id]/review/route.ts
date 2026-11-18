@@ -54,7 +54,7 @@ export async function PATCH(
       );
     }
 
-    if (payment.status !== "PENDING_REVIEW") {
+    if (payment.status !== "PENDING_REVIEW" || payment.order.status !== "PAYMENT_REVIEW") {
       return NextResponse.json(
         { message: "تمت مراجعة عملية الدفع من قبل." },
         { status: 409 }
