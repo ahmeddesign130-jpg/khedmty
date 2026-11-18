@@ -18,11 +18,16 @@ export default async function OrdersPage() {
   const [completedCount, orders] = await Promise.all([
     prisma.order.count({ where: { customerId: user.id, status: "COMPLETED" } }),
     prisma.order.findMany({
-    where: { customerId: user.id },
-    orderBy: { createdAt: "desc" },
-    include: { payments: { orderBy: { createdAt: "desc" }, take: 1 }, service: { select: { title: true } } }
-    })
+      where: { customerId: user.id },
+      orderBy: { createdAt: "desc" },
+      include: { payments: { orderBy: { createdAt: "desc" }, take: 1 } },
+    }),
   ]);
+  const services = await prisma.service.findMany({
+    where: { id: { in: [...new Set(orders.map((order) => order.serviceId))] } },
+    select: { id: true, title: true },
+  });
+  const serviceTitles = new Map(services.map((service) => [service.id, service.title]));
   const capacity = 5 + Math.floor(completedCount / 5) * 5;
   const progress = completedCount % 5 === 0 && completedCount > 0 ? 5 : completedCount % 5;
   const activeCount = orders.filter(order => !["COMPLETED", "CANCELLED", "REJECTED"].includes(order.status)).length;
@@ -41,7 +46,7 @@ export default async function OrdersPage() {
         <h2 className="text-xl font-bold">لسه مفيش طلبات</h2>
         <Link href="/services" className="mt-5 inline-block rounded-xl bg-orange-500 px-6 py-3 font-bold text-white">تصفح الخدمات</Link>
       </section> : <div className="mt-7 space-y-4">{orders.map(order => <article key={order.id} className="rounded-2xl bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><strong>{order.orderNo}</strong><p className="mt-1 text-sm text-slate-500">{order.service.title}</p><p className="mt-1 text-xs text-slate-400">{order.createdAt.toLocaleDateString("en-GB")}</p></div><span className="rounded-full bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700">{labels[order.status] || order.status}</span></div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><div><strong>{order.orderNo}</strong><p className="mt-1 text-sm text-slate-500">{serviceTitles.get(order.serviceId) || "الخدمة"}</p><p className="mt-1 text-xs text-slate-400">{order.createdAt.toLocaleDateString("en-GB")}</p></div><span className="rounded-full bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700">{labels[order.status] || order.status}</span></div>
         <p className="mt-4 text-sm text-slate-500">الإجمالي</p><p className="mt-1 text-xl font-black text-orange-600">{order.total.toLocaleString("en-US")} EG</p>
         <Link href={`/orders/${order.id}`} className="mt-4 inline-block rounded-xl bg-[#14213d] px-5 py-3 font-bold text-white">تفاصيل الطلب</Link>
       </article>)}</div>}
