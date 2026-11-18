@@ -18,7 +18,7 @@ export default function ServiceCreateForm(){
   return {url:signed.publicUrl,type:file.type.startsWith("video/")?"video":"image"};
  }
  async function submit(event:React.FormEvent<HTMLFormElement>){
-  event.preventDefault();setError("");setBusy(true);
+  event.preventDefault();setError("");if(files.length>8){setError("يمكن رفع 8 ملفات كحد أقصى.");return;}setBusy(true);
   try{
    const formElement=event.currentTarget;
    const form=new FormData(formElement);
