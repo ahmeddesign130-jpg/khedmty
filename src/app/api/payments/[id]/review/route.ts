@@ -69,8 +69,8 @@ export async function PATCH(
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      const updatedPayment = await tx.payment.update({
-        where: { id },
+      const paymentUpdate = await tx.payment.updateMany({
+        where: { id, status: "PENDING_REVIEW" },
         data: {
           status,
           reviewNote: reviewNote?.trim() || null,
@@ -78,28 +78,31 @@ export async function PATCH(
         },
       });
 
-      const updatedOrder = await tx.order.update({
-        where: { id: payment.orderId },
+      if (paymentUpdate.count !== 1) {
+        throw new Error("REVIEW_CONFLICT");
+      }
+
+      const orderUpdate = await tx.order.updateMany({
+        where: { id: payment.orderId, status: "PAYMENT_REVIEW" },
         data: {
           status: status === "APPROVED" ? "PAID" : "PENDING_PAYMENT",
         },
       });
 
+      if (orderUpdate.count !== 1) {
+        throw new Error("REVIEW_CONFLICT");
+      }
+
       await tx.auditLog.create({
         data: {
           actorId: user.id,
-          action:
-            status === "APPROVED"
-              ? "PAYMENT_APPROVED"
-              : "PAYMENT_REJECTED",
+          action: status === "APPROVED" ? "PAYMENT_APPROVED" : "PAYMENT_REJECTED",
           targetId: payment.id,
-          details:
-            reviewNote?.trim() ||
-            `تمت مراجعة الدفع للطلب ${payment.order.orderNo}`,
+          details: reviewNote?.trim() || `تمت مراجعة الدفع للطلب ${payment.order.orderNo}`,
         },
       });
 
-      return { payment: updatedPayment, order: updatedOrder };
+      return { success: true };
     });
 
     return NextResponse.json({
@@ -110,8 +113,14 @@ export async function PATCH(
       ...result,
     });
   } catch (error) {
-    console.error("Payment review error:", error);
+    if (error instanceof Error && error.message === "REVIEW_CONFLICT") {
+      return NextResponse.json(
+        { message: "تمت مراجعة عملية الدفع بالفعل بواسطة مسؤول آخر." },
+        { status: 409 }
+      );
+    }
 
+    console.error("Payment review error:", error);
     return NextResponse.json(
       { message: "حدث خطأ أثناء مراجعة الدفع." },
       { status: 500 }
