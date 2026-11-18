@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 function fail(req: NextRequest, code: string) {
   const response = NextResponse.redirect(new URL("/login?error=" + code, req.url));
-  response.cookies.delete("khedmty_google_state");
-  response.cookies.delete("khedmty_google_verifier");
+  response.cookies.set("khedmty_google_state", "", { path: "/api/auth/google/callback", maxAge: 0 });
+  response.cookies.set("khedmty_google_verifier", "", { path: "/api/auth/google/callback", maxAge: 0 });
   return response;
 }
 

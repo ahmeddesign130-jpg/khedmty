@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function ServicesPage() {\n  const viewer = await getCurrentUser();\n  if (!viewer) redirect("/login");\n  if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {\n    redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");\n  }
+export default async function ServicesPage() {
+  const viewer = await getCurrentUser();
+  if (!viewer) redirect("/login");
+  if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
+    redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");
+  }
   const services = await prisma.service.findMany({
     where: { status: "APPROVED" },
     select: {
