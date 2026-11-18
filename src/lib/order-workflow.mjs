@@ -3,7 +3,7 @@ const transitions = {
   PAYMENT_REVIEW: [],
   PAID: ["IN_PROGRESS"],
   IN_PROGRESS: ["DELIVERED"],
-  DELIVERED: ["REVISION_REQUESTED", "COMPLETED"],
+  DELIVERED: ["COMPLETED"],
   REVISION_REQUESTED: ["IN_PROGRESS", "DELIVERED"],
   COMPLETED: [],
   CANCELLED: [],
@@ -17,7 +17,7 @@ const transitions = {
 export function canTransitionOrder(from, to, role) {
   if (!transitions[from]?.includes(to)) return false;
   if (role === "CUSTOMER") {
-    return ["CANCELLED", "REVISION_REQUESTED", "COMPLETED"].includes(to);
+    return ["CANCELLED", "COMPLETED"].includes(to);
   }
   if (role === "PROVIDER") {
     return ["IN_PROGRESS", "DELIVERED"].includes(to);
