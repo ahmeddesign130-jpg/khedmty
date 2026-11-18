@@ -82,6 +82,7 @@ model Service {
   description String
   price       Int
   mediaUrls   String[]      @default([])
+  reviewNote  String?       @db.Text
   status      ServiceStatus @default(DRAFT)
   providerId  String
   provider    User          @relation("ProviderServices", fields: [providerId], references: [id])
