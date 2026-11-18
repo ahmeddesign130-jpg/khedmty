@@ -54,9 +54,18 @@ export async function GET() {
       },
     });
 
+    const safeOrders = user.role === "SUPER_ADMIN"
+      ? orders
+      : orders.map((order) => ({
+          ...order,
+          customer: { id: order.customer.id, displayName: order.customer.displayName },
+          provider: { id: order.provider.id, displayName: order.provider.displayName },
+          customerContact: undefined,
+        }));
+
     return NextResponse.json({
       success: true,
-      orders,
+      orders: safeOrders,
     });
   } catch (error) {
     console.error("GET_ORDERS_ERROR:", error);
