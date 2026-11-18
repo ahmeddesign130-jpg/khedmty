@@ -69,6 +69,7 @@ export async function POST(
         where: { id },
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
+          reviewNote: action === "REJECT" ? reason : null,
         },
       });
 
