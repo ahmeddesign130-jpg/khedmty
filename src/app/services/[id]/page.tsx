@@ -7,10 +7,13 @@ export const dynamic = "force-dynamic";
 
 export default async function ServiceDetailsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const query = await searchParams;
   const viewer = await getCurrentUser();
   if (!viewer) redirect("/login");
   if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {

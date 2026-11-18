@@ -1,7 +1,8 @@
 "use client";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-export default function PaymentSubmissionForm({orderId,amount}:{orderId:string;amount:number}){
+type PaymentMethod = "INSTAPAY" | "E_AND_MONEY" | "ETISALAT_CASH";
+export default function PaymentSubmissionForm({orderId,amount,methods}:{orderId:string;amount:number;methods:{value:PaymentMethod;label:string}[]}){
  const router=useRouter();const [file,setFile]=useState<File|null>(null);const [method,setMethod]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();setError("");if(!file){setError("اختَر صورة إيصال التحويل أولاً.");return;}if(!method){setError("اختر وسيلة الدفع.");return;}setBusy(true);
@@ -15,7 +16,7 @@ export default function PaymentSubmissionForm({orderId,amount}:{orderId:string;a
   }catch(err){setError(err instanceof Error?err.message:"حدث خطأ غير متوقع.");}finally{setBusy(false);}
  }
  return <form onSubmit={submit} className="mt-7 space-y-5">
- <label className="block text-sm font-bold text-slate-700">وسيلة الدفع<select value={method} onChange={e=>setMethod(e.target.value)} required className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3"><option value="">اختر وسيلة الدفع</option><option value="INSTAPAY">InstaPay</option><option value="E_AND_MONEY">e& money</option><option value="ETISALAT_CASH">Etisalat Cash</option><option value="OTHER">وسيلة أخرى</option></select></label>
+ <label className="block text-sm font-bold text-slate-700">وسيلة الدفع<select value={method} onChange={e=>setMethod(e.target.value)} required className="mt-2 w-full rounded-xl border border-slate-200 bg-white p-3"><option value="">اختر وسيلة الدفع</option>{methods.map((item)=><option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
  <label className="block text-sm font-bold text-slate-700">صورة إيصال التحويل<input type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>setFile(e.target.files?.[0]||null)} required className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/></label>
  <p className="text-xs leading-6 text-slate-500">صورة JPG أو PNG أو WEBP، بحد أقصى 8 MB. الصورة محفوظة بشكل خاص ولا يمكن فتحها إلا من لوحة الإدارة.</p>
  {error&&<p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">{error}</p>}

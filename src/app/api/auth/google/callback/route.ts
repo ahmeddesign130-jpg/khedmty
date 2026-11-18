@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 
 function fail(req: NextRequest, code: string) {
   const response = NextResponse.redirect(new URL("/login?error=" + code, req.url));
-  response.cookies.set("khedmty_google_state", "", { path: "/api/auth/google/callback", maxAge: 0 });
-  response.cookies.set("khedmty_google_verifier", "", { path: "/api/auth/google/callback", maxAge: 0 });
+  for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role"]) {
+    response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
+  }
   return response;
 }
 
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     const state = params.get("state");
     const savedState = req.cookies.get("khedmty_google_state")?.value;
     const verifier = req.cookies.get("khedmty_google_verifier")?.value;
+    const requestedRole = req.cookies.get("khedmty_google_role")?.value === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
@@ -61,12 +63,11 @@ export async function GET(req: NextRequest) {
             email,
             displayName: (profile.name || email.split("@")[0]).slice(0, 70),
             passwordHash,
-            role: "CUSTOMER",
-            status: "ACTIVE",
+            role: requestedRole,
+            status: requestedRole === "PROVIDER" ? "PENDING" : "ACTIVE",
           },
         });
       } catch {
-        // A concurrent first login may have created the same verified email.
         user = await prisma.user.findUnique({ where: { email } });
         if (!user) throw new Error("GOOGLE_ACCOUNT_CREATE_FAILED");
       }
@@ -79,8 +80,9 @@ export async function GET(req: NextRequest) {
       : user.role === "PROVIDER" && user.status === "PENDING" ? "/pending"
       : user.role === "PROVIDER" ? "/provider" : "/account";
     const response = NextResponse.redirect(new URL(destination, req.url));
-    response.cookies.delete("khedmty_google_state");
-    response.cookies.delete("khedmty_google_verifier");
+    for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role"]) {
+      response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
+    }
     return response;
   } catch (error) {
     console.error("Google authentication error:", error);

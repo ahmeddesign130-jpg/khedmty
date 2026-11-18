@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const orderSchema = z.object({
   serviceId: z.string().min(1),
+  customerContact: z.string().trim().min(5).max(160),
 });
 
 // عرض الطلبات
@@ -151,6 +152,7 @@ export async function POST(request: Request) {
           .toUpperCase()}`,
         serviceId: service.id,
         customerId: user.id,
+        customerContact: validation.data.customerContact,
         providerId: service.providerId,
         servicePrice,
         commissionRate,

@@ -95,6 +95,7 @@ model Order {
   orderNo        String      @unique
   serviceId      String
   customerId     String
+  customerContact String?    @db.Text
   providerId     String
   servicePrice   Int
   commissionRate Int         @default(10)

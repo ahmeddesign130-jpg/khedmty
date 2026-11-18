@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const paymentSchema = z.object({
   orderId: z.string().min(1),
-  method: z.enum(["INSTAPAY", "E_AND_MONEY", "ETISALAT_CASH", "OTHER"]),
+  method: z.enum(["INSTAPAY", "E_AND_MONEY", "ETISALAT_CASH"]),
   receiptUrl: z.string().min(1).max(500),
   amount: z.number().int().positive(),
 });
@@ -54,6 +54,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { orderId, method, receiptUrl, amount } = parsed.data;
+    const methodConfigured =
+      (method === "INSTAPAY" && Boolean(process.env.INSTAPAY_ADDRESS)) ||
+      (method === "E_AND_MONEY" && Boolean(process.env.E_AND_MONEY_NUMBER)) ||
+      (method === "ETISALAT_CASH" && Boolean(process.env.ETISALAT_CASH_NUMBER));
+    if (!methodConfigured) {
+      return NextResponse.json({ message: "وسيلة الدفع المختارة غير مفعّلة حاليًا." }, { status: 503 });
+    }
     if (!receiptUrl.startsWith(`${user.id}/`) || receiptUrl.includes("..") || receiptUrl.startsWith("/")) {
       return NextResponse.json({ message: "مسار صورة الإيصال غير صحيح." }, { status: 400 });
     }

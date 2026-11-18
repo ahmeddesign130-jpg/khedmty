@@ -136,6 +136,7 @@ export default async function AdminOrdersPage() {
                     <p className="text-xs text-slate-400">
                       {order.customer.email}
                     </p>
+                    <p className="mt-2 text-sm text-slate-600" dir="auto">وسيلة التواصل: {order.customerContact || "غير محددة"}</p>
                   </div>
 
                   <div>

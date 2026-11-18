@@ -3,6 +3,12 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PaymentSubmissionForm from "./PaymentSubmissionForm";
+
+const availableMethods = [
+  ...(process.env.INSTAPAY_ADDRESS ? [{ value: "INSTAPAY" as const, label: "InstaPay" }] : []),
+  ...(process.env.E_AND_MONEY_NUMBER ? [{ value: "E_AND_MONEY" as const, label: "e& money" }] : []),
+  ...(process.env.ETISALAT_CASH_NUMBER ? [{ value: "ETISALAT_CASH" as const, label: "Etisalat Cash" }] : []),
+];
 export const dynamic="force-dynamic";
 export default async function PaymentPage({params}:{params:Promise<{id:string}>}){
  const user=await getCurrentUser();if(!user)redirect("/login");if(user.role!=="CUSTOMER"||user.status!=="ACTIVE")redirect("/account");
@@ -19,5 +25,5 @@ export default async function PaymentPage({params}:{params:Promise<{id:string}>}
  {process.env.ETISALAT_CASH_NUMBER&&<p className="rounded-xl bg-slate-50 p-3"><strong>Etisalat Cash:</strong> <span dir="ltr">{process.env.ETISALAT_CASH_NUMBER}</span></p>}
  </div> : <p className="mt-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">بيانات المحافظ لم تُضف بعد. لن يظهر للعميل رقم تحويل غير موثوق.</p>}
  </div>
- <PaymentSubmissionForm orderId={order.id} amount={order.total}/></div></section></main>;
+ {availableMethods.length > 0 ? <PaymentSubmissionForm orderId={order.id} amount={order.total} methods={availableMethods}/> : <p className="mt-6 rounded-xl bg-orange-50 p-4 text-sm font-bold text-orange-800">لا توجد وسيلة دفع مفعّلة حاليًا. تواصل مع إدارة خِدمتي قبل التحويل.</p>}</div></section></main>;
 }

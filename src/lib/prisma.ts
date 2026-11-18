@@ -33,6 +33,10 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "serviceNo" TEXT`
       );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ADD COLUMN IF NOT EXISTS "customerContact" TEXT`
+      );
       // Backfill only missing numbers. Existing service numbers are preserved.
       await basePrisma.$executeRawUnsafe(
         `UPDATE public."Service"
