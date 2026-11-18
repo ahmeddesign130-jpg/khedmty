@@ -35,7 +35,7 @@ export default async function ServiceDetailsPage({
     notFound();
   }
 
-  async function createOrder() {
+  async function createOrder(formData: FormData) {
     "use server";
 
     const user = await getCurrentUser();
@@ -44,6 +44,11 @@ export default async function ServiceDetailsPage({
 
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
       redirect("/account");
+    }
+
+    const customerContact = String(formData.get("customerContact") || "").trim();
+    if (customerContact.length < 5 || customerContact.length > 160) {
+      redirect(`/services/${id}?error=contact`);
     }
 
     let orderId: string;
@@ -88,6 +93,7 @@ export default async function ServiceDetailsPage({
               .toUpperCase()}`,
             serviceId: currentService.id,
             customerId: user.id,
+            customerContact,
             providerId: currentService.providerId,
             servicePrice,
             commissionRate,
@@ -204,7 +210,11 @@ export default async function ServiceDetailsPage({
                 </div>
               </div>
 
+              {query.error === "contact" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">اكتب وسيلة تواصل صحيحة قبل إنشاء الطلب.</p>}
               <form action={createOrder}>
+                <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
+                  <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
+                </label>
                 <button
                   type="submit"
                   className="mt-7 w-full rounded-xl bg-orange-500 px-6 py-4 font-black text-white transition hover:bg-orange-600"
