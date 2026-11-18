@@ -71,7 +71,7 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-      <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500">خِدمتي — مهارتك تستحق التميز</footer>
+      <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500"><p>خِدمتي — مهارتك تستحق التميز</p><p className="mt-2 text-xs">© 2026 AHMED ZAKRAIA ALI — جميع الحقوق محفوظة.</p></footer>
     </main>
   );
 }
