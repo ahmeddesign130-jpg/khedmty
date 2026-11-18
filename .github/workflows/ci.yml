@@ -2,7 +2,10 @@ name: Khedmty CI
 
 on:
   push:
-    branches: ["fix/auth-redirect-flow"]
+    branches:
+      - main
+      - "rebuild/**"
+      - "fix/**"
   pull_request:
     branches: ["main"]
 
@@ -21,7 +24,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - run: npx prisma generate
-      - run: npx tsc --noEmit
+      - run: npm run typecheck
       - run: npm run build
