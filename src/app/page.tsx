@@ -11,9 +11,9 @@ export default function HomePage() {
   return (
     <main dir="rtl" className="min-h-screen bg-[#f6f7fb] text-[#14213d]">
       <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-5 py-4">
           <Link href="/" className="text-2xl font-black tracking-tight text-orange-600">خِدمتي</Link>
-          <nav className="flex items-center gap-3">
+          <nav className="flex shrink-0 items-center gap-5 sm:gap-6">
             <Link href="/login" className="rounded-xl px-3 py-2 text-sm font-bold text-[#14213d] hover:bg-slate-50">تسجيل الدخول</Link>
             <Link href="/register" className="rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-orange-500/20 hover:bg-orange-600">إنشاء حساب</Link>
           </nav>
