@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
@@ -63,8 +62,7 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const body = await request.json();
-    const parsed = statusSchema.safeParse(body);
+    const parsed = statusSchema.safeParse(await request.json());
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -74,10 +72,7 @@ export async function PATCH(
     }
 
     const newStatus = parsed.data.status as OrderStatus;
-
-    const order = await prisma.order.findUnique({
-      where: { id },
-    });
+    const order = await prisma.order.findUnique({ where: { id } });
 
     if (!order) {
       return NextResponse.json(
@@ -105,21 +100,20 @@ export async function PATCH(
         );
       }
 
-      if (isCustomer && ![
-        "CANCELLED",
-        "REVISION_REQUESTED",
-        "COMPLETED",
-      ].includes(newStatus)) {
+      if (
+        isCustomer &&
+        !["CANCELLED", "REVISION_REQUESTED", "COMPLETED"].includes(newStatus)
+      ) {
         return NextResponse.json(
           { message: "لا يمكنك تنفيذ هذا الإجراء." },
           { status: 403 }
         );
       }
 
-      if (isProvider && ![
-        "IN_PROGRESS",
-        "DELIVERED",
-      ].includes(newStatus)) {
+      if (
+        isProvider &&
+        !["IN_PROGRESS", "DELIVERED"].includes(newStatus)
+      ) {
         return NextResponse.json(
           { message: "لا يمكنك تنفيذ هذا الإجراء." },
           { status: 403 }
@@ -135,10 +129,22 @@ export async function PATCH(
     }
 
     const updatedOrder = await prisma.$transaction(async (tx) => {
-      const updated = await tx.order.update({
-        where: { id },
+      // Compare-and-set prevents two simultaneous requests from overwriting
+      // each other after both read the same previous status.
+      const result = await tx.order.updateMany({
+        where: { id: order.id, status: order.status },
         data: { status: newStatus },
       });
+
+      if (result.count !== 1) {
+        throw new Error("ORDER_STATUS_CONFLICT");
+      }
+
+      const updated = await tx.order.findUnique({ where: { id: order.id } });
+
+      if (!updated) {
+        throw new Error("ORDER_NOT_FOUND_AFTER_UPDATE");
+      }
 
       await tx.auditLog.create({
         data: {
@@ -157,11 +163,17 @@ export async function PATCH(
       order: updatedOrder,
     });
   } catch (error) {
-    console.error("Order status update error:", error);
+    if (error instanceof Error && error.message === "ORDER_STATUS_CONFLICT") {
+      return NextResponse.json(
+        { message: "تم تحديث الطلب بالفعل. حدّث الصفحة وحاول مرة أخرى." },
+        { status: 409 }
+      );
+    }
 
+    console.error("Order status update error:", error);
     return NextResponse.json(
       { message: "حدث خطأ أثناء تحديث حالة الطلب." },
       { status: 500 }
     );
   }
-          }
+}
