@@ -90,7 +90,7 @@ export default async function ServicesPage() {
                 className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="h-48 overflow-hidden bg-slate-100">
-                  {service.mediaUrls[0] ? ( /\\.(mp4|webm|mov)(\\?|$)/i.test(service.mediaUrls[0]) ? <video src={service.mediaUrls[0]} controls className="h-full w-full object-cover"/> : <img src={service.mediaUrls[0]} alt={service.title} className="h-full w-full object-cover"/>) : <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400">لا توجد صورة للخدمة</div>}
+                  {service.mediaUrls[0] ? ( /\.(mp4|webm|mov)(\?|$)/i.test(service.mediaUrls[0]) ? <video src={service.mediaUrls[0]} controls className="h-full w-full object-cover"/> : <img src={service.mediaUrls[0]} alt={service.title} className="h-full w-full object-cover"/>) : <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400">لا توجد صورة للخدمة</div>}
                 </div>
 
                 <div className="p-5">
