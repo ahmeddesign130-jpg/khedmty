@@ -17,13 +17,15 @@ input:not([type="checkbox"]):not([type="radio"]),select,textarea { border-color:
 input:focus,select:focus,textarea:focus { border-color:var(--primary)!important; box-shadow:0 0 0 4px rgb(244 119 33 / 10%); outline:none; }
 .container { width:min(100% - 32px,1200px); margin-inline:auto; }
 
-/* دخول هادئ ومتدرج لكل صفحة، مع احترام إعداد تقليل الحركة */
+/* ظهور تدريجي وناعم لمحتوى الصفحات */
 @keyframes khedmty-enter { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
-@keyframes khedmty-pop { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:scale(1); } }
+@keyframes khedmty-pop { from { opacity:0; transform:translateY(10px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
 main > header, main > aside, main > section, main > footer { animation:khedmty-enter .65s cubic-bezier(.2,.75,.25,1) both; }
 main > section:nth-of-type(2) { animation-delay:.10s; }
 main > section:nth-of-type(3) { animation-delay:.18s; }
-main a[class*="rounded-2xl"], main a[class*="rounded-3xl"], main article { animation:khedmty-pop .5s cubic-bezier(.2,.75,.25,1) both; }
+main > section:nth-of-type(4) { animation-delay:.24s; }
+main > section:nth-of-type(5) { animation-delay:.30s; }
+main a[class*="rounded-2xl"], main a[class*="rounded-3xl"], main article { animation:khedmty-pop .48s cubic-bezier(.2,.75,.25,1) both; }
 main a[class*="rounded-2xl"]:hover,main a[class*="rounded-3xl"]:hover { transform:translateY(-4px); box-shadow:0 16px 34px rgb(20 33 61 / 10%); }
 .ui-icon-tile { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border-radius:16px; background:#fff3e9; color:#e96f1c; padding:12px; }
 .ui-icon-tile-dark { background:rgb(255 255 255 / 12%); color:#ffb477; }
