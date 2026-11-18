@@ -27,7 +27,7 @@ The new `Service.mediaUrls` field stores uploaded service media URLs, and `Servi
 npx prisma db push
 ```
 
-This syncs the Prisma schema without resetting the database. Do **not** run `db:reset` or `--force-reset`.
+This syncs the Prisma schema without resetting the database. If you have a PostgreSQL SQL console instead of a terminal, the equivalent additive SQL is in `database/add_service_media_columns.sql`. Do **not** run `db:reset` or `--force-reset`.
 
 ## Payment destinations
 Only configure wallet destinations that are actually controlled by the platform. The payment page intentionally does not display the wallet owner's name. Until the environment variables are set, customers see a notice that payment details are not configured; no fake numbers are shown.
