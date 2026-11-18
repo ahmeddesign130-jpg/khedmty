@@ -55,6 +55,12 @@ export default async function ServiceDetailsPage({
 
     try {
       orderId = await prisma.$transaction(async (tx) => {
+        const [completedCount, activeCount] = await Promise.all([
+          tx.order.count({ where: { customerId: user.id, status: "COMPLETED" } }),
+          tx.order.count({ where: { customerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED", "REJECTED"] } } }),
+        ]);
+        const capacity = 5 + Math.floor(completedCount / 5) * 5;
+        if (activeCount >= capacity) throw new Error("ORDER_CAPACITY_REACHED");
         // Re-read all purchase-critical data together so the order uses
         // the current approved service, active provider, and commission.
         const currentService = await tx.service.findUnique({
@@ -105,8 +111,11 @@ export default async function ServiceDetailsPage({
         });
 
         return order.id;
-      });
+      }, { isolationLevel: "Serializable" });
     } catch (error) {
+      if (error instanceof Error && error.message === "ORDER_CAPACITY_REACHED") {
+        redirect(`/services/${id}?error=capacity`);
+      }
       if (error instanceof Error && error.message === "SERVICE_NOT_AVAILABLE") {
         redirect("/services");
       }
@@ -152,9 +161,6 @@ export default async function ServiceDetailsPage({
           </div>
 
           <div className="p-6 md:p-10">
-            <span className="rounded-lg bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700">
-              رقم الخدمة: {service.serviceNo}
-            </span>
 
             <h1 className="mt-5 text-3xl font-black text-[#14213d]">
               {service.title}
@@ -211,6 +217,7 @@ export default async function ServiceDetailsPage({
               </div>
 
               {query.error === "contact" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">اكتب وسيلة تواصل صحيحة قبل إنشاء الطلب.</p>}
+              {query.error === "capacity" && <p role="alert" className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">اكتملت الأماكن المتاحة لطلباتك. أكمل طلبًا جاريًا أولًا حتى يتوفر مكان جديد.</p>}
               <form action={createOrder}>
                 <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
                   <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
@@ -224,7 +231,7 @@ export default async function ServiceDetailsPage({
               </form>
 
               <p className="mt-4 text-center text-xs leading-6 text-slate-300">
-                لن يتم اعتماد الدفع إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ.
+                لن يتم اعتماد الدفع إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ. لا يبدأ التواصل مع مقدم الخدمة إلا بعد تأكيد الدفع.
               </p>
             </div>
           </div>
