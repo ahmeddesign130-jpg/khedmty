@@ -6,6 +6,13 @@ import { createSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+function googleRedirectUri(req: NextRequest) {
+  if (process.env.VERCEL_ENV === "preview") {
+    return "https://khedmty-git-audit-final-quality-hardening-ahmeddesign130-jpg.vercel.app/api/auth/google/callback";
+  }
+  return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
+}
+
 function fail(req: NextRequest, code: string) {
   const response = NextResponse.redirect(new URL("/login?error=" + code, req.url));
   for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role"]) {
@@ -25,7 +32,7 @@ export async function GET(req: NextRequest) {
     const requestedRole = req.cookies.get("khedmty_google_role")?.value === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
+    const redirectUri = googleRedirectUri(req);
 
     if (!code || !state || !savedState || state !== savedState || !verifier || !clientId || !clientSecret) {
       return fail(req, "google_failed");
