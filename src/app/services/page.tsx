@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function ServicesPage() {
+export default async function ServicesPage() {\n  const viewer = await getCurrentUser();\n  if (!viewer) redirect("/login");\n  if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {\n    redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");\n  }
   const services = await prisma.service.findMany({
     where: { status: "APPROVED" },
     select: {

@@ -10,7 +10,7 @@ export default async function ServiceDetailsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id } = await params;\n  const viewer = await getCurrentUser();\n  if (!viewer) redirect("/login");\n  if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {\n    redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");\n  }
 
   const service = await prisma.service.findUnique({
     where: { id },
