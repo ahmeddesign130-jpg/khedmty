@@ -33,12 +33,6 @@ export default async function AccountPage() {
           <p className="mt-3 text-gray-500">تابع حالة مشترياتك والمدفوعات وتفاصيل كل طلب.</p>
           <span className="mt-5 inline-flex items-center gap-2 font-bold text-orange-500">عرض الطلبات <UiIcon name="arrow-left" size={17}/></span>
         </Link>
-        <Link href="/account" className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <span className="ui-icon-tile"><UiIcon name="user" size={24}/></span><h2 className="mt-4 font-black">بيانات حسابي</h2><p className="mt-2 text-sm text-gray-500">مراجعة حساب العميل وبياناته.</p>
-        </Link>
-        <Link href="/services" className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <span className="ui-icon-tile"><UiIcon name="help" size={24}/></span><h2 className="mt-4 font-black">المساعدة والبدء</h2><p className="mt-2 text-sm text-gray-500">اعثر على الخدمة المناسبة وابدأ طلبك.</p>
-        </Link>
       </div>
     </section>
   </main>;
