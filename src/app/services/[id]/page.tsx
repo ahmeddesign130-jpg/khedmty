@@ -38,60 +38,68 @@ export default async function ServiceDetailsPage({
       redirect("/account");
     }
 
-    const currentService = await prisma.service.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        price: true,
-        providerId: true,
-        status: true,
-      },
-    });
+    let orderId: string;
 
-    if (!currentService || currentService.status !== "APPROVED") {
-      redirect("/services");
+    try {
+      orderId = await prisma.$transaction(async (tx) => {
+        // Re-read all purchase-critical data together so the order uses
+        // the current approved service, active provider, and commission.
+        const currentService = await tx.service.findUnique({
+          where: { id },
+          select: {
+            id: true,
+            price: true,
+            providerId: true,
+            status: true,
+            provider: { select: { status: true } },
+          },
+        });
+
+        if (
+          !currentService ||
+          currentService.status !== "APPROVED" ||
+          currentService.provider.status !== "ACTIVE" ||
+          currentService.providerId === user.id
+        ) {
+          throw new Error("SERVICE_NOT_AVAILABLE");
+        }
+
+        const settings = await tx.platformSettings.findUnique({
+          where: { id: "main" },
+          select: { commissionRate: true },
+        });
+
+        const commissionRate = settings?.commissionRate ?? 10;
+        const servicePrice = currentService.price;
+        const commission = Math.round((servicePrice * commissionRate) / 100);
+
+        const order = await tx.order.create({
+          data: {
+            orderNo: `KH-${Date.now()}-${crypto.randomUUID()
+              .slice(0, 6)
+              .toUpperCase()}`,
+            serviceId: currentService.id,
+            customerId: user.id,
+            providerId: currentService.providerId,
+            servicePrice,
+            commissionRate,
+            commission,
+            total: servicePrice + commission,
+            status: "PENDING_PAYMENT",
+          },
+          select: { id: true },
+        });
+
+        return order.id;
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "SERVICE_NOT_AVAILABLE") {
+        redirect("/services");
+      }
+      throw error;
     }
 
-    if (currentService.providerId === user.id) {
-      redirect("/services");
-    }
-
-    const provider = await prisma.user.findUnique({
-      where: { id: currentService.providerId },
-      select: { status: true },
-    });
-
-    if (!provider || provider.status !== "ACTIVE") {
-      redirect("/services");
-    }
-
-    const settings = await prisma.platformSettings.findUnique({
-      where: { id: "main" },
-    });
-
-    const commissionRate = settings?.commissionRate ?? 10;
-    const servicePrice = currentService.price;
-    const commission = Math.round(
-      (servicePrice * commissionRate) / 100
-    );
-
-    const order = await prisma.order.create({
-      data: {
-        orderNo: `KH-${Date.now()}-${crypto.randomUUID()
-          .slice(0, 6)
-          .toUpperCase()}`,
-        serviceId: currentService.id,
-        customerId: user.id,
-        providerId: currentService.providerId,
-        servicePrice,
-        commissionRate,
-        commission,
-        total: servicePrice + commission,
-        status: "PENDING_PAYMENT",
-      },
-    });
-
-    redirect(`/orders/${order.id}`);
+    redirect(`/orders/${orderId}`);
   }
 
   const commissionRateSetting = await prisma.platformSettings.findUnique({

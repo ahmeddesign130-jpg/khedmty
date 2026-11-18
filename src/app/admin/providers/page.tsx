@@ -12,10 +12,19 @@ async function reviewProvider(formData:FormData) {
  if(!id||!["APPROVE","REJECT"].includes(action)||action==="REJECT"&&!reason) return;
  const provider=await prisma.user.findFirst({where:{id,role:"PROVIDER",status:"PENDING"}});
  if(!provider) return;
- await prisma.$transaction([
-  prisma.user.update({where:{id},data:{status:action==="APPROVE"?"ACTIVE":"SUSPENDED"}}),
-  prisma.auditLog.create({data:{actorId:admin.id,action:action==="APPROVE"?"PROVIDER_APPROVED":"PROVIDER_REJECTED",targetId:id,details:action==="REJECT"?reason:"تمت الموافقة"}})
- ]);
+ await prisma.$transaction(async (tx) => {
+  const updated = await tx.user.updateMany({
+   where: { id, role: "PROVIDER", status: "PENDING" },
+   data: { status: action === "APPROVE" ? "ACTIVE" : "SUSPENDED" },
+  });
+  if (updated.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
+  await tx.auditLog.create({
+   data: { actorId: admin.id, action: action === "APPROVE" ? "PROVIDER_APPROVED" : "PROVIDER_REJECTED", targetId: id, details: action === "REJECT" ? reason : "تمت الموافقة" },
+  });
+ }).catch((error) => {
+  if (error instanceof Error && error.message === "PROVIDER_REVIEW_CONFLICT") return;
+  throw error;
+ });
  revalidatePath("/admin/providers"); revalidatePath("/admin");
 }
 export default async function AdminProvidersPage(){

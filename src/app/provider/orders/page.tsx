@@ -16,10 +16,19 @@ async function changeStatus(formData:FormData) {
   if (!order) return;
   const allowed = order.status === "PAID" && next === "IN_PROGRESS" || order.status === "IN_PROGRESS" && next === "DELIVERED" || order.status === "REVISION_REQUESTED" && ["IN_PROGRESS","DELIVERED"].includes(next);
   if (!allowed) return;
-  await prisma.$transaction([
-    prisma.order.update({where:{id},data:{status:next as "IN_PROGRESS"|"DELIVERED"}}),
-    prisma.auditLog.create({data:{actorId:user.id,action:"ORDER_STATUS_UPDATED",targetId:id,details:`تم تحديث حالة الطلب إلى ${next}`}})
-  ]);
+  await prisma.$transaction(async (tx) => {
+    const updated = await tx.order.updateMany({
+      where: { id, providerId: user.id, status: order.status },
+      data: { status: next as "IN_PROGRESS" | "DELIVERED" },
+    });
+    if (updated.count !== 1) throw new Error("ORDER_STATUS_CONFLICT");
+    await tx.auditLog.create({
+      data: { actorId: user.id, action: "ORDER_STATUS_UPDATED", targetId: id, details: `تم تحديث حالة الطلب إلى ${next}` },
+    });
+  }).catch((error) => {
+    if (error instanceof Error && error.message === "ORDER_STATUS_CONFLICT") return;
+    throw error;
+  });
   revalidatePath("/provider/orders"); revalidatePath(`/orders/${id}`); revalidatePath("/admin/orders");
 }
 export default async function ProviderOrdersPage() {

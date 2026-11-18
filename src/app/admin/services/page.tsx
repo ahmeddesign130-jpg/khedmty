@@ -34,13 +34,14 @@ export default async function AdminServicesPage() {
     if (!service || service.status !== "PENDING_REVIEW") return;
 
     await prisma.$transaction(async (tx) => {
-      await tx.service.update({
-        where: { id },
+      const updated = await tx.service.updateMany({
+        where: { id, status: "PENDING_REVIEW" },
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
           reviewNote: action === "REJECT" ? reason : null,
         },
       });
+      if (updated.count !== 1) throw new Error("SERVICE_REVIEW_CONFLICT");
 
       await tx.auditLog.create({
         data: {
@@ -52,6 +53,9 @@ export default async function AdminServicesPage() {
             : "تمت الموافقة على الخدمة.",
         },
       });
+    }).catch((error) => {
+      if (error instanceof Error && error.message === "SERVICE_REVIEW_CONFLICT") return;
+      throw error;
     });
 
     revalidatePath("/admin/services");

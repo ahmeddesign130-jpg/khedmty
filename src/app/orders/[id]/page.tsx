@@ -17,10 +17,21 @@ async function updateOrder(formData:FormData) {
  if(!order||order.customerId!==user.id) redirect("/account");
  const allowed=order.status==="PENDING_PAYMENT"&&next==="CANCELLED"||order.status==="DELIVERED"&&["REVISION_REQUESTED","COMPLETED"].includes(next);
  if(!allowed) return;
- await prisma.$transaction([
-  prisma.order.update({where:{id},data:{status:next as "CANCELLED"|"REVISION_REQUESTED"|"COMPLETED"}}),
-  prisma.auditLog.create({data:{actorId:user.id,action:"ORDER_STATUS_UPDATED",targetId:id,details:`تغيير حالة الطلب إلى ${next}`}})
- ]);
+ try {
+  await prisma.$transaction(async (tx) => {
+   const updated = await tx.order.updateMany({
+    where: { id, customerId: user.id, status: order.status },
+    data: { status: next as "CANCELLED" | "REVISION_REQUESTED" | "COMPLETED" },
+   });
+   if (updated.count !== 1) throw new Error("ORDER_STATUS_CONFLICT");
+   await tx.auditLog.create({
+    data: { actorId: user.id, action: "ORDER_STATUS_UPDATED", targetId: id, details: `تغيير حالة الطلب إلى ${next}` },
+   });
+  });
+ } catch (error) {
+  if (error instanceof Error && error.message === "ORDER_STATUS_CONFLICT") return;
+  throw error;
+ }
  revalidatePath("/orders"); revalidatePath(`/orders/${id}`); revalidatePath("/provider/orders"); revalidatePath("/admin/orders");
 }
 

@@ -12,10 +12,7 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(
-  request: Request,
-  context: RouteContext
-) {
+export async function POST(request: Request, context: RouteContext) {
   try {
     const admin = await getCurrentUser();
 
@@ -46,9 +43,7 @@ export async function POST(
       );
     }
 
-    const service = await prisma.service.findUnique({
-      where: { id },
-    });
+    const service = await prisma.service.findUnique({ where: { id } });
 
     if (!service) {
       return NextResponse.json(
@@ -64,22 +59,23 @@ export async function POST(
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const updatedService = await tx.service.update({
-        where: { id },
+    const updatedService = await prisma.$transaction(async (tx) => {
+      const update = await tx.service.updateMany({
+        where: { id, status: "PENDING_REVIEW" },
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
           reviewNote: action === "REJECT" ? reason : null,
         },
       });
 
+      if (update.count !== 1) {
+        throw new Error("REVIEW_CONFLICT");
+      }
+
       await tx.auditLog.create({
         data: {
           actorId: admin.id,
-          action:
-            action === "APPROVE"
-              ? "SERVICE_APPROVED"
-              : "SERVICE_REJECTED",
+          action: action === "APPROVE" ? "SERVICE_APPROVED" : "SERVICE_REJECTED",
           targetId: service.id,
           details: JSON.stringify({
             title: service.title,
@@ -88,20 +84,23 @@ export async function POST(
         },
       });
 
-      return updatedService;
+      return tx.service.findUniqueOrThrow({ where: { id } });
     });
 
     return NextResponse.json({
       success: true,
-      message:
-        action === "APPROVE"
-          ? "تمت الموافقة على الخدمة"
-          : "تم رفض الخدمة",
-      service: result,
+      message: action === "APPROVE" ? "تمت الموافقة على الخدمة" : "تم رفض الخدمة",
+      service: updatedService,
     });
   } catch (error) {
-    console.error("SERVICE_REVIEW_ERROR:", error);
+    if (error instanceof Error && error.message === "REVIEW_CONFLICT") {
+      return NextResponse.json(
+        { success: false, message: "تمت مراجعة الخدمة بالفعل بواسطة مسؤول آخر" },
+        { status: 409 }
+      );
+    }
 
+    console.error("SERVICE_REVIEW_ERROR:", error);
     return NextResponse.json(
       { success: false, message: "حدث خطأ أثناء مراجعة الخدمة" },
       { status: 500 }

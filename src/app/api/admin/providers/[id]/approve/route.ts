@@ -20,11 +20,10 @@ export async function POST(
 
     const { id } = await context.params;
     const body = await req.json();
-
     const action = String(body.action || "");
     const reason = String(body.reason || "").trim();
 
-    if (!["APPROVE", "REJECT"].includes(action)) {
+    if (action !== "APPROVE" && action !== "REJECT") {
       return NextResponse.json(
         { error: "الإجراء غير صحيح." },
         { status: 400 }
@@ -38,9 +37,7 @@ export async function POST(
       );
     }
 
-    const provider = await prisma.user.findUnique({
-      where: { id },
-    });
+    const provider = await prisma.user.findUnique({ where: { id } });
 
     if (!provider || provider.role !== "PROVIDER") {
       return NextResponse.json(
@@ -52,30 +49,29 @@ export async function POST(
     if (provider.status !== "PENDING") {
       return NextResponse.json(
         { error: "تمت مراجعة هذا الحساب من قبل." },
-        { status: 400 }
+        { status: 409 }
       );
     }
 
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id },
-        data: {
-          status: action === "APPROVE" ? "ACTIVE" : "SUSPENDED",
-        },
-      }),
+    await prisma.$transaction(async (tx) => {
+      const update = await tx.user.updateMany({
+        where: { id, role: "PROVIDER", status: "PENDING" },
+        data: { status: action === "APPROVE" ? "ACTIVE" : "SUSPENDED" },
+      });
 
-      prisma.auditLog.create({
+      if (update.count !== 1) {
+        throw new Error("REVIEW_CONFLICT");
+      }
+
+      await tx.auditLog.create({
         data: {
           actorId: admin.id,
-          action:
-            action === "APPROVE"
-              ? "PROVIDER_APPROVED"
-              : "PROVIDER_REJECTED",
+          action: action === "APPROVE" ? "PROVIDER_APPROVED" : "PROVIDER_REJECTED",
           targetId: id,
           details: action === "REJECT" ? reason : "تمت الموافقة",
         },
-      }),
-    ]);
+      });
+    });
 
     return NextResponse.json({
       success: true,
@@ -85,11 +81,17 @@ export async function POST(
           : "تم رفض مقدم الخدمة.",
     });
   } catch (error) {
-    console.error("Provider approval error:", error);
+    if (error instanceof Error && error.message === "REVIEW_CONFLICT") {
+      return NextResponse.json(
+        { error: "تمت مراجعة هذا الحساب بالفعل بواسطة مسؤول آخر." },
+        { status: 409 }
+      );
+    }
 
+    console.error("Provider approval error:", error);
     return NextResponse.json(
       { error: "حدث خطأ أثناء مراجعة مقدم الخدمة." },
       { status: 500 }
     );
   }
-            }
+}

@@ -1,8 +1,12 @@
 name: Khedmty CI
+# CI validates the rebuild branch before any changes reach main.
 
 on:
   push:
-    branches: ["fix/auth-redirect-flow"]
+    branches:
+      - main
+      - "rebuild/**"
+      - "fix/**"
   pull_request:
     branches: ["main"]
 
@@ -23,5 +27,5 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npx prisma generate
-      - run: npx tsc --noEmit
+      - run: npm run typecheck
       - run: npm run build
