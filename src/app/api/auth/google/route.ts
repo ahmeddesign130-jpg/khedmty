@@ -3,6 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+function googleRedirectUri(req: NextRequest) {
+  if (process.env.VERCEL_ENV === "preview") {
+    return "https://khedmty-git-audit-final-quality-hardening-ahmeddesign130-jpg.vercel.app/api/auth/google/callback";
+  }
+  return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
+}
+
 export async function GET(req: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) return NextResponse.redirect(new URL("/login?error=google_not_configured", req.url));
@@ -11,7 +18,7 @@ export async function GET(req: NextRequest) {
   const state = randomBytes(32).toString("hex");
   const verifier = randomBytes(48).toString("base64url");
   const challenge = createHash("sha256").update(verifier).digest("base64url");
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
+  const redirectUri = googleRedirectUri(req);
 
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   url.searchParams.set("client_id", clientId);
