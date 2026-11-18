@@ -12,5 +12,12 @@ export default async function PaymentPage({params}:{params:Promise<{id:string}>}
  <section className="mx-auto max-w-3xl px-5 py-10"><div className="rounded-3xl bg-white p-6 shadow-sm md:p-9"><h1 className="text-2xl font-black text-[#14213d]">إتمام الدفع اليدوي</h1>
  <p className="mt-3 leading-7 text-slate-600">حوّل المبلغ باستخدام بيانات الدفع الرسمية التي حصلت عليها من إدارة خِدمتي، ثم ارفع صورة الإيصال. لن يتم اعتماد الطلب قبل مراجعة الإدارة والتحقق من وصول المبلغ.</p>
  <div className="mt-7 rounded-2xl bg-[#14213d] p-6 text-white"><p className="text-sm text-slate-300">رقم الطلب</p><p className="mt-2 text-xl font-black">{order.orderNo}</p><p className="mt-5 text-sm text-slate-300">المبلغ المطلوب</p><p className="mt-2 text-3xl font-black text-orange-400">{order.total.toLocaleString("en-US")} EG</p></div>
+ <div className="mt-6 rounded-2xl border border-slate-200 p-5"><h2 className="font-black text-[#14213d]">بيانات التحويل</h2><p className="mt-2 text-sm leading-7 text-slate-600">استخدم بيانات التحويل الرسمية التالية. لا يظهر اسم صاحب المحفظة في هذه الصفحة.</p>
+ {process.env.INSTAPAY_ADDRESS||process.env.E_AND_MONEY_NUMBER||process.env.ETISALAT_CASH_NUMBER ? <div className="mt-4 space-y-3">
+ {process.env.INSTAPAY_ADDRESS&&<p className="rounded-xl bg-slate-50 p-3"><strong>InstaPay:</strong> <span dir="ltr">{process.env.INSTAPAY_ADDRESS}</span></p>}
+ {process.env.E_AND_MONEY_NUMBER&&<p className="rounded-xl bg-slate-50 p-3"><strong>e& money:</strong> <span dir="ltr">{process.env.E_AND_MONEY_NUMBER}</span></p>}
+ {process.env.ETISALAT_CASH_NUMBER&&<p className="rounded-xl bg-slate-50 p-3"><strong>Etisalat Cash:</strong> <span dir="ltr">{process.env.ETISALAT_CASH_NUMBER}</span></p>}
+ </div> : <p className="mt-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">بيانات المحافظ لم تُضف بعد. لن يظهر للعميل رقم تحويل غير موثوق.</p>}
+ </div>
  <PaymentSubmissionForm orderId={order.id} amount={order.total}/></div></section></main>;
 }
