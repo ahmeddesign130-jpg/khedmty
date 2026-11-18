@@ -40,7 +40,7 @@ export function SideNavigation({ role }: { role: Role | null }) {
         aria-expanded={open}
         aria-controls="khedmty-side-menu"
         onClick={() => setOpen((value) => !value)}
-        className="fixed right-4 top-4 z-[70] flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-[#14213d] shadow-lg transition hover:-translate-y-0.5 hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+        className="ios-icon-glass fixed right-4 top-4 z-[70] h-12 w-12 text-[#14213d] shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
       >
         <UiIcon name={open ? "x" : "menu"} size={24} />
       </button>
@@ -50,7 +50,7 @@ export function SideNavigation({ role }: { role: Role | null }) {
           type="button"
           aria-label="إغلاق القائمة"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-[60] cursor-default bg-[#14213d]/35 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[60] cursor-default bg-[#14213d]/35 backdrop-blur-[3px]"
         />
       )}
 
@@ -59,14 +59,14 @@ export function SideNavigation({ role }: { role: Role | null }) {
         dir="rtl"
         aria-label="القائمة الرئيسية"
         aria-hidden={!open}
-        className={`fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(84vw,320px)] flex-col border-l border-slate-100 bg-white p-5 shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(84vw,320px)] flex-col border-l border-slate-100/80 bg-white/95 p-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="mb-8 flex items-center justify-between border-b border-slate-100 pb-5">
           <div>
             <p className="text-xl font-black text-[#14213d]">خِدمتي</p>
             <p className="mt-1 text-xs text-slate-500">القائمة الرئيسية</p>
           </div>
-          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100">
+          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="ios-icon-glass h-10 w-10 text-slate-600 hover:bg-orange-50">
             <UiIcon name="x" size={22} />
           </button>
         </div>
@@ -79,7 +79,7 @@ export function SideNavigation({ role }: { role: Role | null }) {
               onClick={() => setOpen(false)}
               className="flex min-h-12 items-center gap-4 rounded-xl px-4 py-3 font-bold text-[#14213d] transition hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+              <span className="ios-icon-glass h-10 w-10">
                 <UiIcon name={item.icon} size={20} />
               </span>
               <span>{item.label}</span>
@@ -90,7 +90,7 @@ export function SideNavigation({ role }: { role: Role | null }) {
 
         <form action="/api/auth/logout" method="POST" className="border-t border-slate-100 pt-4">
           <button type="submit" className="flex min-h-12 w-full items-center gap-4 rounded-xl px-4 py-3 font-bold text-red-600 transition hover:bg-red-50">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50"><UiIcon name="log-out" size={20} /></span>
+            <span className="ios-icon-glass h-10 w-10 text-red-500"><UiIcon name="log-out" size={20} /></span>
             تسجيل الخروج
           </button>
         </form>
