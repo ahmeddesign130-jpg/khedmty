@@ -145,7 +145,14 @@ export async function POST(request: Request) {
 
     const total = servicePrice + commission;
 
-    const order = await prisma.order.create({
+    const order = await prisma.$transaction(async (tx) => {
+      const [completedCount, activeCount] = await Promise.all([
+        tx.order.count({ where: { customerId: user.id, status: "COMPLETED" } }),
+        tx.order.count({ where: { customerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED", "REJECTED"] } } }),
+      ]);
+      const capacity = 5 + Math.floor(completedCount / 5) * 5;
+      if (activeCount >= capacity) throw new Error("ORDER_CAPACITY_REACHED");
+      return tx.order.create({
       data: {
         orderNo: `KH-${Date.now()}-${crypto.randomUUID()
           .slice(0, 6)
@@ -160,7 +167,8 @@ export async function POST(request: Request) {
         total,
         status: "PENDING_PAYMENT",
       },
-    });
+      });
+    }, { isolationLevel: "Serializable" });
 
     return NextResponse.json(
       {
@@ -171,6 +179,9 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof Error && error.message === "ORDER_CAPACITY_REACHED") {
+      return NextResponse.json({ success: false, message: "اكتملت الأماكن المتاحة لطلباتك. أكمل طلبًا جاريًا أولًا حتى يتوفر مكان جديد." }, { status: 409 });
+    }
     console.error("CREATE_ORDER_ERROR:", error);
 
     return NextResponse.json(
