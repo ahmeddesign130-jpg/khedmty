@@ -20,6 +20,7 @@ export default function ServiceCreateForm(){
  async function submit(event:React.FormEvent<HTMLFormElement>){
   event.preventDefault();setError("");setBusy(true);
   try{
+   const formElement=event.currentTarget;
    const form=new FormData(formElement);
    const media:UploadedMedia[]=[];
    for(let i=0;i<files.length;i++){setProgress(`جاري رفع الملف ${i+1} من ${files.length}...`);media.push(await upload(files[i]));}
