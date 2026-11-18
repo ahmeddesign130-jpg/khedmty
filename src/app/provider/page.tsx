@@ -14,7 +14,7 @@ export default async function ProviderPage() {
   return <main dir="rtl" className="min-h-screen bg-[#f7f8fa]">
     <header className="bg-white shadow-sm"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
       <Link href="/" className="text-2xl font-black text-orange-500">خِدمتي</Link>
-      <form action="/api/auth/logout" method="POST"><button className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-bold"><UiIcon name="log-out" size={18}/> تسجيل الخروج</button></form>
+      <div className="flex items-center gap-2"><Link href="/settings" aria-label="الإعدادات" title="الإعدادات" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 font-bold text-[#14213d] hover:bg-orange-50"><UiIcon name="settings" size={19}/><span className="hidden sm:inline">الإعدادات</span></Link><form action="/api/auth/logout" method="POST"><button className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-bold"><UiIcon name="log-out" size={18}/> تسجيل الخروج</button></form>
     </div></header>
     <section className="mx-auto max-w-6xl px-5 py-12">
       <div className="rounded-3xl bg-[#14213d] p-8 text-white shadow-xl">
