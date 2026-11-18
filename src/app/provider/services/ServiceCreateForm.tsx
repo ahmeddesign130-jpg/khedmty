@@ -20,14 +20,14 @@ export default function ServiceCreateForm(){
  async function submit(event:React.FormEvent<HTMLFormElement>){
   event.preventDefault();setError("");setBusy(true);
   try{
-   const form=new FormData(event.currentTarget);
+   const form=new FormData(formElement);
    const media:UploadedMedia[]=[];
    for(let i=0;i<files.length;i++){setProgress(`جاري رفع الملف ${i+1} من ${files.length}...`);media.push(await upload(files[i]));}
    setProgress("جاري إرسال الخدمة للمراجعة...");
    const response=await fetch("/api/services",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:String(form.get("title")||""),description:String(form.get("description")||""),price:Number(form.get("price")),mediaUrls:media.map(x=>x.url)})});
    const data=await response.json();
    if(!response.ok) throw new Error(data.message||"تعذر إنشاء الخدمة.");
-   event.currentTarget.reset();setFiles([]);setProgress("تم إرسال الخدمة للمراجعة.");router.refresh();
+   formElement.reset();setFiles([]);setProgress("تم إرسال الخدمة للمراجعة.");router.refresh();
   }catch(e){setError(e instanceof Error?e.message:"حدث خطأ غير متوقع.");}
   finally{setBusy(false);}
  }
