@@ -5,19 +5,16 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function ServicesPage() {
   const viewer = await getCurrentUser();
   if (!viewer) redirect("/login");
   if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
     redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");
   }
-  const params = await searchParams;
-  const serviceNoQuery = (params.q || "").trim().toUpperCase();
   const services = await prisma.service.findMany({
-    where: { status: "APPROVED", ...(serviceNoQuery ? { serviceNo: serviceNoQuery } : {}) },
+    where: { status: "APPROVED" },
     select: {
       id: true,
-      serviceNo: true,
       title: true,
       description: true,
       price: true,
@@ -41,10 +38,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             خِدمتي
           </Link>
 
-          <div className="flex gap-3 text-sm font-bold">
-            <Link href="/account" className="hover:text-orange-400">حسابي</Link>
-            <Link href="/orders" className="hover:text-orange-400">طلباتي</Link>
-          </div>
+
         </div>
       </header>
 
@@ -59,7 +53,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
           </h1>
 
           <p className="mt-4 max-w-2xl leading-8 text-slate-300">
-            اختار الخدمة المناسبة لك وتواصل مع مقدمها لبدء تنفيذ مشروعك.
+            اختَر الخدمة واطلبها من خلال خِدمتي، وتابع التنفيذ والتسليم بأمان من حسابك.
           </p>
 
           <div className="mt-7 inline-flex rounded-xl bg-white/10 px-5 py-3">
@@ -71,17 +65,11 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-10">
-        <form method="GET" className="mb-7 flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm sm:flex-row">
-          <label htmlFor="service-search" className="sr-only">البحث برقم الخدمة</label>
-          <input id="service-search" name="q" defaultValue={serviceNoQuery} placeholder="ابحث برقم الخدمة مثل KH-SRV-..." className="min-w-0 flex-1 rounded-xl border border-slate-200 px-4 py-3" dir="ltr" />
-          <button type="submit" className="rounded-xl bg-orange-500 px-6 py-3 font-bold text-white">بحث</button>
-          {serviceNoQuery && <Link href="/services" className="rounded-xl border px-5 py-3 text-center font-bold">عرض الكل</Link>}
-        </form>
         {services.length === 0 ? (
           <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
             <div className="text-4xl">✦</div>
             <h2 className="mt-4 text-xl font-black text-[#14213d]">
-              {serviceNoQuery ? "لا توجد خدمة مطابقة لرقم الخدمة." : "لا توجد خدمات متاحة حاليًا"}
+              لا توجد خدمات متاحة حاليًا
             </h2>
             <p className="mt-3 text-gray-500">
               نعمل على إضافة خدمات جديدة قريبًا.
@@ -110,9 +98,6 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                       {service.title}
                     </h2>
 
-                    <span className="shrink-0 rounded-lg bg-orange-50 px-2 py-1 text-xs font-bold text-orange-700">
-                      #{service.serviceNo}
-                    </span>
                   </div>
 
                   <p className="mt-3 min-h-20 whitespace-pre-wrap text-sm leading-7 text-gray-500">
