@@ -21,7 +21,7 @@ The platform commission remains a percentage, not a fixed 100 EG amount. The adm
 The application requests short-lived signed upload URLs on the server. Providers can upload JPG/PNG/WEBP images (up to 8 MB) and MP4/WEBM/MOV videos (up to 40 MB). Customer payment receipts are image-only (up to 8 MB) and stay in the private bucket.
 
 ## Database schema update (required once)
-The new `Service.mediaUrls` field stores uploaded service media URLs. After reviewing a database backup, run this non-resetting command once against the production database:
+The new `Service.mediaUrls` field stores uploaded service media URLs, and `Service.reviewNote` stores admin feedback/rejection reasons for providers. After reviewing a database backup, run this non-resetting command once against the production database:
 
 ```bash
 npx prisma db push
