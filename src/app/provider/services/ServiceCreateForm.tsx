@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 type UploadedMedia={url:string;type:"image"|"video"};
@@ -17,7 +17,7 @@ export default function ServiceCreateForm(){
   if(!uploaded.ok) throw new Error("فشل رفع الملف إلى التخزين.");
   return {url:signed.publicUrl,type:file.type.startsWith("video/")?"video":"image"};
  }
- async function submit(event:React.FormEvent<HTMLFormElement>){
+ async function submit(event:FormEvent<HTMLFormElement>){
   event.preventDefault();setError("");if(files.length>8){setError("يمكن رفع 8 ملفات كحد أقصى.");return;}setBusy(true);
   try{
    const formElement=event.currentTarget;
