@@ -38,6 +38,7 @@ export default async function AdminServicesPage() {
         where: { id },
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
+          reviewNote: action === "REJECT" ? reason : null,
         },
       });
 
