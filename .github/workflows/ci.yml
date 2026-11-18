@@ -1,4 +1,5 @@
 name: Khedmty CI
+# CI validates the rebuild branch before any changes reach main.
 
 on:
   push:
