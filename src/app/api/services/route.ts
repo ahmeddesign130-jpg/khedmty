@@ -23,6 +23,16 @@ export async function POST(request:Request){
   if(user.role!=="PROVIDER"||user.status!=="ACTIVE")return NextResponse.json({success:false,message:"هذه الخاصية لمقدمي الخدمات المعتمدين فقط"},{status:403});
   const validation=serviceSchema.safeParse(await request.json());
   if(!validation.success)return NextResponse.json({success:false,message:"راجع بيانات الخدمة المدخلة",errors:validation.error.flatten()},{status:400});
+  const storageBase=(process.env.SUPABASE_URL||"").replace(/\/$/,"");
+  if(validation.data.mediaUrls.length>0){
+   if(!storageBase)return NextResponse.json({success:false,message:"إعداد التخزين غير مكتمل."},{status:503});
+   const expectedPrefix=`${storageBase}/storage/v1/object/public/service-media/${user.id}/`;
+   const ownedMedia=validation.data.mediaUrls.every((rawUrl)=>{
+    try{const url=new URL(rawUrl);return url.origin===new URL(storageBase).origin&&rawUrl.startsWith(expectedPrefix)&&!url.pathname.includes("..");}
+    catch{return false;}
+   });
+   if(!ownedMedia)return NextResponse.json({success:false,message:"ملفات الخدمة يجب أن تكون مرفوعة من حسابك إلى تخزين خِدمتي."},{status:400});
+  }
   const service=await prisma.service.create({data:{serviceNo:generateServiceNo(),...validation.data,providerId:user.id,status:"PENDING_REVIEW"}});
   await prisma.auditLog.create({data:{actorId:user.id,action:"SERVICE_SUBMITTED",targetId:service.id,details:`تم إرسال الخدمة ${service.serviceNo} للمراجعة`}});
   return NextResponse.json({success:true,message:"تم إرسال الخدمة إلى الإدارة للمراجعة",service},{status:201});
