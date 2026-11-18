@@ -10,8 +10,8 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = basePrisma;
 }
 
-// Additive compatibility migration for databases created before the latest
-// Prisma schema. This only adds nullable/defaulted columns; it never drops data.
+// Additive compatibility migration for older production databases.
+// It only adds columns and indexes; it never drops or overwrites existing service data.
 let compatibilitySchemaPromise: Promise<void> | undefined;
 
 async function ensureCompatibilitySchema() {
@@ -28,6 +28,20 @@ async function ensureCompatibilitySchema() {
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "reviewNote" TEXT`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Service"
+         ADD COLUMN IF NOT EXISTS "serviceNo" TEXT`
+      );
+      // Backfill only missing numbers. Existing service numbers are preserved.
+      await basePrisma.$executeRawUnsafe(
+        `UPDATE public."Service"
+         SET "serviceNo" = 'KH-SRV-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12))
+         WHERE "serviceNo" IS NULL`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Service_serviceNo_key"
+         ON public."Service" ("serviceNo")`
       );
     })().catch((error) => {
       compatibilitySchemaPromise = undefined;
