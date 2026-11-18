@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createStorageDownload } from "@/lib/storage";
+import { createStorageDownload, storageReady } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 const paymentStatus:Record<string,string>={PENDING_REVIEW:"قيد المراجعة",APPROVED:"تم قبول الدفع",REJECTED:"مرفوض"};
@@ -26,7 +26,7 @@ async function reviewPayment(formData:FormData) {
 export default async function AdminPaymentsPage() {
  const user=await getCurrentUser(); if(!user||user.role!=="SUPER_ADMIN") redirect("/login");
  const payments=await prisma.payment.findMany({include:{order:{include:{customer:{select:{displayName:true,email:true}},provider:{select:{displayName:true,email:true}}}}},orderBy:{createdAt:"desc"}});
- const receiptLinks=await Promise.all(payments.map(async p=>{if(!p.receiptUrl)return null;if(p.receiptUrl.startsWith("https://")||p.receiptUrl.startsWith("http://"))return p.receiptUrl;return createStorageDownload("payment-receipts",p.receiptUrl);}));
+ const receiptLinks=await Promise.all(payments.map(async p=>{if(!p.receiptUrl)return null;if(p.receiptUrl.startsWith("https://")||p.receiptUrl.startsWith("http://"))return p.receiptUrl;if(!storageReady())return null;return createStorageDownload("payment-receipts",p.receiptUrl);}));
  const money=(amount:number)=>`${amount.toLocaleString("en-US")} EG`;
  return <main dir="rtl" className="min-h-screen bg-slate-50 p-4 md:p-8"><div className="mx-auto max-w-6xl"><a href="/admin" className="mb-6 inline-block font-bold text-orange-600">← العودة للوحة الإدارة</a>
  <h1 className="text-3xl font-black text-slate-900">إدارة المدفوعات</h1><p className="mb-8 mt-2 text-slate-500">راجع الإيصال والمبلغ قبل اعتماد الدفع.</p>
