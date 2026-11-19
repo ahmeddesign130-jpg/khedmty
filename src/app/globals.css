@@ -422,3 +422,137 @@ html[data-locale="en"] .khedmty-side-drawer[data-open="true"] {
 .khedmty-side-drawer > div:first-child button { position: relative; z-index: 100 !important; pointer-events: auto !important; touch-action: manipulation; }
 .khedmty-side-drawer button, .khedmty-side-drawer a { position: relative; touch-action: manipulation; }
 body:has(.khedmty-side-drawer[data-open="true"]) .khedmty-menu-trigger { visibility: hidden !important; pointer-events: none !important; }
+
+
+/* Khedmty Glass Dashboard V24 — shared visual system for every route */
+:root {
+  --glass-surface: rgb(255 255 255 / 76%);
+  --glass-border: rgb(255 255 255 / 88%);
+  --glass-shadow: 0 18px 48px rgb(20 33 61 / 8%), inset 0 1px 0 rgb(255 255 255 / 92%);
+  --glass-blur: 22px;
+}
+body {
+  background:
+    radial-gradient(ellipse at 8% 4%, rgb(255 181 128 / 18%), transparent 34rem),
+    radial-gradient(ellipse at 94% 20%, rgb(135 166 214 / 13%), transparent 30rem),
+    linear-gradient(145deg, #f7f9fd 0%, #f1f4fa 52%, #fff8f2 100%);
+  background-attachment: fixed;
+}
+main {
+  background-color: transparent;
+}
+main > header:not([class*="bg-[#14213d"]):not([class*="bg-[#14213D"]):not([class*="bg-slate-900"]),
+main > header.bg-white,
+main > header[class*="bg-white"] {
+  background: rgb(255 255 255 / 78%) !important;
+  border-bottom: 1px solid rgb(255 255 255 / 92%);
+  box-shadow: 0 10px 30px rgb(20 33 61 / 5%);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+}
+main section [class*="rounded-2xl"][class*="bg-white"],
+main section [class*="rounded-3xl"][class*="bg-white"],
+main section[class*="rounded-2xl"][class*="bg-white"],
+main section[class*="rounded-3xl"][class*="bg-white"],
+main article[class*="rounded-2xl"][class*="bg-white"],
+main article[class*="rounded-3xl"][class*="bg-white"],
+main a[class*="rounded-2xl"][class*="bg-white"],
+main a[class*="rounded-3xl"][class*="bg-white"] {
+  border: 1px solid var(--glass-border);
+  background: var(--glass-surface) !important;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(165%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(165%);
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease, background .24s ease;
+}
+main section [class*="rounded-2xl"][class*="bg-white"]:hover,
+main section [class*="rounded-3xl"][class*="bg-white"]:hover,
+main article[class*="rounded-2xl"][class*="bg-white"]:hover,
+main a[class*="rounded-2xl"][class*="bg-white"]:hover,
+main a[class*="rounded-3xl"][class*="bg-white"]:hover {
+  border-color: rgb(244 119 33 / 32%);
+  box-shadow: 0 22px 48px rgb(20 33 61 / 11%), inset 0 1px 0 #fff;
+}
+.ui-icon-tile,
+.ios-icon-glass,
+.glassy-nav-icon {
+  border: 1px solid rgb(255 255 255 / 92%);
+  background: linear-gradient(145deg, rgb(255 255 255 / 94%), rgb(255 231 213 / 72%));
+  color: #d85f12;
+  box-shadow: 0 8px 22px rgb(216 95 18 / 12%), inset 0 1px 0 #fff;
+  backdrop-filter: blur(18px) saturate(175%);
+  -webkit-backdrop-filter: blur(18px) saturate(175%);
+}
+svg.ui-icon {
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
+  filter: drop-shadow(0 1px 1px rgb(255 255 255 / 45%));
+}
+button:has(> svg.ui-icon), a:has(> svg.ui-icon),
+button:has(.ui-icon), a:has(.ui-icon) {
+  -webkit-tap-highlight-color: transparent;
+}
+button:active, a:active { transform: scale(.985); }
+.khedmty-side-drawer {
+  border: 1px solid rgb(255 255 255 / 82%);
+  background: rgb(250 252 255 / 88%) !important;
+  box-shadow: 0 28px 80px rgb(12 24 46 / 22%), inset 0 1px 0 #fff;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+}
+.glassy-nav-tab {
+  border-color: rgb(255 255 255 / 90%);
+  background: linear-gradient(135deg, rgb(255 255 255 / 88%), rgb(245 248 253 / 70%));
+  box-shadow: 0 8px 22px rgb(20 33 61 / 6%), inset 0 1px 0 #fff;
+}
+.settings-surface,
+main .settings-choice {
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(ellipse at 8% 4%, rgb(244 119 33 / 12%), transparent 34rem),
+    radial-gradient(ellipse at 94% 20%, rgb(68 103 163 / 15%), transparent 30rem),
+    linear-gradient(145deg, #0a1220 0%, #101b2d 55%, #171b27 100%);
+  background-attachment: fixed;
+}
+html[data-theme="dark"] main > header.bg-white,
+html[data-theme="dark"] main > header[class*="bg-white"] {
+  background: rgb(18 29 48 / 82%) !important;
+  border-color: rgb(255 255 255 / 10%);
+}
+html[data-theme="dark"] main section [class*="rounded-2xl"][class*="bg-white"],
+html[data-theme="dark"] main section [class*="rounded-3xl"][class*="bg-white"],
+html[data-theme="dark"] main section[class*="rounded-2xl"][class*="bg-white"],
+html[data-theme="dark"] main section[class*="rounded-3xl"][class*="bg-white"],
+html[data-theme="dark"] main article[class*="rounded-2xl"][class*="bg-white"],
+html[data-theme="dark"] main article[class*="rounded-3xl"][class*="bg-white"],
+html[data-theme="dark"] main a[class*="rounded-2xl"][class*="bg-white"],
+html[data-theme="dark"] main a[class*="rounded-3xl"][class*="bg-white"] {
+  border-color: rgb(255 255 255 / 12%);
+  background: rgb(22 34 54 / 76%) !important;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 20%), inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+html[data-theme="dark"] .ui-icon-tile,
+html[data-theme="dark"] .ios-icon-glass,
+html[data-theme="dark"] .glassy-nav-icon {
+  border-color: rgb(255 255 255 / 14%);
+  background: linear-gradient(145deg, rgb(255 255 255 / 16%), rgb(244 119 33 / 12%));
+  color: #ffb477;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 20%), inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+@media (max-width: 640px) {
+  main section [class*="rounded-2xl"][class*="bg-white"],
+  main section [class*="rounded-3xl"][class*="bg-white"],
+  main article[class*="rounded-2xl"][class*="bg-white"],
+  main a[class*="rounded-2xl"][class*="bg-white"] {
+    backdrop-filter: blur(16px) saturate(155%);
+    -webkit-backdrop-filter: blur(16px) saturate(155%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  main section [class*="rounded-2xl"], main article, main a { transition: none !important; }
+}
