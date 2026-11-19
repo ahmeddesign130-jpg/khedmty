@@ -78,3 +78,7 @@ input,textarea,select,button { max-width:100%; }
   button,a { overflow-wrap:anywhere; }
 }
 @media (min-width:1600px) { .container { width:min(100% - 64px,1440px); } }
+
+
+/* Reserve a dedicated top row for the authenticated menu trigger. */
+body.has-side-navigation { padding-top: 4.75rem; }
