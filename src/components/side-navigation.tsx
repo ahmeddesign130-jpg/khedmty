@@ -83,20 +83,20 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
       {!open && (
         <button type="button" aria-label="فتح قائمة خِدمتي" aria-expanded={false} aria-controls="khedmty-side-menu"
           onClick={() => setOpen(true)}
-          className="khedmty-menu-trigger fixed right-3 top-3 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_8px_24px_rgba(234,105,24,0.32)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_28px_rgba(234,105,24,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
+          className="khedmty-menu-trigger fixed right-3 top-3 z-[50] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_8px_24px_rgba(234,105,24,0.32)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_28px_rgba(234,105,24,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
           <UiIcon name="menu" size={26} strokeWidth={2.5} />
         </button>
       )}
-      {open && <button type="button" aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} onClick={() => setOpen(false)} className="khedmty-menu-backdrop fixed inset-0 z-[60] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
+      {open && <button type="button" aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} onClick={() => setOpen(false)} className="khedmty-menu-backdrop fixed inset-0 z-[80] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
       <aside id="khedmty-side-menu" dir={locale === "en" ? "ltr" : "rtl"} aria-label={locale === "en" ? "Main menu" : "القائمة الرئيسية"} aria-hidden={!open}
         data-open={open ? "true" : "false"}
-        className="khedmty-side-drawer fixed top-0 z-[65] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-slate-100/80 bg-white p-5 shadow-2xl">
+        className="khedmty-side-drawer fixed top-0 z-[90] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-slate-100/80 bg-white p-5 shadow-2xl">
         <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-5">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-2xl font-black leading-tight tracking-normal text-[#14213d]">خِدمتي</p>
             <p className="mt-1 whitespace-nowrap text-xs text-slate-500">القائمة الرئيسية</p>
           </div>
-          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="ios-icon-glass h-10 w-10 shrink-0 text-slate-600 hover:bg-orange-50"><UiIcon name="x" size={22} /></button>
+          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="ios-icon-glass relative z-[100] h-10 w-10 shrink-0 cursor-pointer touch-manipulation text-slate-600 hover:bg-orange-50" style={{ pointerEvents: "auto" }}><UiIcon name="x" size={22} /></button>
         </div>
 
         <nav className="flex flex-col gap-2">
