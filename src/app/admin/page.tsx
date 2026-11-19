@@ -25,7 +25,7 @@ export default async function AdminPage() {
     <section className="mx-auto max-w-7xl px-5 py-10">
       <div className="rounded-3xl bg-white p-8 shadow-sm"><span className="ui-icon-tile"><UiIcon name="shield" size={28}/></span>
         <p className="mt-4 font-bold text-orange-500">مركز التحكم</p><h1 className="mt-2 text-3xl font-black text-[#14213d]">لوحة إدارة خِدمتي</h1>
-        <p className="mt-4 leading-8 text-gray-500">كل أدوات إدارة المنصة ومراجعة الحسابات والخدمات والطلبات والمدفوعات في مكان واحد.</p>
+        <p className="mt-4 leading-8 text-gray-500">راجع الحسابات والخدمات، وتابع الطلبات والمدفوعات، وخلي تشغيل المنصة واضح من لوحة واحدة.</p>
       </div>
       <h2 className="mb-5 mt-10 text-2xl font-black text-[#14213d]">أقسام الإدارة</h2>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
