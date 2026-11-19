@@ -130,7 +130,7 @@ export default async function ServiceDetailsPage({
     select: { commissionRate: true },
   });
 
-  const commissionRate = commissionRateSetting?.commissionRate ?? 10;
+  const commissionRate = commissionRateSetting?.commissionRate ?? 100;
   const commission = commissionRate;
   const total = service.price + commission;
 
