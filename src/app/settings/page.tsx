@@ -28,7 +28,7 @@ export default async function SettingsPage() {
         <span className="ui-icon-tile ui-icon-tile-dark"><UiIcon name="settings" size={28}/></span>
         <p className="mt-4 text-orange-300">تحكم في تفضيلاتك</p>
         <h1 className="mt-2 text-3xl font-black">الإعدادات</h1>
-        <p className="mt-3 leading-8 text-slate-300">إعدادات الحساب واللغة في مكان واحد.</p>
+        <p className="mt-3 leading-8 text-slate-300">إعدادات الحساب واللغة والمظهر في مكان واحد.</p>
       </div>
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -41,17 +41,8 @@ export default async function SettingsPage() {
             <div className="rounded-xl bg-slate-50 p-3"><span className="block text-xs text-slate-500">نوع الحساب</span><strong className="mt-1 block">{roleLabel}</strong></div>
           </div>
         </section>
-        <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <span className="ui-icon-tile"><UiIcon name="languages" size={26}/></span>
-          <h2 className="mt-4 text-xl font-black text-[#14213d]">اللغة</h2>
-          <p className="mt-2 text-sm leading-7 text-slate-500">لغة عرض الموقع وواجهات الحساب.</p>
-          <div className="mt-5 flex items-center justify-between rounded-xl border border-orange-200 bg-orange-50 p-4">
-            <span className="inline-flex items-center gap-3 font-bold text-[#14213d]"><UiIcon name="globe" size={21}/> العربية</span>
-            <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">مفعّلة</span>
-          </div>
-          <p className="mt-3 text-xs leading-6 text-slate-500">خِدمتي متاحة حاليًا باللغة العربية، وسيتم إضافة لغات أخرى عند تجهيز واجهاتها بالكامل.</p>
-        </section>
       </div>
+      <div className="mt-5"><AppearanceLanguageControls userId={session.id} /></div>
     </section>
   </main>;
 }
