@@ -59,7 +59,6 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
             {walletReady ? (
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-white p-4">
                 <strong className="text-2xl font-black tracking-wider text-[#14213d]" dir="ltr">{walletNumber}</strong>
-                <button type="button" onClick={undefined} className="hidden" aria-hidden="true">نسخ</button>
               </div>
             ) : (
               <p className="mt-4 rounded-xl bg-white p-4 text-sm font-bold text-orange-800">
