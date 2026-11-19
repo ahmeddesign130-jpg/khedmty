@@ -11,7 +11,7 @@ const errors: Record<string, string> = {
   google_config: "إعدادات Google غير مكتملة في نسخة التجربة.",
   google_token: "تعذر تأكيد الدخول مع Google. راجع إعدادات رابط الرجوع.",
   google_profile: "لم نتمكن من قراءة بيانات حساب Google الموثّق.",
-  google_session: "تم التحقق من Google لكن تعذر إنشاء جلسة الدخول."
+  google_session: "تم التحقق من Google لكن تعذر إنشاء جلسة الدخول.",
   google_denied: "تم إلغاء تسجيل الدخول باستخدام Google.",
 };
 
