@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className={activeRole ? "has-side-navigation" : undefined}>
         <PreferenceInitializer userId={user?.id ?? "guest"} />
         {children}
-        <SideNavigation role={activeRole} />
+        <SideNavigation role={activeRole} userId={user?.id ?? "guest"} />
       </body>
     </html>
   );
