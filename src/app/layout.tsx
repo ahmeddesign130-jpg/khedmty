@@ -30,6 +30,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const activeRole = user?.status === "ACTIVE" ? user.role : null;
   return (
     <html lang="ar" dir="rtl">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className={activeRole ? "has-side-navigation" : undefined}>
         <PreferenceInitializer userId={user?.id ?? "guest"} />
         {children}
