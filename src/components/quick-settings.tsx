@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/components/ui-icon";
 
 export function QuickSettings() {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpen(false); triggerRef.current?.focus(); } };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <div dir="rtl" className="fixed bottom-5 left-5 z-[60]">
       {open && (
-        <div className="mb-3 w-64 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl">
+        <div id="khedmty-quick-settings" role="region" aria-label="الإعدادات السريعة" className="mb-3 w-64 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl">
           <div className="rounded-xl bg-[#14213d] px-4 py-3 text-white">
             <p className="text-xs text-orange-300">خِدمتي</p>
             <p className="mt-1 font-black">الإعدادات السريعة</p>
@@ -36,8 +43,10 @@ export function QuickSettings() {
         </div>
       )}
       <button
+        ref={triggerRef}
         type="button"
-        aria-label="فتح الإعدادات السريعة"
+        aria-label={open ? "إغلاق الإعدادات السريعة" : "فتح الإعدادات السريعة"}
+        aria-controls="khedmty-quick-settings"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-[#14213d] text-white shadow-xl ring-4 ring-white transition hover:-translate-y-1 hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-orange-200"
