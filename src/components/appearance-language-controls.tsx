@@ -15,6 +15,7 @@ function applyPreferences(locale: Locale, theme: Theme) {
   document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
   document.documentElement.dataset.locale = locale;
   document.documentElement.dataset.theme = theme;
+  window.dispatchEvent(new Event("khedmty-preferences-change"));
 }
 
 export function PreferenceInitializer({ userId }: { userId: string }) {
