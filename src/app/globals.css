@@ -299,3 +299,81 @@ html[data-locale="en"] body {
 html[data-locale="ar"] body {
   font-family: "Alexandria", "Segoe UI", Tahoma, sans-serif;
 }
+
+
+/* Glassy Navigation Tabs V5 — translucent, tactile navigation surfaces */
+#khedmty-side-menu nav { gap: .7rem; padding: .2rem .1rem; }
+.glassy-nav-tab {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 82%);
+  background: linear-gradient(135deg, rgb(255 255 255 / 92%), rgb(248 250 252 / 68%));
+  color: #243451;
+  box-shadow: 0 7px 20px rgb(20 33 61 / 6%), inset 0 1px 0 rgb(255 255 255 / 95%);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+}
+.glassy-nav-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  border-radius: 0 8px 8px 0;
+  background: linear-gradient(180deg, #ffb36d, #f47721);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.glassy-nav-tab:hover {
+  transform: translateY(-2px);
+  border-color: rgb(244 119 33 / 28%);
+  background: linear-gradient(135deg, #fff, rgb(255 244 234 / 94%));
+  box-shadow: 0 12px 26px rgb(20 33 61 / 10%), inset 0 1px 0 #fff;
+}
+.glassy-nav-tab.is-active {
+  border-color: rgb(244 119 33 / 38%);
+  background: linear-gradient(120deg, rgb(255 247 239 / 98%), rgb(255 255 255 / 92%));
+  color: #b94d0b;
+  box-shadow: 0 10px 26px rgb(244 119 33 / 13%), inset 0 1px 0 #fff;
+}
+.glassy-nav-tab.is-active::before { opacity: 1; }
+.glassy-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / 92%);
+  border-radius: 15px;
+  background: linear-gradient(145deg, #fff, #fff0e3);
+  color: #e96b16;
+  box-shadow: 0 5px 13px rgb(20 33 61 / 9%), inset 0 1px 0 #fff;
+  transition: transform .22s ease, box-shadow .22s ease, color .22s ease;
+}
+.glassy-nav-tab:hover .glassy-nav-icon,
+.glassy-nav-tab.is-active .glassy-nav-icon {
+  transform: scale(1.04);
+  color: #fff;
+  border-color: rgb(255 255 255 / 28%);
+  background: linear-gradient(145deg, #ff9a43, #e96313);
+  box-shadow: 0 7px 16px rgb(233 105 24 / 28%);
+}
+.glassy-nav-tab > span:nth-child(2) { position: relative; z-index: 1; }
+html[data-theme="dark"] .glassy-nav-tab {
+  border-color: rgb(255 255 255 / 12%);
+  background: linear-gradient(135deg, rgb(37 52 76 / 88%), rgb(19 31 50 / 78%));
+  color: #e7edf7;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 20%), inset 0 1px 0 rgb(255 255 255 / 9%);
+}
+html[data-theme="dark"] .glassy-nav-tab:hover,
+html[data-theme="dark"] .glassy-nav-tab.is-active {
+  border-color: rgb(255 157 76 / 48%);
+  background: linear-gradient(120deg, rgb(92 53 30 / 65%), rgb(35 49 70 / 92%));
+  color: #ffd0a9;
+}
+html[data-theme="dark"] .glassy-nav-icon {
+  border-color: rgb(255 255 255 / 12%);
+  background: linear-gradient(145deg, rgb(255 255 255 / 18%), rgb(255 255 255 / 6%));
+  color: #ffb477;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glassy-nav-tab, .glassy-nav-icon { transition: none !important; }
+}
