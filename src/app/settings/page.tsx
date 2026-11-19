@@ -1,16 +1,41 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UiIcon } from "@/components/ui-icon";
 import { AppearanceLanguageControls } from "@/components/appearance-language-controls";
 
-export default async function SettingsPage() {
+async function updateProfile(formData: FormData) {
+  "use server";
+  const session = await getCurrentUser();
+  if (!session || session.status !== "ACTIVE") redirect("/login");
+  const displayName = String(formData.get("displayName") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const bio = String(formData.get("bio") || "").trim();
+  const skills = String(formData.get("skills") || "").split(",").map((item) => item.trim()).filter(Boolean).slice(0, 10);
+  if (displayName.length < 2 || displayName.length > 70 || phone.length > 30 || bio.length > 600 || skills.some((item) => item.length > 40)) redirect("/settings?error=invalid_profile");
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: session.id }, data: { displayName } });
+    await tx.profile.upsert({
+      where: { userId: session.id },
+      update: { displayName, phone: phone || null, bio: bio || null, skills },
+      create: { userId: session.id, displayName, phone: phone || null, bio: bio || null, skills },
+    });
+  });
+  revalidatePath("/settings");
+  revalidatePath("/account");
+  revalidatePath("/provider");
+  redirect("/settings?success=profile");
+}
+
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ success?: string; error?: string }> }) {
+  const params = await searchParams;
   const session = await getCurrentUser();
   if (!session) redirect("/login");
   const user = await prisma.user.findUnique({
     where: { id: session.id },
-    select: { email: true, displayName: true, role: true },
+    select: { email: true, displayName: true, role: true, profile: { select: { phone: true, bio: true, skills: true } } },
   });
   if (!user) redirect("/login");
 
@@ -24,6 +49,8 @@ export default async function SettingsPage() {
       </div>
     </header>
     <section className="mx-auto max-w-4xl px-5 py-10">
+      {params.success === "profile" && <p role="status" className="mb-5 rounded-xl bg-green-50 p-4 font-bold text-green-700">تم حفظ بيانات الحساب بنجاح.</p>}
+      {params.error === "invalid_profile" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">راجع البيانات المدخلة وحاول مرة أخرى.</p>}
       <div className="rounded-3xl bg-[#14213d] p-7 text-white shadow-lg">
         <span className="ui-icon-tile ui-icon-tile-dark"><UiIcon name="settings" size={28}/></span>
         <p className="mt-4 text-orange-300">تحكم في تفضيلاتك</p>
@@ -42,6 +69,26 @@ export default async function SettingsPage() {
           </div>
         </section>
       </div>
+      <section className="mt-7 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <span className="ui-icon-tile"><UiIcon name="user-round-pen" size={26}/></span>
+        <h2 className="mt-4 text-xl font-black text-[#14213d]">تعديل بيانات الحساب</h2>
+        <p className="mt-2 text-sm leading-7 text-slate-500">حدّث اسم العرض ووسيلة التواصل والنبذة والمهارات.</p>
+        <form action={updateProfile} className="mt-5 grid gap-4 sm:grid-cols-2">
+          <label className="block text-sm font-bold text-slate-700">الاسم الظاهر
+            <input name="displayName" required minLength={2} maxLength={70} defaultValue={user.displayName} className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-orange-500"/>
+          </label>
+          <label className="block text-sm font-bold text-slate-700">رقم الهاتف أو وسيلة التواصل
+            <input name="phone" maxLength={30} defaultValue={user.profile?.phone || ""} dir="ltr" className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500"/>
+          </label>
+          <label className="block text-sm font-bold text-slate-700 sm:col-span-2">نبذة عنك
+            <textarea name="bio" maxLength={600} rows={3} defaultValue={user.profile?.bio || ""} className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-orange-500"/>
+          </label>
+          <label className="block text-sm font-bold text-slate-700 sm:col-span-2">المهارات (افصل بينها بفاصلة)
+            <input name="skills" maxLength={400} defaultValue={user.profile?.skills.join(", ") || ""} className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-orange-500"/>
+          </label>
+          <button type="submit" className="rounded-xl bg-orange-500 px-5 py-3.5 font-black text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 sm:col-span-2">حفظ بيانات الحساب</button>
+        </form>
+      </section>
       <div className="mt-5"><AppearanceLanguageControls userId={session.id} /></div>
     </section>
   </main>;
