@@ -52,7 +52,9 @@ export function AppearanceLanguageControls({ userId }: { userId: string }) {
     setTheme(nextTheme);
     applyPreferences(nextLocale, nextTheme);
     try {
-      localStorage.setItem(preferenceKey(userId), JSON.stringify({ locale: nextLocale, theme: nextTheme }));
+      const value = JSON.stringify({ locale: nextLocale, theme: nextTheme });
+      localStorage.setItem(preferenceKey(userId), value);
+      localStorage.setItem("khedmty-public-preferences", value);
     } catch {
       // The current page still updates if browser storage is unavailable.
     }
