@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 function googleRedirectUri(req: NextRequest) {
   if (process.env.VERCEL_ENV === "preview") {
-    return "https://khedmty-git-audit-final-quality-hardening-ahmeddesign130-jpg.vercel.app/api/auth/google/callback";
+    return "https://khedmty-git-feature-wallet-checkout-refresh-ahmeddesign130-jpg.vercel.app/api/auth/google/callback";
   }
   return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
 }
