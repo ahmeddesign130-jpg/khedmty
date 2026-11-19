@@ -5,14 +5,16 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function ServicesPage() {
+export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ serviceNo?: string }> }) {
+  const query = await searchParams;
+  const serviceNo = (query.serviceNo || "").trim().toUpperCase();
   const viewer = await getCurrentUser();
   if (!viewer) redirect("/login");
   if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
     redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");
   }
   const services = await prisma.service.findMany({
-    where: { status: "APPROVED" },
+    where: { status: "APPROVED", ...(serviceNo ? { serviceNo } : {}) },
     select: {
       id: true,
       title: true,
@@ -56,9 +58,15 @@ export default async function ServicesPage() {
             اختَر الخدمة واطلبها من خلال خِدمتي، وتابع التنفيذ والتسليم بأمان من حسابك.
           </p>
 
-          <div className="mt-7 inline-flex rounded-xl bg-white/10 px-5 py-3">
+          <form action="/services" method="GET" className="mt-7 flex max-w-2xl flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 sm:flex-row">
+            <label htmlFor="serviceNo" className="sr-only">ابحث برقم الخدمة</label>
+            <input id="serviceNo" name="serviceNo" defaultValue={serviceNo} placeholder="اكتب رقم الخدمة للبحث" dir="ltr" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-4 py-3 text-left font-semibold text-[#14213d] outline-none placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-300" />
+            <button type="submit" className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 font-black text-white shadow-lg transition hover:bg-orange-400">بحث عن الخدمة</button>
+            {serviceNo && <Link href="/services" className="inline-flex items-center justify-center rounded-xl border border-white/30 px-4 py-3 font-bold text-white">عرض كل الخدمات</Link>}
+          </form>
+          <div className="mt-4 inline-flex rounded-xl bg-white/10 px-5 py-3">
             <span className="font-bold">
-              {services.length} خدمة متاحة
+              {services.length} {serviceNo ? "نتيجة بحث" : "خدمة متاحة"}
             </span>
           </div>
         </div>
@@ -69,10 +77,10 @@ export default async function ServicesPage() {
           <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
             <div className="text-4xl">✦</div>
             <h2 className="mt-4 text-xl font-black text-[#14213d]">
-              لا توجد خدمات متاحة حاليًا
+              {serviceNo ? "لم يتم العثور على خدمة بهذا الرقم." : "لا توجد خدمات متاحة حاليًا"}
             </h2>
             <p className="mt-3 text-gray-500">
-              نعمل على إضافة خدمات جديدة قريبًا.
+              {serviceNo ? "تأكد من كتابة رقم الخدمة بشكل صحيح أو اعرض كل الخدمات." : "نعمل على إضافة خدمات جديدة قريبًا."}
             </p>
             <Link
               href="/"
