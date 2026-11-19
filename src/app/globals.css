@@ -649,3 +649,109 @@ html[data-theme="dark"] main input:not([type="checkbox"]):not([type="radio"]),ht
 @media (prefers-reduced-motion:reduce) {
   .ui-icon-v4,button:hover > .ui-icon-v4,a:hover > .ui-icon-v4 { transition:none; transform:none; }
 }
+
+
+/* Khedmty Glass refresh — warm pearl, champagne and copper (no cold blue cast) */
+:root {
+  --background:#f5f1eb;
+  --foreground:#292a2d;
+  --primary:#d97732;
+  --primary-dark:#bd5d20;
+  --navy:#343238;
+  --muted:#77716c;
+  --surface:#fffdfa;
+  --border:#e9dfd4;
+  --glass-border:rgba(255,250,244,.88);
+  --glass-surface:rgba(255,252,247,.78);
+  --glass-shadow:0 16px 42px rgba(78,57,39,.09),inset 0 1px 0 rgba(255,255,255,.96);
+  --glass-blur:24px;
+}
+body {
+  background:
+    radial-gradient(ellipse at 12% 5%,rgba(230,157,104,.17),transparent 34rem),
+    radial-gradient(ellipse at 90% 82%,rgba(210,190,164,.19),transparent 36rem),
+    linear-gradient(145deg,#f5f1eb 0%,#f9f6f1 52%,#f2ece4 100%);
+  background-attachment:fixed;
+}
+.glass-auth-page {
+  background:
+    radial-gradient(ellipse at 12% 8%,rgba(225,147,91,.18),transparent 32rem),
+    radial-gradient(ellipse at 88% 90%,rgba(205,183,155,.2),transparent 34rem),
+    linear-gradient(140deg,#f4eee6 0%,#fbf8f3 52%,#f2e9df 100%) !important;
+}
+.glass-auth-page::before { background:rgba(221,145,91,.19) !important; }
+.glass-auth-page::after { background:rgba(190,167,139,.18) !important; }
+.glass-surface {
+  border:1px solid rgba(255,252,247,.9) !important;
+  background:linear-gradient(145deg,rgba(255,255,252,.88),rgba(255,249,241,.68)) !important;
+  box-shadow:0 22px 58px rgba(82,59,40,.12),inset 0 1px 0 rgba(255,255,255,.98) !important;
+  backdrop-filter:blur(28px) saturate(135%);
+  -webkit-backdrop-filter:blur(28px) saturate(135%);
+}
+main article,
+main [class*="rounded-2xl"][class*="border"][class*="bg-white"],
+main [class*="rounded-3xl"][class*="border"][class*="bg-white"],
+main [class*="rounded-[28px]"][class*="bg-white"],
+main section [class*="rounded-2xl"][class*="bg-white"],
+main section [class*="rounded-3xl"][class*="bg-white"] {
+  border-color:rgba(255,250,243,.9) !important;
+  background:linear-gradient(145deg,rgba(255,253,249,.9),rgba(250,244,236,.72)) !important;
+  box-shadow:0 13px 34px rgba(77,57,41,.075),inset 0 1px 0 rgba(255,255,255,.96) !important;
+  backdrop-filter:blur(22px) saturate(135%);
+  -webkit-backdrop-filter:blur(22px) saturate(135%);
+}
+main > header.bg-white,main > header[class*="bg-white"] {
+  background:rgba(255,251,245,.82) !important;
+  border-color:rgba(255,255,255,.86) !important;
+  box-shadow:0 9px 28px rgba(75,55,37,.06);
+}
+main input:not([type="checkbox"]):not([type="radio"]),main select,main textarea {
+  border:1px solid rgba(184,160,137,.35) !important;
+  background:rgba(255,253,249,.82) !important;
+  color:#343238 !important;
+}
+.ui-icon-tile,.ios-icon-glass,.glassy-nav-icon {
+  border:1px solid rgba(255,255,255,.9) !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(246,226,207,.76)) !important;
+  color:#bd642d !important;
+  box-shadow:0 8px 22px rgba(145,94,54,.1),inset 0 1px 0 #fff !important;
+}
+.khedmty-side-drawer {
+  background:linear-gradient(150deg,rgba(255,253,249,.96),rgba(246,238,228,.91)) !important;
+  border-color:rgba(255,255,255,.9) !important;
+}
+.glassy-nav-tab {
+  border-color:rgba(255,255,255,.92) !important;
+  background:linear-gradient(135deg,rgba(255,253,249,.9),rgba(246,238,228,.72)) !important;
+}
+.glassy-nav-tab.is-active {
+  border-color:rgba(204,112,54,.3) !important;
+  background:linear-gradient(120deg,rgba(248,224,204,.94),rgba(255,251,245,.9)) !important;
+  box-shadow:0 8px 22px rgba(184,104,53,.12) !important;
+}
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(ellipse at 8% 4%,rgba(211,125,65,.13),transparent 34rem),
+    linear-gradient(145deg,#171614 0%,#211e1a 55%,#29231e 100%) !important;
+}
+html[data-theme="dark"] .glass-auth-page {
+  background:linear-gradient(145deg,#191714,#24201b 60%,#2b241e) !important;
+}
+html[data-theme="dark"] .glass-surface,
+html[data-theme="dark"] main article,
+html[data-theme="dark"] main [class*="rounded-2xl"][class*="border"][class*="bg-white"],
+html[data-theme="dark"] main [class*="rounded-3xl"][class*="border"][class*="bg-white"] {
+  border-color:rgba(255,235,215,.12) !important;
+  background:linear-gradient(145deg,rgba(49,43,37,.92),rgba(34,30,26,.86)) !important;
+  box-shadow:0 18px 48px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+html[data-theme="dark"] main input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] main select,html[data-theme="dark"] main textarea {
+  background:rgba(30,27,24,.9) !important;color:#f4eee7 !important;border-color:rgba(255,235,215,.16) !important;
+}
+html[data-theme="dark"] .ui-icon-tile,
+html[data-theme="dark"] .ios-icon-glass,
+html[data-theme="dark"] .glassy-nav-icon {
+  background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(215,135,79,.12)) !important;
+  color:#efb184 !important;border-color:rgba(255,255,255,.14) !important;
+}
