@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UiIcon } from "@/components/ui-icon";
 
 type Role = "CUSTOMER" | "PROVIDER" | "SUPER_ADMIN";
@@ -31,6 +32,7 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
 };
 
 export function SideNavigation({ role, userId }: { role: Role | null; userId: string }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [locale, setLocale] = useState<Locale>("ar");
   const [theme, setTheme] = useState<Theme>("light");
@@ -93,8 +95,9 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         <nav className="flex flex-col gap-2">
           {links.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
-              className="flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-start font-bold text-[#14213d] transition hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
-              <span className="ios-icon-glass h-10 w-10 shrink-0"><UiIcon name={item.icon} size={20} /></span>
+              aria-current={pathname === item.href ? "page" : undefined}
+              className={`glassy-nav-tab flex min-h-14 w-full min-w-0 items-center gap-3 rounded-2xl px-3 py-3 text-start font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${pathname === item.href ? "is-active" : ""}`}>
+              <span className="glassy-nav-icon h-11 w-11 shrink-0"><UiIcon name={item.icon} size={21} strokeWidth={2.2} /></span>
               <span className="min-w-0 flex-1 truncate leading-6">{item.label}</span>
               <span className="shrink-0 text-slate-300"><UiIcon name="chevron-left" size={17} /></span>
             </Link>
