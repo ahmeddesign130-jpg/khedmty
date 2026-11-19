@@ -61,14 +61,14 @@ export function SideNavigation({ role }: { role: Role | null }) {
         dir="rtl"
         aria-label="القائمة الرئيسية"
         aria-hidden={!open}
-        className={`fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(84vw,320px)] flex-col border-l border-slate-100/80 bg-white/95 p-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(88vw,360px)] flex-col border-l border-slate-100/80 bg-white/95 p-5 shadow-2xl backdrop-blur-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="mb-8 flex items-center justify-between border-b border-slate-100 pb-5">
-          <div>
-            <p className="text-xl font-black text-[#14213d]">خِدمتي</p>
-            <p className="mt-1 text-xs text-slate-500">القائمة الرئيسية</p>
+        <div className="mb-8 flex items-center justify-between gap-3 border-b border-slate-100 pb-5">
+          <div className="min-w-0">
+            <p className="whitespace-nowrap text-xl font-black leading-tight text-[#14213d]">خِدمتي</p>
+            <p className="mt-1 whitespace-nowrap text-xs text-slate-500">القائمة الرئيسية</p>
           </div>
-          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="ios-icon-glass h-10 w-10 text-slate-600 hover:bg-orange-50">
+          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="ios-icon-glass h-10 w-10 shrink-0 text-slate-600 hover:bg-orange-50">
             <UiIcon name="x" size={22} />
           </button>
         </div>
