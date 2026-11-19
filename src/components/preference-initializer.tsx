@@ -345,29 +345,50 @@ function translateText(value: string) {
   return translated;
 }
 
-const originalText = new WeakMap<Text, string>();
-const originalAttributes = new WeakMap<Element, Map<string, string>>();
+type TextTranslationState = { original: string; rendered: string };
+type AttributeTranslationState = { original: string; rendered: string };
+const originalText = new WeakMap<Text, TextTranslationState>();
+const originalAttributes = new WeakMap<Element, Map<string, AttributeTranslationState>>();
 
 function translateDocument(locale: "ar" | "en") {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
   while (walker.nextNode()) nodes.push(walker.currentNode as Text);
   for (const node of nodes) {
-    if (!node.parentElement?.closest("script,style,noscript,textarea,input,[contenteditable='true']")) {
-      if (!originalText.has(node)) originalText.set(node, node.nodeValue || "");
-      const original = originalText.get(node) || "";
-      const nextValue = locale === "en" ? translateText(original) : original;
-      if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
+    if (node.parentElement?.closest("script,style,noscript,textarea,input,[contenteditable='true']")) continue;
+    const current = node.nodeValue || "";
+    let state = originalText.get(node);
+    if (!state) {
+      state = { original: current, rendered: current };
+      originalText.set(node, state);
+    } else if (current !== state.rendered) {
+      // React changed this text node; treat the new value as the source language.
+      state.original = current;
     }
+    const nextValue = locale === "en" ? translateText(state.original) : state.original;
+    if (current !== nextValue) node.nodeValue = nextValue;
+    state.rendered = nextValue;
   }
+
   document.querySelectorAll<HTMLElement>("[placeholder],[title],[aria-label]").forEach((element) => {
+    let saved = originalAttributes.get(element);
+    if (!saved) {
+      saved = new Map<string, AttributeTranslationState>();
+      originalAttributes.set(element, saved);
+    }
     for (const attr of ["placeholder", "title", "aria-label"] as const) {
-      let saved = originalAttributes.get(element);
-      if (!saved) { saved = new Map<string, string>(); originalAttributes.set(element, saved); }
-      if (!saved.has(attr)) saved.set(attr, element.getAttribute(attr) || "");
-      const value = saved.get(attr) || "";
-      const nextValue = locale === "en" ? (translations[value.trim()] || value) : value;
-      if (element.getAttribute(attr) !== nextValue) element.setAttribute(attr, nextValue);
+      if (!element.hasAttribute(attr)) continue;
+      const current = element.getAttribute(attr) || "";
+      let state = saved.get(attr);
+      if (!state) {
+        state = { original: current, rendered: current };
+        saved.set(attr, state);
+      } else if (current !== state.rendered) {
+        state.original = current;
+      }
+      const nextValue = locale === "en" ? translateText(state.original) : state.original;
+      if (current !== nextValue) element.setAttribute(attr, nextValue);
+      state.rendered = nextValue;
     }
   });
 }
