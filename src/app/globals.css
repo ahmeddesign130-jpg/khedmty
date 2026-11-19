@@ -210,3 +210,67 @@ svg.ui-icon {
   width: 17px;
   height: 17px;
 }
+
+
+/* Refined navigation placement: the floating menu owns its own top strip. */
+body { padding-top: 4.5rem; }
+body.has-side-navigation { padding-top: 4.5rem; }
+html[data-locale="en"] .khedmty-menu-trigger {
+  left: 12px !important;
+  right: auto !important;
+}
+html[data-locale="en"] .khedmty-side-drawer {
+  left: 0;
+  right: auto;
+  border-left: 0;
+  border-right: 1px solid rgb(226 232 240 / 85%);
+}
+html[data-locale="en"] .khedmty-side-drawer.translate-x-full {
+  transform: translateX(-100%);
+}
+html[data-locale="en"] .khedmty-side-drawer.translate-x-0 {
+  transform: translateX(0);
+}
+html[data-locale="en"] .khedmty-side-drawer > div:first-child {
+  direction: ltr;
+}
+html[data-locale="en"] #khedmty-side-menu nav a {
+  text-align: left;
+}
+html[data-locale="en"] #khedmty-side-menu nav a > span:last-child svg {
+  transform: rotate(180deg);
+}
+
+/* More legible, premium icon treatment and consistent type rendering. */
+.ui-icon-tile {
+  min-width: 3.25rem;
+  min-height: 3.25rem;
+  border: 1px solid #ffdfc8;
+  background: linear-gradient(145deg,#fff8f2 0%,#ffe7d5 100%);
+  color: #d85f12;
+  box-shadow: 0 7px 18px rgb(216 95 18 / 12%), inset 0 1px 0 #fff;
+}
+.ios-icon-glass {
+  border-color: #ffd5b7;
+  background: linear-gradient(145deg,#fffaf6 0%,#ffe9da 100%);
+  color: #d85f12;
+  box-shadow: 0 6px 16px rgb(20 33 61 / 9%), inset 0 1px 0 #fff;
+}
+.ui-icon { shape-rendering: geometricPrecision; }
+body { letter-spacing: -0.01em; }
+h1,h2,h3,h4 { text-wrap: balance; }
+button,a { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 380px) {
+  #khedmty-side-menu { padding: 1rem; }
+  #khedmty-side-menu nav a { gap: .65rem; padding-inline: .65rem; }
+}
+html[data-theme="dark"] .ui-icon-tile {
+  border-color: rgb(255 180 119 / 22%);
+  background: linear-gradient(145deg,#38291f,#242d40);
+  color: #ffb477;
+}
+html[data-theme="dark"] .ios-icon-glass {
+  border-color: rgb(255 180 119 / 24%);
+  background: linear-gradient(145deg,#38291f,#242d40);
+  color: #ffb477;
+}
