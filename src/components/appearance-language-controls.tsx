@@ -50,7 +50,6 @@ export function AppearanceLanguageControls({ userId }: { userId: string }) {
   function save(nextLocale: Locale, nextTheme: Theme) {
     setLocale(nextLocale);
     setTheme(nextTheme);
-    applyPreferences(nextLocale, nextTheme);
     try {
       const value = JSON.stringify({ locale: nextLocale, theme: nextTheme });
       localStorage.setItem(preferenceKey(userId), value);
@@ -58,6 +57,8 @@ export function AppearanceLanguageControls({ userId }: { userId: string }) {
     } catch {
       // The current page still updates if browser storage is unavailable.
     }
+    // Save first so the global initializer reads the new values when this event fires.
+    applyPreferences(nextLocale, nextTheme);
   }
 
   if (!ready) return null;
