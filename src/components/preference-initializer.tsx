@@ -159,21 +159,27 @@ function translateText(value: string) {
   return value.replace(trimmed, translated);
 }
 
-function translateDocument() {
+const originalText = new WeakMap<Text, string>();
+const originalAttributes = new WeakMap<Element, Map<string, string>>();
+
+function translateDocument(locale: "ar" | "en") {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
   while (walker.nextNode()) nodes.push(walker.currentNode as Text);
   for (const node of nodes) {
     if (!node.parentElement?.closest("script,style,noscript,textarea,input,[contenteditable='true']")) {
-      const original = node.nodeValue || "";
-      const translated = translateText(original);
-      if (translated !== original) node.nodeValue = translated;
+      if (!originalText.has(node)) originalText.set(node, node.nodeValue || "");
+      const original = originalText.get(node) || "";
+      node.nodeValue = locale === "en" ? translateText(original) : original;
     }
   }
   document.querySelectorAll<HTMLElement>("[placeholder],[title],[aria-label]").forEach((element) => {
     for (const attr of ["placeholder", "title", "aria-label"] as const) {
-      const value = element.getAttribute(attr);
-      if (value && translations[value.trim()]) element.setAttribute(attr, translations[value.trim()]);
+      let saved = originalAttributes.get(element);
+      if (!saved) { saved = new Map<string, string>(); originalAttributes.set(element, saved); }
+      if (!saved.has(attr)) saved.set(attr, element.getAttribute(attr) || "");
+      const value = saved.get(attr) || "";
+      element.setAttribute(attr, locale === "en" ? (translations[value.trim()] || value) : value);
     }
   });
 }
@@ -193,14 +199,24 @@ export function PreferenceInitializer({ userId }: { userId: string }) {
       root.dir = locale === "en" ? "ltr" : "rtl";
       root.dataset.locale = locale;
       root.dataset.theme = theme;
-      if (locale === "en") translateDocument();
+      translateDocument(locale);
+    };
+    const refresh = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}") as { locale?: string; theme?: string };
+        locale = saved.locale === "en" ? "en" : "ar";
+        theme = saved.theme === "dark" ? "dark" : "light";
+      } catch {}
+      apply();
     };
     apply();
-    const observer = new MutationObserver(() => {
-      if (locale === "en") translateDocument();
-    });
+    const observer = new MutationObserver(() => translateDocument(locale));
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-    return () => observer.disconnect();
+    window.addEventListener("khedmty-preferences-change", refresh);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("khedmty-preferences-change", refresh);
+    };
   }, [userId]);
   return null;
 }
