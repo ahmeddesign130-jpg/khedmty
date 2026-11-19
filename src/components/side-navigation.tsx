@@ -75,13 +75,13 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
       {!open && (
         <button type="button" aria-label="فتح قائمة خِدمتي" aria-expanded={false} aria-controls="khedmty-side-menu"
           onClick={() => setOpen(true)}
-          className="fixed right-3 top-3 z-[70] inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/70 bg-white/95 text-[#14213d] shadow-lg backdrop-blur-xl transition hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
-          <UiIcon name="menu" size={24} />
+          className="khedmty-menu-trigger fixed right-3 top-3 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_8px_24px_rgba(234,105,24,0.32)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_28px_rgba(234,105,24,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
+          <UiIcon name="menu" size={26} strokeWidth={2.5} />
         </button>
       )}
       {open && <button type="button" aria-label="إغلاق القائمة" onClick={() => setOpen(false)} className="fixed inset-0 z-[60] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
       <aside id="khedmty-side-menu" dir="rtl" aria-label="القائمة الرئيسية" aria-hidden={!open}
-        className={`fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-l border-slate-100/80 bg-white p-5 shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
+        className={`khedmty-side-drawer fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-l border-slate-100/80 bg-white p-5 shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
         <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-5">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-2xl font-black leading-tight tracking-normal text-[#14213d]">خِدمتي</p>
