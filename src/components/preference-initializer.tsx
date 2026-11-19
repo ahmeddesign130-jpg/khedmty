@@ -170,7 +170,8 @@ function translateDocument(locale: "ar" | "en") {
     if (!node.parentElement?.closest("script,style,noscript,textarea,input,[contenteditable='true']")) {
       if (!originalText.has(node)) originalText.set(node, node.nodeValue || "");
       const original = originalText.get(node) || "";
-      node.nodeValue = locale === "en" ? translateText(original) : original;
+      const nextValue = locale === "en" ? translateText(original) : original;
+      if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
     }
   }
   document.querySelectorAll<HTMLElement>("[placeholder],[title],[aria-label]").forEach((element) => {
@@ -179,7 +180,8 @@ function translateDocument(locale: "ar" | "en") {
       if (!saved) { saved = new Map<string, string>(); originalAttributes.set(element, saved); }
       if (!saved.has(attr)) saved.set(attr, element.getAttribute(attr) || "");
       const value = saved.get(attr) || "";
-      element.setAttribute(attr, locale === "en" ? (translations[value.trim()] || value) : value);
+      const nextValue = locale === "en" ? (translations[value.trim()] || value) : value;
+      if (element.getAttribute(attr) !== nextValue) element.setAttribute(attr, nextValue);
     }
   });
 }
