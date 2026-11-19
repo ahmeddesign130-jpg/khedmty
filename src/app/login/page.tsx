@@ -13,8 +13,8 @@ const errors: Record<string, string> = {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; registered?: string }> }) {
   const params = await searchParams;
   return (
-    <main dir="rtl" className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#eef1f7] via-[#f8f9fc] to-orange-50 px-5 py-10">
-      <section className="w-full max-w-md rounded-[28px] border border-white bg-white p-7 shadow-xl shadow-slate-900/5 md:p-10">
+    <main dir="rtl" className="glass-auth-page flex min-h-screen items-center justify-center px-5 py-10">
+      <section className="glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
         <Link href="/" className="block text-center text-3xl font-black text-orange-600">خِدمتي</Link>
         <h1 className="mt-8 text-center text-2xl font-black text-[#14213d]">تسجيل الدخول</h1>
         <p className="mt-3 text-center text-sm leading-7 text-slate-500">سجّل دخولك للوصول إلى حسابك ومتابعة طلباتك.</p>
