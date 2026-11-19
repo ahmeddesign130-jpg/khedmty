@@ -3,12 +3,12 @@ import Link from "next/link";
 export default function PendingPage() {
   return (
     <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#f7f8fa] px-5">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-lg">
+      <section aria-labelledby="pending-title" className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-lg">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-orange-100 text-4xl text-orange-500">
           !
         </div>
 
-        <h1 className="mt-7 text-3xl font-black text-[#14213d]">
+        <h1 id="pending-title" className="mt-7 text-3xl font-black text-[#14213d]">
           حسابك قيد المراجعة
         </h1>
 
@@ -28,7 +28,7 @@ export default function PendingPage() {
         >
           العودة إلى الرئيسية
         </Link>
-      </div>
+      </section>
     </main>
   );
 }
