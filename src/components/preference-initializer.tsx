@@ -393,6 +393,7 @@ const translations: Record<string, string> = {
   "قيمة العمولة الجديدة ستُطبق على الطلبات التي يتم إنشاؤها بعد الحفظ. الطلبات القديمة تحتفظ بقيمتها الأصلية.": "The new fee applies to orders created after saving. Existing orders keep their original fee.",
   "أدخل مبلغًا صحيحًا من 0 إلى 100000 EG.": "Enter a valid amount from 0 to 100000 EG.",
   "عمولة المنصة الثابتة": "Fixed platform fee",
+
 };
 
 function translateText(value: string) {
