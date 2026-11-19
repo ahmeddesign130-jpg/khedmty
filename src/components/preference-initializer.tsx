@@ -191,7 +191,7 @@ export function PreferenceInitializer({ userId }: { userId: string }) {
     let locale: "ar" | "en" = "ar";
     let theme: "light" | "dark" = "light";
     try {
-      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}") as { locale?: string; theme?: string };
+      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string };
       locale = saved.locale === "en" ? "en" : "ar";
       theme = saved.theme === "dark" ? "dark" : "light";
     } catch {}
@@ -205,7 +205,7 @@ export function PreferenceInitializer({ userId }: { userId: string }) {
     };
     const refresh = () => {
       try {
-        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}") as { locale?: string; theme?: string };
+        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string };
         locale = saved.locale === "en" ? "en" : "ar";
         theme = saved.theme === "dark" ? "dark" : "light";
       } catch {}
