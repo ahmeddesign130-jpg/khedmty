@@ -36,13 +36,16 @@ export function SideNavigation({ role }: { role: Role | null }) {
     <>
       <button
         type="button"
-        aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+        aria-label={open ? "إغلاق قائمة خِدمتي" : "فتح قائمة خِدمتي"}
         aria-expanded={open}
         aria-controls="khedmty-side-menu"
         onClick={() => setOpen((value) => !value)}
-        className="ios-icon-glass fixed right-4 top-4 z-[70] h-12 w-12 text-[#14213d] shadow-lg transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+        className="fixed right-4 top-4 z-[70] inline-flex min-h-12 items-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-3 py-2 text-[#14213d] shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
       >
-        <UiIcon name={open ? "x" : "menu"} size={24} />
+        <span className="text-lg font-black tracking-tight">خِدمتي</span>
+        <span className="ios-icon-glass h-9 w-9 rounded-xl">
+          <UiIcon name={open ? "x" : "menu"} size={22} />
+        </span>
       </button>
 
       {open && (
