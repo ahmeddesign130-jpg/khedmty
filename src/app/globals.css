@@ -151,3 +151,62 @@ html[data-theme="dark"] .menu-preference-button.is-active { background:#482b1c; 
 @media (max-width:360px) {
   .brand-wordmark { font-size:19px!important; }
 }
+
+
+/* Consistent icon sizing and spacing in Arabic RTL and English LTR layouts. */
+svg.ui-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  max-width: none;
+  position: static;
+  vertical-align: middle;
+}
+.ios-icon-glass {
+  display: inline-flex;
+  flex: 0 0 2.5rem;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.ios-icon-glass > svg.ui-icon {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+#khedmty-side-menu nav {
+  gap: 0.5rem;
+}
+#khedmty-side-menu nav a {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  gap: 0.75rem;
+  align-items: center;
+}
+#khedmty-side-menu nav a > span:nth-child(2) {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#khedmty-side-menu nav a > span:last-child {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+.menu-preference-button {
+  min-width: 0;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+.menu-preference-button > svg.ui-icon {
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+}
