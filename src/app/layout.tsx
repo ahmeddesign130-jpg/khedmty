@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SideNavigation } from "@/components/side-navigation";
-import { AppearanceLanguageControls } from "@/components/appearance-language-controls";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -33,7 +32,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         {children}
         <SideNavigation role={activeRole} />
-        <AppearanceLanguageControls userId={user?.id ?? "guest"} />
       </body>
     </html>
   );
