@@ -7,6 +7,11 @@ const errors: Record<string, string> = {
   server: "حصل خطأ أثناء تسجيل الدخول. حاول مرة أخرى بعد قليل.",
   google_not_configured: "تسجيل Google يحتاج إكمال إعداداته أولًا.",
   google_failed: "تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى.",
+  google_state: "انتهت جلسة Google أو لم تصل ملفات التحقق. جرّب مرة أخرى.",
+  google_config: "إعدادات Google غير مكتملة في نسخة التجربة.",
+  google_token: "تعذر تأكيد الدخول مع Google. راجع إعدادات رابط الرجوع.",
+  google_profile: "لم نتمكن من قراءة بيانات حساب Google الموثّق.",
+  google_session: "تم التحقق من Google لكن تعذر إنشاء جلسة الدخول."
   google_denied: "تم إلغاء تسجيل الدخول باستخدام Google.",
 };
 
