@@ -849,3 +849,112 @@ html[data-theme="dark"] .glassy-nav-icon {
   }
 }
 
+/* Mobile-first responsive foundation — Khedmty */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+body, main, main > *, main section, main article,
+main form, main nav, main header, main footer {
+  min-width: 0;
+  max-width: 100%;
+}
+main img, main video, main iframe, main canvas {
+  max-width: 100%;
+}
+main :where(.flex, .inline-flex) > * {
+  min-width: 0;
+}
+main :where(p, h1, h2, h3, h4, label, a, button, span) {
+  overflow-wrap: anywhere;
+}
+main :where(input, select, textarea) {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+}
+main textarea { min-height: 112px; }
+main :where(button, a, [role="button"], input[type="checkbox"], input[type="radio"]) {
+  touch-action: manipulation;
+}
+main :where(button, a, [role="button"]) {
+  scroll-margin-block: 1rem;
+}
+main :where(button, a, [role="button"]) {
+  min-height: 44px;
+}
+main :where(button, a) svg {
+  flex-shrink: 0;
+}
+main :where(.grid) > * { min-width: 0; }
+main :where(table) { max-width: 100%; }
+main :where(pre, code) { overflow-wrap: anywhere; }
+
+/* Fluid type and spacing scale down gracefully on narrow phones. */
+main h1 { font-size: clamp(1.55rem, 6vw, 2.65rem); line-height: 1.2; }
+main h2 { font-size: clamp(1.25rem, 4.8vw, 2rem); line-height: 1.3; }
+main h3 { font-size: clamp(1.05rem, 4vw, 1.4rem); line-height: 1.35; }
+
+.khedmty-menu-trigger {
+  min-width: 48px;
+  min-height: 48px;
+  width: 48px;
+  height: 48px;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  left: auto;
+  touch-action: manipulation;
+}
+html[data-locale="en"] .khedmty-menu-trigger {
+  right: auto !important;
+  left: max(12px, env(safe-area-inset-left)) !important;
+}
+.khedmty-side-drawer {
+  width: min(88vw, 360px, 100%);
+  height: 100vh;
+  height: 100dvh;
+  padding-top: max(1.25rem, env(safe-area-inset-top));
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  overscroll-behavior-y: contain;
+}
+.khedmty-side-drawer nav a,
+.khedmty-side-drawer button {
+  min-height: 48px;
+}
+.khedmty-menu-backdrop { touch-action: manipulation; }
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .container { width: calc(100% - 24px); }
+  main > section, main > header, main > footer {
+    padding-inline: max(12px, env(safe-area-inset-left));
+  }
+  main .grid.grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  main .grid.grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  main .grid[class*="grid-cols-5"],
+  main .grid[class*="grid-cols-6"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  main :where(.overflow-x-auto) { max-width: 100%; overscroll-behavior-inline: contain; }
+  main :where(.rounded-2xl, .rounded-3xl) { min-width: 0; }
+  main :where(.flex-row) { flex-wrap: wrap; }
+  main :where(.flex-nowrap) { flex-wrap: nowrap; }
+  main :where(.text-4xl) { font-size: clamp(1.65rem, 7vw, 2.25rem); }
+  main :where(.text-3xl) { font-size: clamp(1.45rem, 6vw, 1.9rem); }
+  main :where(.text-2xl) { font-size: clamp(1.2rem, 5vw, 1.55rem); }
+}
+@media (max-width: 380px) {
+  .container { width: calc(100% - 20px); }
+  main .grid.grid-cols-3,
+  main .grid.grid-cols-4,
+  main .grid[class*="grid-cols-5"],
+  main .grid[class*="grid-cols-6"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .khedmty-side-drawer { width: min(92vw, 340px, 100%); padding-inline: 16px; }
+  main :where(.gap-6) { gap: 1rem; }
+  main :where(.p-8) { padding: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .khedmty-side-drawer { transition: none !important; }
+}
+
