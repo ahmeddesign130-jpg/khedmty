@@ -105,3 +105,27 @@ html[data-theme="dark"] main [class*="text-slate-800"] { color:#e8edf7!important
 html[data-theme="dark"] main [class*="border-slate-100"],
 html[data-theme="dark"] main [class*="border-slate-200"] { border-color:#29364b!important; }
 html[lang="en"] body { font-family:"Manrope",Arial,sans-serif; }
+
+
+/* English locale layout: override page-level RTL defaults consistently. */
+html[data-locale="en"] body,
+html[data-locale="en"] main,
+html[data-locale="en"] header,
+html[data-locale="en"] section,
+html[data-locale="en"] aside,
+html[data-locale="en"] nav,
+html[data-locale="en"] footer {
+  direction: ltr;
+}
+html[data-locale="en"] body {
+  font-family: Manrope, Arial, sans-serif;
+}
+html[data-locale="en"] [dir="rtl"] {
+  direction: ltr !important;
+}
+html[data-locale="en"] .text-right {
+  text-align: left;
+}
+html[data-locale="en"] .text-left {
+  text-align: right;
+}
