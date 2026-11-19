@@ -7,8 +7,10 @@ import { UiIcon } from "@/components/ui-icon";
 export function QuickSettings() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
+    panelRef.current?.querySelector<HTMLElement>("a[href], button:not([disabled])")?.focus();
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpen(false); triggerRef.current?.focus(); } };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -17,7 +19,7 @@ export function QuickSettings() {
   return (
     <div dir="rtl" className="fixed bottom-5 left-5 z-[60]">
       {open && (
-        <div id="khedmty-quick-settings" role="region" aria-label="الإعدادات السريعة" className="mb-3 w-64 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl">
+        <div ref={panelRef} id="khedmty-quick-settings" role="region" aria-label="الإعدادات السريعة" className="mb-3 w-64 overflow-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl">
           <div className="rounded-xl bg-[#14213d] px-4 py-3 text-white">
             <p className="text-xs text-orange-300">خِدمتي</p>
             <p className="mt-1 font-black">الإعدادات السريعة</p>
@@ -36,7 +38,7 @@ export function QuickSettings() {
             <UiIcon name="shield" size={20} /> الخصوصية والأمان
           </Link>
           <form action="/api/auth/logout" method="POST">
-            <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-red-600 hover:bg-red-50">
+            <button type="submit" className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-red-600 hover:bg-red-50">
               <UiIcon name="log-out" size={20} /> تسجيل الخروج
             </button>
           </form>
@@ -46,7 +48,7 @@ export function QuickSettings() {
         ref={triggerRef}
         type="button"
         aria-label={open ? "إغلاق الإعدادات السريعة" : "فتح الإعدادات السريعة"}
-        aria-controls="khedmty-quick-settings"
+        aria-controls={open ? "khedmty-quick-settings" : undefined}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-[#14213d] text-white shadow-xl ring-4 ring-white transition hover:-translate-y-1 hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-orange-200"
