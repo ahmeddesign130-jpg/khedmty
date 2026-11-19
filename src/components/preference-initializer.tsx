@@ -329,8 +329,7 @@ const translations: Record<string, string> = {
   "الإعدادات السريعة": "Quick settings",
   "اللغة": "Language",
   "الخصوصية والأمان": "Privacy and security",
-  "فتح الإعدادات السريعة": "Open quick settings"
-
+  "فتح الإعدادات السريعة": "Open quick settings",
   "إنشاء حساب": "Create account",
   "الطلبات": "Orders",
   "طلباتي": "My orders",
