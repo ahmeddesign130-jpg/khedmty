@@ -418,6 +418,20 @@ const translations: Record<string, string> = {
   "كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.": "Pick up where you left off: track your orders, payments, and services from your account.",
   "حساب واحد يوصلك للخدمة اللي تحتاجها أو يفتح مهارتك لعملاء جدد.": "One account to find the service you need or put your skills in front of new customers.",
 
+
+  "تابع مشترياتك ومدفوعاتك، واوصل للخدمة اللي تناسب احتياجك من حساب واحد.": "Track purchases and payments, and find the service that fits your needs — all from one account.",
+  "دوّر على الخدمة باسمها أو نوعها، وقارن التفاصيل قبل ما تختار.": "Search by service name or category, then compare the details before choosing.",
+  "اعرف كل طلب وصل لفين، وراجع تفاصيله ومدفوعاته في أي وقت.": "See where every order stands and review its details and payments anytime.",
+  "راجع الحسابات والخدمات، وتابع الطلبات والمدفوعات، وخلي تشغيل المنصة واضح من لوحة واحدة.": "Review accounts and services, track orders and payments, and keep platform operations clear from one dashboard.",
+  "حوّل مهارتك لخدمة واضحة، وتابع طلبات العملاء والتنفيذ والتسليم من مكان واحد.": "Turn your skills into a clear service offering, then manage customer orders, progress, and delivery in one place.",
+  "جهّز عرضك، حدّث تفاصيله، وتابع قرار المراجعة أولًا بأول.": "Build your listing, update its details, and keep track of its review status.",
+  "اعرف الطلبات الجديدة، ونظّم شغلك، وتابع كل مرحلة لحد التسليم.": "See new orders, organize your work, and track every stage through delivery.",
+  "قدّم خدمتك بشكل احترافي، وبعد المراجعة تظهر للعملاء.": "Present your service professionally. Once reviewed, it can be discovered by customers.",
+  "اكتب اسم الخدمة أو المجال اللي محتاجه — مثل تصميم أو مونتاج — وهتلاقي الخيارات المتاحة.": "Enter the service or field you need — such as design or video editing — to explore available options.",
+  "اعثر على الخدمة": "Find a service",
+  "كل طلباتك في مكان واحد: تابع التنفيذ، راجع الدفع، واعرف الخطوة الجاية.": "All your orders in one place: track progress, review payment, and see what's next.",
+  "لسه ما طلبتش خدمة؟ ابدأ باكتشاف الخدمات المناسبة ليك.": "Haven't ordered a service yet? Explore options that fit your needs.",
+
 };
 
 function translateText(value: string) {
