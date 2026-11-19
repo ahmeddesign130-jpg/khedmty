@@ -157,7 +157,7 @@ export default async function ServiceDetailsPage({
 
         <article className="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm">
           <div className="grid gap-2 bg-slate-100 sm:grid-cols-2">
-            {service.mediaUrls.length ? service.mediaUrls.map((url,index)=> /\.(mp4|webm|mov)(\?|$)/i.test(url) ? <video key={url} src={url} controls preload="none" playsInline className="max-h-[420px] w-full bg-black object-contain"/> : <img key={url} src={url} alt={`${service.title} - ${index+1}`} loading={index === 0 ? "eager" : "lazy"} decoding="async" fetchPriority={index === 0 ? "high" : "low"} className="max-h-[420px] w-full object-contain"/>) : <div className="flex h-44 items-center justify-center text-slate-400">لا توجد صور مرفقة</div>}
+            {service.mediaUrls.length ? service.mediaUrls.map((url,index)=> /\.(mp4|webm|mov)(\?|$)/i.test(url) ? <video key={url} src={url} aria-label={`فيديو ${service.title} رقم ${index+1}`} controls preload="none" playsInline className="max-h-[420px] w-full bg-black object-contain"/> : <img key={url} src={url} alt={`${service.title} - ${index+1}`} loading={index === 0 ? "eager" : "lazy"} decoding="async" fetchPriority={index === 0 ? "high" : "low"} className="max-h-[420px] w-full object-contain"/>) : <div className="flex h-44 items-center justify-center text-slate-400">لا توجد صور مرفقة</div>}
           </div>
 
           <div className="p-6 md:p-10">
