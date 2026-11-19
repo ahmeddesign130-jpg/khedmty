@@ -371,6 +371,15 @@ const translations: Record<string, string> = {
   "كلمة المرور": "Password",
   "أدخل كلمة المرور": "Enter your password",
   "لا توجد خدمات قيد المراجعة.": "No services awaiting review.",
+  "تم حفظ بيانات الحساب بنجاح.": "Account details saved successfully.",
+  "راجع البيانات المدخلة وحاول مرة أخرى.": "Check the information and try again.",
+  "تعديل بيانات الحساب": "Edit account details",
+  "حدّث اسم العرض ووسيلة التواصل والنبذة والمهارات.": "Update your display name, contact method, bio, and skills.",
+  "الاسم الظاهر": "Display name",
+  "رقم الهاتف أو وسيلة التواصل": "Phone number or contact method",
+  "نبذة عنك": "About you",
+  "المهارات (افصل بينها بفاصلة)": "Skills (separate with commas)",
+  "حفظ بيانات الحساب": "Save account details",
 };
 
 function translateText(value: string) {
