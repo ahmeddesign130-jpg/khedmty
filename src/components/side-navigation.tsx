@@ -102,7 +102,7 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         </nav>
 
         <section className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-          <div className="mb-3 flex items-center gap-2 font-black text-[#14213d]"><UiIcon name="sliders-horizontal" size={19} /> اللغة والمظهر</div>
+          <div className="mb-3 flex items-center gap-2 font-black text-[#14213d]"><UiIcon name="settings" size={19} /> اللغة والمظهر</div>
           <p className="mb-2 text-xs font-bold text-slate-500">لغة الموقع</p>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" aria-pressed={locale === "ar"} onClick={() => savePreferences("ar", theme)} className={`menu-preference-button ${locale === "ar" ? "is-active" : ""}`}><UiIcon name="languages" size={17}/> العربية</button>
