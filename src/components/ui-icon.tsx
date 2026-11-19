@@ -59,7 +59,7 @@ export function UiIcon({
   return (
     <svg
       {...svgProps}
-      className={`ui-icon shrink-0 ${className ?? ""}`}
+      className={`ui-icon ui-icon-v4 shrink-0 ${className ?? ""}`}
       style={{
         display: "block",
         flex: "0 0 auto",
