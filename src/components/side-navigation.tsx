@@ -38,6 +38,12 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}");
       const nextLocale: Locale = saved.locale === "en" ? "en" : "ar";
@@ -81,9 +87,10 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
           <UiIcon name="menu" size={26} strokeWidth={2.5} />
         </button>
       )}
-      {open && <button type="button" aria-label="إغلاق القائمة" onClick={() => setOpen(false)} className="fixed inset-0 z-[60] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
-      <aside id="khedmty-side-menu" dir="rtl" aria-label="القائمة الرئيسية" aria-hidden={!open}
-        className={`khedmty-side-drawer fixed right-0 top-0 z-[65] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-l border-slate-100/80 bg-white p-5 shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
+      {open && <button type="button" aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} onClick={() => setOpen(false)} className="khedmty-menu-backdrop fixed inset-0 z-[60] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
+      <aside id="khedmty-side-menu" dir={locale === "en" ? "ltr" : "rtl"} aria-label={locale === "en" ? "Main menu" : "القائمة الرئيسية"} aria-hidden={!open}
+        data-open={open ? "true" : "false"}
+        className="khedmty-side-drawer fixed top-0 z-[65] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-slate-100/80 bg-white p-5 shadow-2xl">
         <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-5">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-2xl font-black leading-tight tracking-normal text-[#14213d]">خِدمتي</p>
