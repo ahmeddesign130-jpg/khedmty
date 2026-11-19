@@ -405,9 +405,15 @@ const translations: Record<string, string> = {
 
 function translateText(value: string) {
   const trimmed = value.trim();
-  const translated = translations[trimmed];
-  if (!translated) return value;
-  return value.replace(trimmed, translated);
+  if (translations[trimmed]) return value.replace(trimmed, translations[trimmed]);
+  let translated = value;
+  const keys = Object.keys(translations).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (key.length > 1 && translated.includes(key)) {
+      translated = translated.split(key).join(translations[key]);
+    }
+  }
+  return translated;
 }
 
 const originalText = new WeakMap<Text, string>();
