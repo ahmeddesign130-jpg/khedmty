@@ -35,7 +35,7 @@ export default async function OrdersPage() {
     <div className="mx-auto max-w-4xl">
       <Link href="/account" className="font-bold text-orange-600">← حسابي</Link>
       <h1 className="mt-5 text-3xl font-black text-slate-900">طلباتي</h1>
-      <p className="mt-2 text-slate-500">تابع حالة مشترياتك ومدفوعاتك من هنا.</p>
+      <p className="mt-2 text-slate-500">كل طلباتك في مكان واحد: تابع التنفيذ، راجع الدفع، واعرف الخطوة الجاية.</p>
       <section className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-black text-[#14213d]">تقدمك في خِدمتي</p><p className="mt-1 text-sm text-slate-500">أنجزت {completedCount.toLocaleString("en-US")} طلبات مكتملة — سعتك الحالية {capacity.toLocaleString("en-US")} أماكن</p></div><strong className="text-orange-600">{progress.toLocaleString("en-US")} من 5</strong></div>
         <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-orange-500" style={{width:`${(progress/5)*100}%`}}/></div>
@@ -43,7 +43,7 @@ export default async function OrdersPage() {
         <p className="mt-1 text-xs text-slate-500">الأماكن المستخدمة حاليًا: {activeCount.toLocaleString("en-US")} من {capacity.toLocaleString("en-US")}</p>
       </section>
       {orders.length === 0 ? <section className="mt-8 rounded-2xl bg-white p-10 text-center shadow-sm">
-        <h2 className="text-xl font-bold">لسه مفيش طلبات</h2>
+        <h2 className="text-xl font-bold">لسه ما طلبتش خدمة؟ ابدأ باكتشاف الخدمات المناسبة ليك.</h2>
         <Link href="/services" className="mt-5 inline-block rounded-xl bg-orange-500 px-6 py-3 font-bold text-white">تصفح الخدمات</Link>
       </section> : <div className="mt-7 space-y-4">{orders.map(order => <article key={order.id} className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><strong>{order.orderNo}</strong><p className="mt-1 text-sm text-slate-500">{serviceTitles.get(order.serviceId) || "الخدمة"}</p><p className="mt-1 text-xs text-slate-400">{order.createdAt.toLocaleDateString("en-GB")}</p></div><span className="rounded-full bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700">{labels[order.status] || order.status}</span></div>
