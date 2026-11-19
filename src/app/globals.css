@@ -958,3 +958,27 @@ html[data-locale="en"] .khedmty-menu-trigger {
   .khedmty-side-drawer { transition: none !important; }
 }
 
+
+
+/* Performance guardrails: preserve the glass look without expensive mobile blur. */
+@media (max-width: 640px), (hover: none) and (pointer: coarse) {
+  .glass-surface,
+  .ios-icon-glass,
+  .glassy-nav-icon,
+  .khedmty-side-drawer,
+  main article,
+  main [class*="rounded-2xl"][class*="border"][class*="bg-white"],
+  main [class*="rounded-3xl"][class*="border"][class*="bg-white"] {
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    backdrop-filter: blur(8px) saturate(120%);
+  }
+  main article,
+  main [class*="rounded-2xl"][class*="border"][class*="bg-white"],
+  main [class*="rounded-3xl"][class*="border"][class*="bg-white"] {
+    box-shadow: 0 8px 22px rgba(77,57,41,.06), inset 0 1px 0 rgba(255,255,255,.88);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
