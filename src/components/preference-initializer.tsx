@@ -350,6 +350,13 @@ const translations: Record<string, string> = {
   "لا توجد نتائج": "No results",
   "جاري التحميل...": "Loading...",
 
+  "ابحث برقم الخدمة": "Search by service number",
+  "اكتب رقم الخدمة للبحث": "Enter the service number to search",
+  "بحث عن الخدمة": "Search service",
+  "نتيجة بحث": "search results",
+  "عرض كل الخدمات": "View all services",
+  "لم يتم العثور على خدمة بهذا الرقم.": "No service was found with this number.",
+  "تأكد من كتابة رقم الخدمة بشكل صحيح أو اعرض كل الخدمات.": "Check the service number or view all services.",
 };
 
 function translateText(value: string) {
