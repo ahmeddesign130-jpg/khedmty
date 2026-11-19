@@ -380,6 +380,13 @@ const translations: Record<string, string> = {
   "نبذة عنك": "About you",
   "المهارات (افصل بينها بفاصلة)": "Skills (separate with commas)",
   "حفظ بيانات الحساب": "Save account details",
+  "تم تغيير كلمة المرور بنجاح.": "Password changed successfully.",
+  "تأكد من تطابق كلمتي المرور وأن الجديدة 10 أحرف على الأقل.": "Make sure both passwords match and the new one has at least 10 characters.",
+  "كلمة المرور الحالية غير صحيحة.": "The current password is incorrect.",
+  "تغيير كلمة المرور": "Change password",
+  "استخدم كلمة مرور قوية لا تقل عن 10 أحرف.": "Use a strong password with at least 10 characters.",
+  "كلمة المرور الحالية": "Current password",
+  "تأكيد كلمة المرور": "Confirm password",
 };
 
 function translateText(value: string) {
