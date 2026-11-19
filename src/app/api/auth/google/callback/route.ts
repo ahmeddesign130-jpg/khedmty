@@ -48,17 +48,17 @@ export async function GET(req: NextRequest) {
       }),
       cache: "no-store",
     });
-    if (!tokenResponse.ok) return fail(req, "google_failed");
+    if (!tokenResponse.ok) { console.error("Google token exchange failed", tokenResponse.status, await tokenResponse.text().catch(() => "")); return fail(req, "google_token"); }
     const tokenData = await tokenResponse.json() as { access_token?: string };
-    if (!tokenData.access_token) return fail(req, "google_failed");
+    if (!tokenData.access_token) { console.error("Google token response did not include an access token"); return fail(req, "google_token"); }
 
     const profileResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: "Bearer " + tokenData.access_token },
       cache: "no-store",
     });
-    if (!profileResponse.ok) return fail(req, "google_failed");
+    if (!profileResponse.ok) { console.error("Google profile request failed", profileResponse.status); return fail(req, "google_profile"); }
     const profile = await profileResponse.json() as { sub?: string; email?: string; email_verified?: boolean; name?: string };
-    if (!profile.sub || !profile.email || profile.email_verified !== true) return fail(req, "google_failed");
+    if (!profile.sub || !profile.email || profile.email_verified !== true) { console.error("Google profile is missing verified identity fields"); return fail(req, "google_profile"); }
 
     const email = profile.email.trim().toLowerCase();
     let user = await prisma.user.findUnique({ where: { email } });
@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (user.status === "SUSPENDED") return fail(req, "google_failed");
-    await createSession({ id: user.id, role: user.role, status: user.status });
+    try { await createSession({ id: user.id, role: user.role, status: user.status }); } catch (sessionError) { console.error("Google session creation failed:", sessionError); return fail(req, "google_session"); }
 
     const destination = user.role === "SUPER_ADMIN" ? "/admin"
       : user.role === "PROVIDER" && user.status === "PENDING" ? "/pending"
