@@ -82,3 +82,26 @@ input,textarea,select,button { max-width:100%; }
 
 /* Reserve a dedicated top row for the authenticated menu trigger. */
 body.has-side-navigation { padding-top: 4.75rem; }
+
+
+/* Working appearance preferences across the authenticated experience. */
+.settings-choice { border-color:#e2e8f0; background:#fff; color:#475569; }
+.settings-choice.is-selected { border-color:#f47721; background:#fff3e9; color:#c65a12; box-shadow:0 0 0 2px rgb(244 119 33 / 10%); }
+html[data-theme="dark"] .settings-surface { background:#121d30!important; border-color:#29364b!important; color:#e8edf7!important; }
+html[data-theme="dark"] .settings-surface h2,html[data-theme="dark"] .settings-surface h3 { color:#e8edf7!important; }
+html[data-theme="dark"] .settings-choice { background:#17243a; border-color:#34445d; color:#dbe5f5; }
+html[data-theme="dark"] .settings-choice.is-selected { background:#482b1c; border-color:#f47721; color:#ffc18f; }
+html[data-theme="dark"] body,
+html[data-theme="dark"] main { background-color:#0b1220!important; color:#e8edf7; }
+html[data-theme="dark"] main [class~="bg-white"],
+html[data-theme="dark"] main [class~="bg-slate-50"],
+html[data-theme="dark"] main [class~="bg-gray-50"],
+html[data-theme="dark"] main [class~="bg-[#f7f8fa]"],
+html[data-theme="dark"] main [class~="bg-[#f6f7fb]"],
+html[data-theme="dark"] main [class~="bg-[#f5f6f8]"] { background-color:#121d30!important; }
+html[data-theme="dark"] main [class*="text-[#14213d]"],
+html[data-theme="dark"] main [class*="text-slate-900"],
+html[data-theme="dark"] main [class*="text-slate-800"] { color:#e8edf7!important; }
+html[data-theme="dark"] main [class*="border-slate-100"],
+html[data-theme="dark"] main [class*="border-slate-200"] { border-color:#29364b!important; }
+html[lang="en"] body { font-family:"Manrope",Arial,sans-serif; }
