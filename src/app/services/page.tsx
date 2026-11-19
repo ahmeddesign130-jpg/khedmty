@@ -143,7 +143,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                       href={`/services/${service.id}`}
                       className="rounded-xl bg-[#14213d] px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-500"
                     >
-                      عرض الخدمة
+                      اطلب الخدمة
                     </Link>
                   </div>
                 </div>
