@@ -31,7 +31,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
       <section className="glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
         <Link href="/" className="block text-center text-3xl font-black text-orange-600">خِدمتي</Link>
         <h1 className="mt-8 text-center text-2xl font-black text-[#14213d]">إنشاء حساب جديد</h1>
-        <p className="mt-3 text-center text-sm text-slate-500">انضم إلى خِدمتي وابدأ رحلتك معنا.</p>
+        <p className="mt-3 text-center text-sm text-slate-500">حساب واحد يوصلك للخدمة اللي تحتاجها أو يفتح مهارتك لعملاء جدد.</p>
         {params.error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">{errors[params.error] || errors.server}</p>}
         <div className="mt-7 grid gap-3">
           <a href="/api/auth/google?role=CUSTOMER" className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-100 bg-white shadow-sm"><GoogleMark/></span><span>التسجيل كعميل باستخدام Google</span></a>
