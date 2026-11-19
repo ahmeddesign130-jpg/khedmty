@@ -83,7 +83,7 @@ export function AppearanceLanguageControls({ userId }: { userId: string }) {
               <span className="flex items-center justify-center gap-2"><UiIcon name="globe" size={19}/> English</span>
             </button>
           </div>
-          <p className="mt-2 text-xs leading-6 text-slate-500">يتغير اتجاه الصفحة والخط عند اختيار English. ترجمة جميع نصوص الصفحات والقوائم ما زالت قيد الاستكمال.</p>
+          <p className="mt-2 text-xs leading-6 text-slate-500">تقدر تغيّر لغة الموقع في أي وقت من هنا.</p>
         </div>
 
         <div>
