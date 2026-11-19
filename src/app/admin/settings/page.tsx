@@ -18,7 +18,7 @@ async function updateSettings(formData: FormData) {
   if (
     !Number.isInteger(rawRate) ||
     rawRate < 0 ||
-    rawRate > 100
+    rawRate > 100000
   ) {
     redirect("/admin/settings?error=invalid_rate");
   }
@@ -52,7 +52,7 @@ export default async function AdminSettingsPage({
     where: { id: "main" },
   });
 
-  const commissionRate = settings?.commissionRate ?? 10;
+  const commissionRate = settings?.commissionRate ?? 100;
 
   return (
     <main dir="rtl" className="min-h-screen bg-slate-50 p-4 md:p-8">
@@ -69,7 +69,7 @@ export default async function AdminSettingsPage({
         </h1>
 
         <p className="mb-8 mt-2 text-slate-500">
-          التحكم في النسبة التي تحصل عليها المنصة من الطلبات الجديدة
+          تحديد مبلغ ثابت تحصل عليه المنصة مع كل طلب جديد
         </p>
 
         {params.success === "saved" && (
@@ -80,18 +80,17 @@ export default async function AdminSettingsPage({
 
         {params.error === "invalid_rate" && (
           <div className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">
-            أدخل نسبة صحيحة من 0 إلى 100.
+            أدخل مبلغًا صحيحًا من 0 إلى 100000 EG.
           </div>
         )}
 
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="text-xl font-black text-slate-900">
-            نسبة عمولة المنصة
+            قيمة عمولة المنصة الثابتة
           </h2>
 
           <p className="mb-5 mt-2 text-sm text-slate-500">
-            النسبة الجديدة ستُطبق على الطلبات التي يتم إنشاؤها بعد الحفظ.
-            الطلبات القديمة تحتفظ بعمولتها الأصلية.
+            قيمة العمولة الجديدة ستُطبق على الطلبات التي يتم إنشاؤها بعد الحفظ. الطلبات القديمة تحتفظ بقيمتها الأصلية.
           </p>
 
           <form action={updateSettings}>
@@ -99,7 +98,7 @@ export default async function AdminSettingsPage({
               htmlFor="commissionRate"
               className="mb-2 block text-sm font-bold text-slate-700"
             >
-              نسبة العمولة (%)
+              قيمة العمولة (EG)
             </label>
 
             <input
@@ -107,7 +106,7 @@ export default async function AdminSettingsPage({
               name="commissionRate"
               type="number"
               min="0"
-              max="100"
+              max="100000"
               step="1"
               defaultValue={commissionRate}
               required
