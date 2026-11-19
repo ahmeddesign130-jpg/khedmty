@@ -274,3 +274,28 @@ html[data-theme="dark"] .ios-icon-glass {
   background: linear-gradient(145deg,#38291f,#242d40);
   color: #ffb477;
 }
+
+
+/* Language direction is global, including legacy page roots with explicit RTL. */
+html[data-locale="en"] [dir="rtl"] {
+  direction: ltr !important;
+}
+html[data-locale="en"] .text-right {
+  text-align: left !important;
+}
+html[data-locale="en"] .text-start {
+  text-align: left !important;
+}
+html[data-locale="en"] input[dir="ltr"],
+html[data-locale="en"] strong[dir="ltr"],
+html[data-locale="en"] p[dir="ltr"] {
+  direction: ltr !important;
+  text-align: left;
+}
+html[data-locale="en"] body {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0;
+}
+html[data-locale="ar"] body {
+  font-family: "Alexandria", "Segoe UI", Tahoma, sans-serif;
+}
