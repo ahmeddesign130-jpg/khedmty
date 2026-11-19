@@ -755,3 +755,97 @@ html[data-theme="dark"] .glassy-nav-icon {
   background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(215,135,79,.12)) !important;
   color:#efb184 !important;border-color:rgba(255,255,255,.14) !important;
 }
+
+/* Premium micro-interactions + native scroll reveal (V25 motion layer) */
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]) {
+    transition:
+      transform .18s cubic-bezier(.2,.75,.25,1),
+      box-shadow .2s ease,
+      border-color .2s ease,
+      background-color .2s ease,
+      filter .2s ease;
+  }
+  button:not(:disabled):hover, [role="button"]:not([aria-disabled="true"]):hover {
+    transform: translate3d(0,-1.5px,0);
+    box-shadow: 0 9px 22px rgba(116,75,43,.12);
+    filter: saturate(1.035);
+  }
+  button:not(:disabled):active, [role="button"]:not([aria-disabled="true"]):active {
+    transform: translate3d(0,0,0) scale(.985);
+  }
+  main article,
+  main section [class*="rounded-2xl"][class*="bg-white"],
+  main section [class*="rounded-3xl"][class*="bg-white"],
+  main a[class*="rounded-2xl"][class*="bg-white"],
+  main a[class*="rounded-3xl"][class*="bg-white"],
+  .glass-surface {
+    transition:
+      transform .24s cubic-bezier(.2,.75,.25,1),
+      box-shadow .24s ease,
+      border-color .24s ease,
+      background-color .24s ease;
+  }
+  main article:hover,
+  main section [class*="rounded-2xl"][class*="bg-white"]:hover,
+  main section [class*="rounded-3xl"][class*="bg-white"]:hover,
+  main a[class*="rounded-2xl"][class*="bg-white"]:hover,
+  main a[class*="rounded-3xl"][class*="bg-white"]:hover,
+  .glass-surface:hover {
+    transform: translate3d(0,-3px,0) scale(1.008);
+    border-color: rgba(205,117,65,.42) !important;
+    box-shadow:
+      0 18px 38px rgba(93,65,43,.12),
+      0 0 0 1px rgba(255,255,255,.48),
+      inset 0 1px 0 rgba(255,255,255,.96);
+  }
+  .glassy-nav-tab:hover {
+    transform: translate3d(0,-2px,0);
+  }
+}
+
+/* Scroll-driven reveals: supported browsers animate as elements enter the viewport.
+   No JavaScript, layout measurement, or permanently hidden fallback content. */
+@keyframes khedmty-scroll-reveal {
+  from { opacity: .01; transform: translate3d(0,22px,0); }
+  to   { opacity: 1; transform: translate3d(0,0,0); }
+}
+@supports (animation-timeline: view()) {
+  main > section,
+  main > footer,
+  main article,
+  main section > div,
+  main [data-scroll-reveal] {
+    animation-name: khedmty-scroll-reveal;
+    animation-duration: 1ms;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 30%;
+  }
+}
+
+/* Keep touch devices calm and honor accessibility preferences. */
+@media (hover: none) {
+  button:not(:disabled):hover,
+  [role="button"]:not([aria-disabled="true"]):hover {
+    transform: none;
+    filter: none;
+    box-shadow: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  main > section,
+  main > footer,
+  main article,
+  main section > div,
+  main [data-scroll-reveal] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  button, [role="button"], main article, .glass-surface {
+    transition: none !important;
+  }
+}
+
