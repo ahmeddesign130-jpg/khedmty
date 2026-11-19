@@ -394,6 +394,26 @@ const translations: Record<string, string> = {
   "أدخل مبلغًا صحيحًا من 0 إلى 100000 EG.": "Enter a valid amount from 0 to 100000 EG.",
   "عمولة المنصة الثابتة": "Fixed platform fee",
 
+
+  "خدمات تناسب احتياجك. ومكان يبرز مهارتك.": "Services that fit your needs. A place where your skills stand out.",
+  "أنجز شغلك مع الشخص المناسب — من غير دوشة البحث والتنسيق.": "Get the work done with the right professional — without the hassle of searching and coordinating.",
+  "بدل ما تضيع وقتك في البحث والسؤال، اكتشف خدمات واضحة وتابع طلبك من مكان واحد. ولو بتقدم خدمة، اعرض شغلك وخلي العملاء يلاقوك.": "Spend less time searching. Discover clear service listings and track your order in one place. Offering a service? Showcase your work and help customers find you.",
+  "اعثر على خدمتك أو اعرض مهارتك": "Find the service you need or showcase your skills",
+  "وعد خِدمتي": "The Khedmty promise",
+  "خلّي مهارتك توصل للي محتاجها": "Put your skills in front of people who need them",
+  "اختار بوضوح": "Choose with clarity",
+  "وصل لعملاء": "Reach customers",
+  "خطوات واضحة. متابعة أسهل.": "Clear steps. Easier tracking.",
+  "من أول تسجيل لحد استلام الخدمة": "From sign-up to service delivery",
+  "سواء بتشتري خدمة أو بتقدمها، هتلاقي خطواتك الأساسية قدامك.": "Whether you're buying or offering a service, your next steps are easy to follow.",
+  "حدد أنت جاي تعمل إيه": "Choose what brings you here",
+  "سجّل كعميل لو بتدور على خدمة، أو كمقدم خدمة لو عايز توصل مهارتك لعملاء جدد.": "Join as a customer looking for a service, or as a provider ready to reach new customers.",
+  "اختار وابدأ من مكان واحد": "Choose and get started in one place",
+  "استعرض الخدمات أو جهّز خدمتك، وتابع كل التفاصيل من حسابك.": "Browse services or prepare your listing, then manage the details from your account.",
+  "تابع لحد ما تخلص": "Stay on top until it's done",
+  "شوف حالة الطلب وخطوات التنفيذ والتسليم بدون ما تتوه بين المحادثات.": "Follow order status, progress, and delivery without losing track across conversations.",
+  "ابدأ كعميل فورًا. أما حساب مقدم الخدمة فيُراجع قبل إتاحة عرض الخدمات.": "Start immediately as a customer. Provider accounts are reviewed before services can be listed.",
+
 };
 
 function translateText(value: string) {
