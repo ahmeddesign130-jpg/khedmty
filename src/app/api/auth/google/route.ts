@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const PREVIEW_HOST = "khedmty-git-audit-final-quality-hardening-ahmeddesign130-jpg.vercel.app";
+const PREVIEW_HOST = "khedmty-git-feature-wallet-checkout-refresh-ahmeddesign130-jpg.vercel.app";
 
 function googleRedirectUri(req: NextRequest) {
   if (process.env.VERCEL_ENV === "preview") {
