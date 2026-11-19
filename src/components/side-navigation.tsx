@@ -10,13 +10,13 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
   CUSTOMER: [
     { href: "/services", label: "السوق", icon: "search" },
     { href: "/orders", label: "طلباتي", icon: "clipboard-list" },
-    { href: "/settings", label: "الإعدادات واللغة", icon: "settings" },
+    { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
   PROVIDER: [
     { href: "/provider", label: "الرئيسية", icon: "grid" },
     { href: "/provider/services", label: "خدماتي", icon: "briefcase" },
     { href: "/provider/orders", label: "الطلبات", icon: "clipboard-list" },
-    { href: "/settings", label: "الإعدادات واللغة", icon: "settings" },
+    { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
   SUPER_ADMIN: [
     { href: "/admin", label: "لوحة الإدارة", icon: "grid" },
@@ -34,19 +34,18 @@ export function SideNavigation({ role }: { role: Role | null }) {
 
   return (
     <>
-      <button
-        type="button"
-        aria-label={open ? "إغلاق قائمة خِدمتي" : "فتح قائمة خِدمتي"}
-        aria-expanded={open}
-        aria-controls="khedmty-side-menu"
-        onClick={() => setOpen((value) => !value)}
-        className="fixed right-4 top-4 z-[70] inline-flex min-h-12 items-center gap-3 rounded-2xl border border-white/70 bg-white/90 px-3 py-2 text-[#14213d] shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-      >
-        <span className="text-lg font-black tracking-tight">خِدمتي</span>
-        <span className="ios-icon-glass h-9 w-9 rounded-xl">
-          <UiIcon name={open ? "x" : "menu"} size={22} />
-        </span>
-      </button>
+      {!open && (
+        <button
+          type="button"
+          aria-label="فتح قائمة خِدمتي"
+          aria-expanded={false}
+          aria-controls="khedmty-side-menu"
+          onClick={() => setOpen(true)}
+          className="fixed right-4 top-4 z-[70] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/70 bg-white/95 text-[#14213d] shadow-lg backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+        >
+          <UiIcon name="menu" size={25} />
+        </button>
+      )}
 
       {open && (
         <button
