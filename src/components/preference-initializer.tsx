@@ -357,6 +357,20 @@ const translations: Record<string, string> = {
   "عرض كل الخدمات": "View all services",
   "لم يتم العثور على خدمة بهذا الرقم.": "No service was found with this number.",
   "تأكد من كتابة رقم الخدمة بشكل صحيح أو اعرض كل الخدمات.": "Check the service number or view all services.",
+  "مراجعة الدفع": "Payment review",
+  "مكتمل": "Completed",
+  "ملغي": "Cancelled",
+  "غير متاح": "Unavailable",
+  "لإنشاء طلب جديد يجب أن يتوفر مكان. أكمل طلبًا جاريًا ليتحرر مكان، وكل 5 طلبات مكتملة تزيد سعتك الدائمة 5 أماكن.": "You need an available slot to place a new order. Complete an active order to free a slot; every 5 completed orders permanently add 5 more slots.",
+  "وسيلة تواصل العميل (للإدارة فقط)": "Customer contact method (admin only)",
+  "ملخص المبلغ": "Payment summary",
+  "آخر عملية دفع": "Latest payment",
+  "جاري تنفيذ الطلب": "Order in progress",
+  "قيد مراجعة الإدارة": "Pending admin review",
+  "العودة للوحة التحكم": "Back to dashboard",
+  "كلمة المرور": "Password",
+  "أدخل كلمة المرور": "Enter your password",
+  "لا توجد خدمات قيد المراجعة.": "No services awaiting review.",
 };
 
 function translateText(value: string) {
