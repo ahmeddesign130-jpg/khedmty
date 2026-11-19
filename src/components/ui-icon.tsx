@@ -40,6 +40,6 @@ const paths: Record<IconName, React.ReactNode> = {
   moon: <><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></>,
 };
 
-export function UiIcon({ name, size = 22, strokeWidth = 1.8, className, style, ...props }: SVGProps<SVGSVGElement> & { name: IconName; size?: number; strokeWidth?: number }) {
+export function UiIcon({ name, size = 22, strokeWidth = 2.15, className, style, ...props }: SVGProps<SVGSVGElement> & { name: IconName; size?: number; strokeWidth?: number }) {
   return <svg className={`ui-icon shrink-0 ${className ?? ""}`} style={{ flex: "0 0 auto", width: size, height: size, maxWidth: "none", ...style }} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>{paths[name]}</svg>;
 }
