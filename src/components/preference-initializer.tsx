@@ -387,6 +387,12 @@ const translations: Record<string, string> = {
   "استخدم كلمة مرور قوية لا تقل عن 10 أحرف.": "Use a strong password with at least 10 characters.",
   "كلمة المرور الحالية": "Current password",
   "تأكيد كلمة المرور": "Confirm password",
+  "قيمة عمولة المنصة الثابتة": "Fixed platform fee",
+  "قيمة العمولة (EG)": "Fee amount (EG)",
+  "تحديد مبلغ ثابت تحصل عليه المنصة مع كل طلب جديد": "Set a fixed amount the platform receives with every new order.",
+  "قيمة العمولة الجديدة ستُطبق على الطلبات التي يتم إنشاؤها بعد الحفظ. الطلبات القديمة تحتفظ بقيمتها الأصلية.": "The new fee applies to orders created after saving. Existing orders keep their original fee.",
+  "أدخل مبلغًا صحيحًا من 0 إلى 100000 EG.": "Enter a valid amount from 0 to 100000 EG.",
+  "عمولة المنصة الثابتة": "Fixed platform fee",
 };
 
 function translateText(value: string) {
