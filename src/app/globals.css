@@ -129,3 +129,25 @@ html[data-locale="en"] .text-right {
 html[data-locale="en"] .text-left {
   text-align: right;
 }
+
+/* Visible quick controls inside the side drawer */
+.menu-preference-button {
+  display:flex; min-height:44px; align-items:center; justify-content:center; gap:7px;
+  border:1px solid #e2e8f0; border-radius:12px; background:#fff; color:#475569;
+  padding:9px 7px; font-size:13px; font-weight:700;
+}
+.menu-preference-button.is-active {
+  border-color:#f47721; background:#fff3e9; color:#c65a12;
+  box-shadow:0 0 0 2px rgb(244 119 33 / 10%);
+}
+html[data-theme="dark"] #khedmty-side-menu { background:#121d30; border-color:#29364b; }
+html[data-theme="dark"] #khedmty-side-menu p,
+html[data-theme="dark"] #khedmty-side-menu nav a { color:#e8edf7; }
+html[data-theme="dark"] #khedmty-side-menu section { background:#17243a; border-color:#34445d; }
+html[data-theme="dark"] #khedmty-side-menu section div { color:#e8edf7; }
+html[data-theme="dark"] .menu-preference-button { background:#17243a; border-color:#34445d; color:#dbe5f5; }
+html[data-theme="dark"] .menu-preference-button.is-active { background:#482b1c; border-color:#f47721; color:#ffc18f; }
+.brand-wordmark { display:inline-block; flex:0 0 auto; white-space:nowrap; word-break:keep-all; overflow-wrap:normal; }
+@media (max-width:360px) {
+  .brand-wordmark { font-size:19px!important; }
+}
