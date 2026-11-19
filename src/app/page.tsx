@@ -12,7 +12,7 @@ export default function HomePage() {
     <main dir="rtl" className="min-h-screen bg-[#f6f7fb] text-[#14213d]">
       <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-6 sm:px-5 sm:py-4">
-          <Link href="/" aria-label="خِدمتي - الصفحة الرئيسية" className="brand-wordmark mr-12 shrink-0 whitespace-nowrap text-[21px] font-black leading-none tracking-normal text-orange-600 sm:text-2xl">خِدمتي</Link>
+          <Link href="/" aria-label="خِدمتي - الصفحة الرئيسية" className="brand-wordmark shrink-0 whitespace-nowrap text-[21px] font-black leading-none tracking-normal text-orange-600 sm:text-2xl">خِدمتي</Link>
           <nav className="flex shrink-0 items-center gap-1 sm:gap-5">
             <Link href="/login" className="whitespace-nowrap rounded-lg px-2 py-2 text-xs font-bold text-[#14213d] hover:bg-slate-50 sm:rounded-xl sm:px-3 sm:text-sm">تسجيل الدخول</Link>
             <Link href="/register" className="whitespace-nowrap rounded-lg bg-orange-500 px-2.5 py-2.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:bg-orange-600 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">إنشاء حساب</Link>
