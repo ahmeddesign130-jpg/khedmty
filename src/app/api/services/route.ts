@@ -19,23 +19,32 @@ function generateServiceNo() {
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
       return NextResponse.json({ success: false, message: "تصفح الخدمات متاح للعملاء النشطين فقط." }, { status: 403 });
     }
 
     const serviceNo = request.nextUrl.searchParams.get("serviceNo")?.trim().toUpperCase();
     const services = await prisma.service.findMany({
-      where: {
-        status: "APPROVED",
-        ...(serviceNo ? { serviceNo: { equals: serviceNo } } : {}),
+      where: { status: "APPROVED", ...(serviceNo ? { serviceNo: { equals: serviceNo } } : {}) },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        mediaUrls: true,
+        status: true,
+        providerId: true,
+        createdAt: true,
+        updatedAt: true,
+        provider: { select: { id: true, displayName: true } },
       },
-      include: { provider: { select: { id: true, displayName: true } } },
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
-    return NextResponse.json({ success: true, services });
+    return NextResponse.json({ success: true, services }, {
+      headers: { "Cache-Control": "private, no-store, max-age=0" },
+    });
   } catch (error) {
     console.error("GET_SERVICES_ERROR:", error);
     return NextResponse.json({ success: false, message: "حدث خطأ أثناء تحميل الخدمات." }, { status: 500 });
@@ -80,7 +89,9 @@ export async function POST(request: Request) {
       return created;
     });
 
-    return NextResponse.json({ success: true, message: "تم إرسال الخدمة إلى الإدارة للمراجعة.", service }, { status: 201 });
+    // Service numbers are internal identifiers and are never returned to providers.
+    const { serviceNo: _serviceNo, ...publicService } = service;
+    return NextResponse.json({ success: true, message: "تم إرسال الخدمة إلى الإدارة للمراجعة.", service: publicService }, { status: 201 });
   } catch (error) {
     console.error("CREATE_SERVICE_ERROR:", error);
     return NextResponse.json({ success: false, message: "حدث خطأ أثناء إنشاء الخدمة." }, { status: 500 });
