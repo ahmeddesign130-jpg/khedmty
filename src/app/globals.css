@@ -413,3 +413,12 @@ html[data-locale="en"] .khedmty-side-drawer[data-open="true"] {
 @media (prefers-reduced-motion: reduce) {
   .khedmty-side-drawer { transition: none !important; }
 }
+
+
+/* Final mobile drawer interaction layer: the panel and close control must sit above every page control. */
+.khedmty-menu-trigger { z-index: 50 !important; }
+.khedmty-menu-backdrop { z-index: 80 !important; }
+.khedmty-side-drawer { z-index: 90 !important; }
+.khedmty-side-drawer > div:first-child button { position: relative; z-index: 100 !important; pointer-events: auto !important; touch-action: manipulation; }
+.khedmty-side-drawer button, .khedmty-side-drawer a { position: relative; touch-action: manipulation; }
+body:has(.khedmty-side-drawer[data-open="true"]) .khedmty-menu-trigger { visibility: hidden !important; pointer-events: none !important; }
