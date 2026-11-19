@@ -29,7 +29,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const activeRole = user?.status === "ACTIVE" ? user.role : null;
   return (
     <html lang="ar" dir="rtl">
-      <body>
+      <body className={activeRole ? "has-side-navigation" : undefined}>
         {children}
         <SideNavigation role={activeRole} />
       </body>
