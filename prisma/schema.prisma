@@ -98,7 +98,7 @@ model Order {
   customerContact String?    @db.Text
   providerId     String
   servicePrice   Int
-  commissionRate Int         @default(10)
+  commissionRate Int         @default(100)
   commission     Int
   total          Int
   status         OrderStatus @default(PENDING_PAYMENT)
