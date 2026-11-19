@@ -13,9 +13,9 @@ export default function HomePage() {
       <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-6 sm:px-5 sm:py-4">
           <Link href="/" aria-label="خِدمتي - الصفحة الرئيسية" className="brand-wordmark shrink-0 whitespace-nowrap text-[21px] font-black leading-none tracking-normal text-orange-600 sm:text-2xl">خِدمتي</Link>
-          <nav className="flex shrink-0 items-center gap-1 sm:gap-5">
-            <Link href="/login" className="whitespace-nowrap rounded-lg px-2 py-2 text-xs font-bold text-[#14213d] hover:bg-slate-50 sm:rounded-xl sm:px-3 sm:text-sm">تسجيل الدخول</Link>
-            <Link href="/register" className="whitespace-nowrap rounded-lg bg-orange-500 px-2.5 py-2.5 text-xs font-bold text-white shadow-md shadow-orange-500/20 hover:bg-orange-600 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm">إنشاء حساب</Link>
+          <nav className="flex shrink-0 items-center gap-2 sm:gap-4" aria-label="التنقل الرئيسي">
+            <Link href="/login" className="whitespace-nowrap rounded-lg px-2 py-2 text-xs font-bold text-[#14213d] hover:bg-slate-50 sm:px-3 sm:text-sm">دخول</Link>
+            <Link href="/services" className="whitespace-nowrap rounded-xl bg-orange-500 px-3 py-2.5 text-xs font-black text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600 sm:px-5 sm:py-3 sm:text-sm">اكتشف الخدمات</Link>
           </nav>
         </div>
       </header>
@@ -29,9 +29,9 @@ export default function HomePage() {
             <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-orange-200">خدمات تناسب احتياجك. ومكان يبرز مهارتك.</span>
             <h1 className="mt-7 text-4xl font-black leading-[1.5] md:text-6xl">أنجز شغلك مع الشخص المناسب — من غير دوشة البحث والتنسيق.</h1>
             <p className="mt-6 max-w-xl text-base leading-9 text-slate-200 md:text-lg">بدل ما تضيع وقتك في البحث والسؤال، اكتشف خدمات واضحة وتابع طلبك من مكان واحد. ولو بتقدم خدمة، اعرض شغلك وخلي العملاء يلاقوك.</p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/register" className="rounded-2xl bg-orange-500 px-7 py-4 font-bold text-white shadow-xl shadow-orange-950/20 hover:-translate-y-0.5 hover:bg-orange-600">اعثر على خدمتك أو وصل لعملاء</Link>
-              <Link href="/login" className="rounded-2xl border border-white/25 bg-white/10 px-7 py-4 font-bold text-white hover:bg-white/15">لديك حساب؟ دخول</Link>
+            <div className="mt-9">
+              <Link href="/services" className="inline-flex min-h-14 items-center justify-center rounded-2xl bg-orange-500 px-8 py-4 font-black text-white shadow-xl shadow-orange-950/20 transition hover:-translate-y-0.5 hover:bg-orange-600">اكتشف الخدمات</Link>
+              <p className="mt-4 text-sm text-slate-200">مقدم خدمة؟ <Link href="/register" className="font-bold text-orange-200 underline decoration-orange-200/50 underline-offset-4 hover:text-white">سجّل مجانًا واعرض مهارتك</Link></p>
             </div>
             <p className="mt-5 text-xs text-slate-300">ابدأ كعميل فورًا. أما حساب مقدم الخدمة فيُراجع قبل إتاحة عرض الخدمات.</p>
           </div>
@@ -70,6 +70,13 @@ export default function HomePage() {
               <p className="mt-3 text-sm leading-8 text-slate-500">{step.description}</p>
             </article>
           ))}
+        </div>
+      </section>
+      <section className="px-5 pb-16">
+        <div className="mx-auto max-w-6xl rounded-[28px] bg-[#14213d] px-6 py-10 text-center text-white shadow-xl md:px-12">
+          <h2 className="text-2xl font-black md:text-3xl">جاهز تلاقي الخدمة المناسبة؟</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-300">ابدأ البحث واختار من الخدمات المتاحة على خِدمتي.</p>
+          <Link href="/services" className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-500 px-7 py-3 font-black text-white transition hover:bg-orange-600">اكتشف الخدمات</Link>
         </div>
       </section>
       <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500"><p>خِدمتي — مهارتك تستحق التميز</p><p className="mt-2 text-xs">© 2026 AHMED ZAKRAIA ALI — جميع الحقوق محفوظة.</p></footer>
