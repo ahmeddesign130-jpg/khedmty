@@ -88,9 +88,9 @@ export async function POST(request: Request) {
     }
 
     const settings = await prisma.platformSettings.findUnique({ where: { id: "main" } });
-    const commissionRate = settings?.commissionRate ?? 10;
+    const commissionRate = settings?.commissionRate ?? 100;
     const servicePrice = service.price;
-    const commission = Math.round((servicePrice * commissionRate) / 100);
+    const commission = commissionRate;
     const total = servicePrice + commission;
 
     const order = await prisma.$transaction(async (tx) => {
