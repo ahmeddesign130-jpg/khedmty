@@ -109,7 +109,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         </form>
       </section>
       <section className="mt-7 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-        <span className="ui-icon-tile"><UiIcon name="shield-check" size={26}/></span>
+        <span className="ui-icon-tile"><UiIcon name="shield" size={26}/></span>
         <h2 className="mt-4 text-xl font-black text-[#14213d]">تغيير كلمة المرور</h2>
         <p className="mt-2 text-sm leading-7 text-slate-500">استخدم كلمة مرور قوية لا تقل عن 10 أحرف.</p>
         <form action={changePassword} className="mt-5 grid gap-4 sm:grid-cols-2">
