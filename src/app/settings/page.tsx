@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UiIcon } from "@/components/ui-icon";
+import { AppearanceLanguageControls } from "@/components/appearance-language-controls";
 
 export default async function SettingsPage() {
   const session = await getCurrentUser();
