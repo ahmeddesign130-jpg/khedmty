@@ -125,7 +125,7 @@ model Payment {
 
 model PlatformSettings {
   id             String   @id @default("main")
-  commissionRate Int      @default(10)
+  commissionRate Int      @default(100)
   updatedAt      DateTime @updatedAt
 }
 
