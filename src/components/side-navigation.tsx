@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { UiIcon } from "@/components/ui-icon";
 
@@ -35,12 +35,25 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
   const [open, setOpen] = useState(false);
   const [locale, setLocale] = useState<Locale>("ar");
   const [theme, setTheme] = useState<Theme>("light");
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    if (!open) return;
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }
+      if (event.key !== "Tab" || !drawerRef.current) return;
+      const focusable = Array.from(drawerRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) { event.preventDefault(); return; }
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+    return () => { window.removeEventListener("keydown", onKeyDown); triggerRef.current?.focus(); };
+  }, [open]);
 
   useEffect(() => {
     try {
@@ -87,7 +100,7 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         </button>
       )}
       {open && <button type="button" aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} onClick={() => setOpen(false)} className="khedmty-menu-backdrop fixed inset-0 z-[80] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
-      <aside id="khedmty-side-menu" dir={locale === "en" ? "ltr" : "rtl"} aria-label={locale === "en" ? "Main menu" : "القائمة الرئيسية"} aria-hidden={!open}
+      <aside ref={drawerRef} role="dialog" aria-modal="true" inert={!open} id="khedmty-side-menu" dir={locale === "en" ? "ltr" : "rtl"} aria-label={locale === "en" ? "Main menu" : "القائمة الرئيسية"} aria-hidden={!open}
         data-open={open ? "true" : "false"}
         className="khedmty-side-drawer fixed top-0 z-[90] flex h-[100dvh] w-[min(88vw,360px)] flex-col overflow-y-auto border-slate-100/80 bg-white p-5 shadow-2xl">
         <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-5">
@@ -95,10 +108,10 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
             <p className="whitespace-nowrap text-2xl font-black leading-tight tracking-normal text-[#14213d]">خِدمتي</p>
             <p className="mt-1 whitespace-nowrap text-xs text-slate-500">القائمة الرئيسية</p>
           </div>
-          <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق القائمة" className="ios-icon-glass relative z-[100] h-10 w-10 shrink-0 cursor-pointer touch-manipulation text-slate-600 hover:bg-orange-50" style={{ pointerEvents: "auto" }}><UiIcon name="x" size={22} /></button>
+          <button ref={closeRef} type="button" onClick={() => setOpen(false)} aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} className="ios-icon-glass relative z-[100] h-10 w-10 shrink-0 cursor-pointer touch-manipulation text-slate-600 hover:bg-orange-50" style={{ pointerEvents: "auto" }}><UiIcon name="x" size={22} /></button>
         </div>
 
-        <nav className="flex flex-col gap-2">
+        <nav aria-label={locale === "en" ? "Page navigation" : "التنقل بين الصفحات"} className="flex flex-col gap-2">
           {links.map((item) => (
             <a key={item.href} href={item.href} onClick={() => setOpen(false)}
               aria-current={pathname === item.href ? "page" : undefined}
