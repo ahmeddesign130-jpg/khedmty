@@ -414,6 +414,10 @@ const translations: Record<string, string> = {
   "شوف حالة الطلب وخطوات التنفيذ والتسليم بدون ما تتوه بين المحادثات.": "Follow order status, progress, and delivery without losing track across conversations.",
   "ابدأ كعميل فورًا. أما حساب مقدم الخدمة فيُراجع قبل إتاحة عرض الخدمات.": "Start immediately as a customer. Provider accounts are reviewed before services can be listed.",
 
+
+  "كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.": "Pick up where you left off: track your orders, payments, and services from your account.",
+  "حساب واحد يوصلك للخدمة اللي تحتاجها أو يفتح مهارتك لعملاء جدد.": "One account to find the service you need or put your skills in front of new customers.",
+
 };
 
 function translateText(value: string) {
