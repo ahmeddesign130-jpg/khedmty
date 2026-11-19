@@ -149,7 +149,7 @@ const translations: Record<string, string> = {
   "سعر الخدمة": "Service price", "وسيلة تواصل العميل (للإدارة فقط)": "Customer contact method (admin only)",
   "بيانات الحساب المسجل حاليًا.": "Details for your current account.",
   "اسم صاحب المحفظة غير معروض.": "The wallet owner's name is hidden.",
-  "حدث خطأ غير متوقع.": "An unexpected error occurred."
+  "حدث خطأ غير متوقع.": "An unexpected error occurred.",
 
   "اكتب البريد الإلكتروني وكلمة المرور.": "Enter your email address and password.",
   "البريد الإلكتروني أو كلمة المرور غير صحيحة.": "The email address or password is incorrect.",
