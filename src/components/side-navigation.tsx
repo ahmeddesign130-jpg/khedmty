@@ -92,13 +92,11 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   return (
     <>
-      {!open && (
-        <button type="button" aria-label="فتح قائمة خِدمتي" aria-expanded={false} aria-controls="khedmty-side-menu"
+      <button ref={triggerRef} type="button" aria-label={locale === "en" ? "Open Khedmty menu" : "فتح قائمة خِدمتي"} aria-expanded={open} aria-controls="khedmty-side-menu" aria-hidden={open} tabIndex={open ? -1 : 0}
           onClick={() => setOpen(true)}
-          className="khedmty-menu-trigger fixed right-3 top-3 z-[50] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_8px_24px_rgba(234,105,24,0.32)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_28px_rgba(234,105,24,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
+          className={`khedmty-menu-trigger fixed right-3 top-3 z-[50] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_8px_24px_rgba(234,105,24,0.32)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_28px_rgba(234,105,24,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 ${open ? "invisible pointer-events-none opacity-0" : ""}`}>
           <UiIcon name="menu" size={26} strokeWidth={2.5} />
         </button>
-      )}
       {open && <button type="button" aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} onClick={() => setOpen(false)} className="khedmty-menu-backdrop fixed inset-0 z-[80] cursor-default bg-[#14213d]/40 backdrop-blur-[3px]" />}
       <aside ref={drawerRef} role="dialog" aria-modal="true" inert={!open} id="khedmty-side-menu" dir={locale === "en" ? "ltr" : "rtl"} aria-label={locale === "en" ? "Main menu" : "القائمة الرئيسية"} aria-hidden={!open}
         data-open={open ? "true" : "false"}
