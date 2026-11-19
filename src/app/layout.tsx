@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SideNavigation } from "@/components/side-navigation";
+import { PreferenceInitializer } from "@/components/preference-initializer";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="ar" dir="rtl">
       <body className={activeRole ? "has-side-navigation" : undefined}>
+        {user?.status === "ACTIVE" ? <PreferenceInitializer userId={user.id} /> : null}
         {children}
         <SideNavigation role={activeRole} />
       </body>
