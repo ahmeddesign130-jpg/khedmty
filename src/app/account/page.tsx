@@ -19,18 +19,18 @@ export default async function AccountPage() {
         <div className="absolute -left-12 -top-16 h-48 w-48 rounded-full bg-orange-500/20 blur-3xl"/>
         <div className="relative"><span className="ui-icon-tile ui-icon-tile-dark"><UiIcon name="user" size={28}/></span>
           <p className="mt-4 text-orange-300">مرحبًا بك في خِدمتي</p><h1 className="mt-2 text-3xl font-black">حساب العميل</h1>
-          <p className="mt-3 text-gray-300">كل أدواتك لمتابعة الخدمات والطلبات في مكان واحد.</p>
+          <p className="mt-3 text-gray-300">تابع مشترياتك ومدفوعاتك، واوصل للخدمة اللي تناسب احتياجك من حساب واحد.</p>
         </div>
       </div>
       <div className="mt-8 grid gap-5 sm:grid-cols-2">
         <Link href="/services" className="group rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <span className="ui-icon-tile"><UiIcon name="search" size={27}/></span><h2 className="mt-5 text-xl font-black">تصفح الخدمات</h2>
-          <p className="mt-3 text-gray-500">اكتشف الخدمات المعتمدة وابحث عن الخدمة المناسبة لك.</p>
+          <p className="mt-3 text-gray-500">دوّر على الخدمة باسمها أو نوعها، وقارن التفاصيل قبل ما تختار.</p>
           <span className="mt-5 inline-flex items-center gap-2 font-bold text-orange-500">استكشف الخدمات <UiIcon name="arrow-left" size={17}/></span>
         </Link>
         <Link href="/orders" className="group rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <span className="ui-icon-tile"><UiIcon name="shopping-bag" size={27}/></span><h2 className="mt-5 text-xl font-black">طلباتي</h2>
-          <p className="mt-3 text-gray-500">تابع حالة مشترياتك والمدفوعات وتفاصيل كل طلب.</p>
+          <p className="mt-3 text-gray-500">اعرف كل طلب وصل لفين، وراجع تفاصيله ومدفوعاته في أي وقت.</p>
           <span className="mt-5 inline-flex items-center gap-2 font-bold text-orange-500">عرض الطلبات <UiIcon name="arrow-left" size={17}/></span>
         </Link>
       </div>
