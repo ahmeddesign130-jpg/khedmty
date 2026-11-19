@@ -26,7 +26,7 @@ const translations: Record<string, string> = {
   "حسابك قيد المراجعة": "Your account is under review",
   "شكرًا لانضمامك إلى خِدمتي كمقدم خدمة.": "Thank you for joining Khedmty as a service provider.",
   "حسابك حاليًا في انتظار مراجعة وموافقة إدارة المنصة.": "Your account is awaiting review and approval by the platform team.",
-  "سنتمكن من إتاحة لوحة مقدم الخدمة بعد الموافقة.": "Your provider dashboard will become available after approval.",
+  "سنتمكن من إتاحة لوحة مقدم الخدمة بعد الموافقة.": "Your provider dashboard will be available after approval.",
   "لا تحتاج إلى إنشاء حساب جديد. انتظر حتى تنتهي الإدارة من مراجعة حسابك.": "You do not need to create another account. Please wait for the team to review your account.",
   "لوحة التحكم": "Dashboard",
   "الرئيسية": "Home",
@@ -314,7 +314,22 @@ const translations: Record<string, string> = {
   "لغة الموقع": "Website language",
   "مظهر الموقع": "Appearance",
   "إعدادات الحساب": "Account settings",
-  "البريد الإلكتروني": "Email address"
+  "البريد الإلكتروني": "Email address",
+  "استعادة دخول الأدمن": "Admin access recovery",
+  "هذه الصفحة مخصصة لإعادة تعيين كلمة مرور حساب الإدارة الأساسي فقط.": "This page is only for resetting the primary administrator account password.",
+  "تم تحديث كلمة المرور. يمكنك تسجيل الدخول الآن.": "Password updated. You can now log in.",
+  "مفتاح الأمان غير صحيح أو غير مضبوط.": "The security key is invalid or has not been configured.",
+  "كلمة المرور يجب أن تكون 12 حرفًا على الأقل.": "The password must be at least 12 characters long.",
+  "لم يتم العثور على حساب أدمن نشط بهذا البريد.": "No active administrator account was found for this email.",
+  "حدث خطأ. حاول مرة أخرى لاحقًا.": "An error occurred. Please try again later.",
+  "مفتاح الأمان": "Security key",
+  "كلمة المرور الجديدة": "New password",
+  "12 حرفًا على الأقل. استخدم كلمة مرور قوية وفريدة.": "At least 12 characters. Use a strong, unique password.",
+  "تحديث كلمة المرور": "Update password",
+  "الإعدادات السريعة": "Quick settings",
+  "اللغة": "Language",
+  "الخصوصية والأمان": "Privacy and security",
+  "فتح الإعدادات السريعة": "Open quick settings"
 };
 
 function translateText(value: string) {
