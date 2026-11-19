@@ -93,10 +93,10 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         <nav className="flex flex-col gap-2">
           {links.map((item) => (
             <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
-              className="flex min-h-12 items-center gap-4 rounded-xl px-4 py-3 font-bold text-[#14213d] transition hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
-              <span className="ios-icon-glass h-10 w-10"><UiIcon name={item.icon} size={20} /></span>
-              <span>{item.label}</span>
-              <span className="mr-auto text-slate-300"><UiIcon name="chevron-left" size={17} /></span>
+              className="flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-start font-bold text-[#14213d] transition hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500">
+              <span className="ios-icon-glass h-10 w-10 shrink-0"><UiIcon name={item.icon} size={20} /></span>
+              <span className="min-w-0 flex-1 truncate leading-6">{item.label}</span>
+              <span className="shrink-0 text-slate-300"><UiIcon name="chevron-left" size={17} /></span>
             </Link>
           ))}
         </nav>
@@ -116,8 +116,8 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         </section>
 
         {role && <form action="/api/auth/logout" method="POST" className="mt-auto border-t border-slate-100 pt-4">
-          <button type="submit" className="flex min-h-12 w-full items-center gap-4 rounded-xl px-4 py-3 font-bold text-red-600 transition hover:bg-red-50">
-            <span className="ios-icon-glass h-10 w-10 text-red-500"><UiIcon name="log-out" size={20} /></span> تسجيل الخروج
+          <button type="submit" className="flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-start font-bold text-red-600 transition hover:bg-red-50">
+            <span className="ios-icon-glass h-10 w-10 shrink-0 text-red-500"><UiIcon name="log-out" size={20} /></span><span className="min-w-0 flex-1">تسجيل الخروج</span>
           </button>
         </form>}
       </aside>
