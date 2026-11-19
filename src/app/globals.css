@@ -556,3 +556,5 @@ html[data-theme="dark"] .glassy-nav-icon {
 @media (prefers-reduced-motion: reduce) {
   main section [class*="rounded-2xl"], main article, main a { transition: none !important; }
 }
+
+/* Preview rebuild trigger after the Preview-only database pooler update. */
