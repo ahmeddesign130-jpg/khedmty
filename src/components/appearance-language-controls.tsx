@@ -62,7 +62,7 @@ export function AppearanceLanguageControls({ userId }: { userId: string }) {
   return (
     <section className="settings-surface rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-3">
-        <span className="ui-icon-tile"><UiIcon name="sliders-horizontal" size={25} /></span>
+        <span className="ui-icon-tile"><UiIcon name="settings" size={25} /></span>
         <div>
           <h2 className="text-xl font-black text-[#14213d]">اللغة والمظهر</h2>
           <p className="mt-1 text-sm text-slate-500">اختَر تفضيلات العرض، وسيتم حفظها لهذا الحساب على هذا الجهاز.</p>
