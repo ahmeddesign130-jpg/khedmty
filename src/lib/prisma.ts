@@ -4,7 +4,27 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const basePrisma = globalForPrisma.prisma ?? new PrismaClient();
+function prismaDatabaseUrl() {
+  const raw = process.env.DATABASE_URL;
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    // Supabase transaction pooler (port 6543) runs in PgBouncer transaction mode.
+    // Disable Prisma's prepared-statement reuse to prevent "prepared statement s0 already exists".
+    if (url.port === "6543" || url.hostname.includes(".pooler.supabase.com")) {
+      url.searchParams.set("pgbouncer", "true");
+      url.searchParams.set("statement_cache_size", "0");
+      if (!url.searchParams.has("connection_limit")) url.searchParams.set("connection_limit", "1");
+    }
+    return url.toString();
+  } catch {
+    return raw;
+  }
+}
+
+const basePrisma = globalForPrisma.prisma ?? new PrismaClient({
+  datasources: { db: { url: prismaDatabaseUrl() } },
+});
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = basePrisma;
