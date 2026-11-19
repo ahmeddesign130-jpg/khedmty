@@ -88,9 +88,9 @@ export default async function ServiceDetailsPage({
           select: { commissionRate: true },
         });
 
-        const commissionRate = settings?.commissionRate ?? 10;
+        const commissionRate = settings?.commissionRate ?? 100;
         const servicePrice = currentService.price;
-        const commission = Math.round((servicePrice * commissionRate) / 100);
+        const commission = commissionRate;
 
         const order = await tx.order.create({
           data: {
@@ -131,7 +131,7 @@ export default async function ServiceDetailsPage({
   });
 
   const commissionRate = commissionRateSetting?.commissionRate ?? 10;
-  const commission = Math.round((service.price * commissionRate) / 100);
+  const commission = commissionRate;
   const total = service.price + commission;
 
   return (
@@ -199,7 +199,7 @@ export default async function ServiceDetailsPage({
 
                 <div className="flex justify-between gap-3">
                   <span className="text-slate-300">
-                    عمولة المنصة ({commissionRate}%)
+                    عمولة المنصة الثابتة
                   </span>
                   <span className="font-bold">
                     {commission.toLocaleString("en-US")} EG
