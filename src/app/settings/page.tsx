@@ -70,7 +70,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         </section>
       </div>
       <section className="mt-7 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-        <span className="ui-icon-tile"><UiIcon name="user-round-pen" size={26}/></span>
+        <span className="ui-icon-tile"><UiIcon name="user-cog" size={26}/></span>
         <h2 className="mt-4 text-xl font-black text-[#14213d]">تعديل بيانات الحساب</h2>
         <p className="mt-2 text-sm leading-7 text-slate-500">حدّث اسم العرض ووسيلة التواصل والنبذة والمهارات.</p>
         <form action={updateProfile} className="mt-5 grid gap-4 sm:grid-cols-2">
