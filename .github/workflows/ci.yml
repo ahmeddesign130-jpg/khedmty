@@ -7,7 +7,8 @@ on:
       - main
       - "rebuild/**"
       - "fix/**"
-      - "audit/**"\n      - "feature/**"
+      - "audit/**"
+      - "feature/**"
   pull_request:
     branches: ["main"]
 
