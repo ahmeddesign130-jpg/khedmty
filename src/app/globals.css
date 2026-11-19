@@ -377,3 +377,39 @@ html[data-theme="dark"] .glassy-nav-icon {
 @media (prefers-reduced-motion: reduce) {
   .glassy-nav-tab, .glassy-nav-icon { transition: none !important; }
 }
+
+
+/* Stable side drawer positioning: avoid Tailwind translate utilities changing
+   direction semantics when the user switches between RTL and LTR. */
+.khedmty-side-drawer {
+  left: auto;
+  right: 0;
+  translate: none !important;
+  transform: translate3d(105%, 0, 0);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform .28s cubic-bezier(.2,.75,.25,1), visibility .28s;
+  z-index: 65;
+  overscroll-behavior: contain;
+}
+.khedmty-side-drawer[data-open="true"] {
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
+  pointer-events: auto;
+}
+.khedmty-menu-backdrop { z-index: 60; }
+html[data-locale="en"] .khedmty-side-drawer {
+  left: 0;
+  right: auto;
+  transform: translate3d(-105%, 0, 0);
+  border-left: 0;
+  border-right: 1px solid rgb(226 232 240 / 85%);
+}
+html[data-locale="en"] .khedmty-side-drawer[data-open="true"] {
+  transform: translate3d(0, 0, 0);
+}
+.khedmty-side-drawer button,
+.khedmty-side-drawer a { touch-action: manipulation; }
+@media (prefers-reduced-motion: reduce) {
+  .khedmty-side-drawer { transition: none !important; }
+}
