@@ -40,6 +40,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <PreferenceInitializer userId={user?.id ?? "guest"} />
         <Link href="/" aria-label="خِدمتي - الصفحة الرئيسية" className="khedmty-global-brand text-xl font-black leading-none tracking-normal sm:text-2xl">خِدمتي</Link>
         {children}
+        <footer className="site-creator-footer" dir="ltr" aria-label="Website creator">
+          <span>AHMED ZAKRAIA ALI</span>
+        </footer>
         <SideNavigation role={activeRole} userId={user?.id ?? "guest"} />
       </body>
     </html>
