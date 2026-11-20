@@ -43,6 +43,18 @@ async function reviewCustomerApplication(formData: FormData) {
     if (action === "APPROVE") {
       const changed = await tx.user.updateMany({ where: { id, role: "CUSTOMER", status: "ACTIVE" }, data: { role: "PROVIDER" } });
       if (changed.count !== 1) throw new Error("APPLICATION_REVIEW_CONFLICT");
+      const application = await tx.auditLog.findFirst({
+        where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
+        orderBy: { createdAt: "desc" },
+        select: { details: true },
+      });
+      const details = application?.details ? decryptProviderApplication(application.details) : null;
+      if (!details) throw new Error("APPLICATION_DATA_UNAVAILABLE");
+      await tx.profile.upsert({
+        where: { userId: id },
+        update: { displayName: details.fullName, phone: details.phone, bio: details.bio, skills: [details.profession] },
+        create: { userId: id, displayName: details.fullName, phone: details.phone, bio: details.bio, skills: [details.profession] },
+      });
     }
     await tx.auditLog.create({
       data: { actorId: admin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? reason : "تمت الموافقة على طلب التحويل إلى مقدم خدمة." },
