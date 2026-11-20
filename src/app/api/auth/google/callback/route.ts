@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 
     const email = profile.email.trim().toLowerCase();
     let user = await prisma.user.findUnique({ where: { email } });
-    if (!user && intent === "login") return fail(req, "google_account_required", "/register");
+    if (!user && intent === "login") return fail(req, "google_account_required", "/login");
     if (!user) {
       const passwordHash = await bcrypt.hash(randomBytes(48).toString("hex"), 12);
       try {
