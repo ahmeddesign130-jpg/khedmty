@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   return (
     <main dir="rtl" className="auth-v7-page flex min-h-screen items-center justify-center px-5 py-10">
-      <section className="auth-v7-card glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
+      <section className="auth-v7-card auth-readable glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
         <Link href="/" className="block text-center text-3xl font-black text-orange-600">خِدمتي</Link>
         <h1 className="mt-8 text-center text-3xl font-black text-white">تسجيل الدخول</h1>
         <p className="mt-3 text-center text-base leading-8 text-slate-300">كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.</p>
