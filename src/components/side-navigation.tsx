@@ -40,6 +40,25 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
   const drawerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    const updateAuthMenuPosition = () => {
+      const card = document.querySelector<HTMLElement>(".auth-v7-card");
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      document.documentElement.style.setProperty("--auth-menu-top", `${Math.max(8, rect.top + 8)}px`);
+      document.documentElement.style.setProperty("--auth-menu-right", `${Math.max(8, window.innerWidth - rect.right + 8)}px`);
+    };
+    updateAuthMenuPosition();
+    window.addEventListener("resize", updateAuthMenuPosition);
+    window.addEventListener("scroll", updateAuthMenuPosition, { passive: true });
+    return () => {
+      window.removeEventListener("resize", updateAuthMenuPosition);
+      window.removeEventListener("scroll", updateAuthMenuPosition);
+      document.documentElement.style.removeProperty("--auth-menu-top");
+      document.documentElement.style.removeProperty("--auth-menu-right");
+    };
+  }, [pathname]);
+
+  useEffect(() => {
     if (!open) return;
     closeRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
