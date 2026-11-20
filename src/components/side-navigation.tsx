@@ -26,6 +26,7 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
     { href: "/admin/services", label: "مراجعة الخدمات", icon: "badge-check" },
     { href: "/admin/orders", label: "الطلبات", icon: "clipboard-list" },
     { href: "/admin/payments", label: "المدفوعات", icon: "wallet" },
+    { href: "/admin/administrators", label: "إدارة المسؤولين", icon: "user-cog" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
 };
