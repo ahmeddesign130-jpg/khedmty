@@ -521,11 +521,19 @@ export function PreferenceInitializer({ userId }: { userId: string }) {
       apply();
     };
     apply();
-    const observer = new MutationObserver(() => translateDocument(locale));
+    let frame = 0;
+    const observer = new MutationObserver(() => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        translateDocument(locale);
+      });
+    });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     window.addEventListener("khedmty-preferences-change", refresh);
     return () => {
       observer.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
       window.removeEventListener("khedmty-preferences-change", refresh);
     };
   }, [userId]);
