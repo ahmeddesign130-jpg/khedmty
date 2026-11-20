@@ -9,8 +9,8 @@ const steps = [
 
 export default function HomePage() {
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f6f7fb] text-[#14213d]">
-      <header className="sticky top-0 z-20 border-b border-slate-100 bg-white/95 backdrop-blur">
+    <main dir="rtl" className="min-h-screen bg-[#f6f7fb] pt-[76px] text-[#14213d]">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 px-3 py-3 sm:gap-6 sm:px-5 sm:py-4">
           <Link href="/" aria-label="خِدمتي - الصفحة الرئيسية" className="brand-wordmark shrink-0 whitespace-nowrap text-[21px] font-black leading-none tracking-normal text-orange-600 sm:text-2xl">خِدمتي</Link>
           <nav className="flex shrink-0 items-center gap-2 sm:gap-4" aria-label="التنقل الرئيسي">
