@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { EscrowActions } from "@/components/escrow-actions";
 
 export const dynamic = "force-dynamic";
 const statusLabels:Record<string,string>={PENDING_PAYMENT:"في انتظار الدفع",PAYMENT_REVIEW:"الدفع قيد المراجعة",PAID:"تم تأكيد الدفع",IN_PROGRESS:"جاري تنفيذ الطلب",DELIVERED:"تم تسليم الخدمة",REVISION_REQUESTED:"مطلوب تعديل",COMPLETED:"مكتمل",CANCELLED:"ملغي",REJECTED:"مرفوض"};
@@ -38,7 +39,7 @@ async function updateOrder(formData:FormData) {
 export default async function OrderDetailsPage({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{payment?:string}>}) {
  const user=await getCurrentUser(); if(!user) redirect("/login");
  const {id}=await params; const query=await searchParams;
- const order=await prisma.order.findUnique({where:{id},include:{customer:{select:{id:true,displayName:true}},provider:{select:{id:true,displayName:true}},payments:{orderBy:{createdAt:"desc"}}}});
+ const order=await prisma.order.findUnique({where:{id},include:{customer:{select:{id:true,displayName:true}},provider:{select:{id:true,displayName:true}},payments:{orderBy:{createdAt:"desc"}},dispute:true}});
  if(!order) notFound();
  const isAdmin=user.role==="SUPER_ADMIN",isCustomer=order.customerId===user.id,isProvider=order.providerId===user.id;
  if(!isAdmin&&!isCustomer&&!isProvider) redirect("/account");
@@ -50,6 +51,7 @@ export default async function OrderDetailsPage({params,searchParams}:{params:Pro
  <div className="flex flex-wrap items-center justify-between gap-4"><h1 className="text-2xl font-black text-[#14213d]">تفاصيل الطلب</h1><span className="rounded-xl bg-orange-50 px-4 py-2 text-sm font-bold text-orange-700">{statusLabels[order.status]||order.status}</span></div>
  <div className="mt-7 rounded-2xl bg-slate-50 p-5"><p className="text-sm text-slate-500">رقم الطلب</p><p className="mt-2 text-xl font-black text-[#14213d]">{order.orderNo}</p></div>
  <div className="mt-6 grid gap-5 sm:grid-cols-2"><div><p className="text-sm text-slate-500">الخدمة</p><p className="mt-1 font-bold">{service?.title||"الخدمة"}</p>{isAdmin&&service&&<p className="mt-1 text-xs text-slate-500">رقم الخدمة: {service.serviceNo}</p>}</div><div><p className="text-sm text-slate-500">العميل</p><p className="mt-1 font-bold">{order.customer.displayName}</p></div><div><p className="text-sm text-slate-500">مقدم الخدمة</p><p className="mt-1 font-bold">{order.provider.displayName}</p></div>{isAdmin&&<div><p className="text-sm text-slate-500">وسيلة تواصل العميل (للإدارة فقط)</p><p className="mt-1 font-bold" dir="auto">{order.customerContact || "غير محددة"}</p></div>}</div>
+ <EscrowActions orderId={order.id} role={isAdmin?"SUPER_ADMIN":isProvider?"PROVIDER":"CUSTOMER"} orderStatus={order.status} escrowStatus={order.escrowStatus} dispute={order.dispute ? {reason:order.dispute.reason,status:order.dispute.status,adminNote:order.dispute.adminNote} : null} />
  <div className="mt-7 rounded-2xl bg-[#14213d] p-6 text-white"><h2 className="text-lg font-black">ملخص المبلغ</h2><div className="mt-5 space-y-4 text-sm"><div className="flex justify-between gap-3"><span className="text-slate-300">سعر الخدمة</span><span className="font-bold">{order.servicePrice.toLocaleString("en-US")} EG</span></div><div className="flex justify-between gap-3"><span className="text-slate-300">عمولة المنصة الثابتة</span><span className="font-bold">{order.commission.toLocaleString("en-US")} EG</span></div><div className="flex justify-between border-t border-white/20 pt-4"><span className="font-bold">الإجمالي</span><span className="text-2xl font-black text-orange-400">{order.total.toLocaleString("en-US")} EG</span></div></div></div>
  {latestPayment&&<div className="mt-6 rounded-2xl border border-slate-200 p-5"><h2 className="font-black text-[#14213d]">آخر عملية دفع</h2><p className="mt-3 text-sm text-slate-600">الحالة: {paymentLabels[latestPayment.status]||latestPayment.status}</p><p className="mt-2 text-sm text-slate-600">المبلغ: {latestPayment.amount.toLocaleString("en-US")} EG</p>{latestPayment.reviewNote&&<p className="mt-3 rounded-lg bg-orange-50 p-3 text-sm">{latestPayment.reviewNote}</p>}</div>}
  {isCustomer&&order.status==="PENDING_PAYMENT"&&<Link href={`/orders/${order.id}/payment`} className="mt-7 block rounded-xl bg-orange-500 px-6 py-4 text-center font-black text-white">الانتقال إلى الدفع</Link>}
