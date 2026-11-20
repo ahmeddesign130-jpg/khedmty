@@ -1831,3 +1831,49 @@ main :where(button) { font-size: 15px; }
   main :where(.text-sm) { font-size: 14px !important; }
   main :where(.text-base) { font-size: 16px !important; }
 }
+
+
+/* Menu icon palette: clear contrast in both appearances. */
+.khedmty-menu-trigger {
+  background: linear-gradient(135deg,#f47721 0%,#d9570b 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #f9a36b !important;
+}
+.khedmty-menu-trigger svg { color:#ffffff !important; stroke:#ffffff !important; }
+.khedmty-side-drawer .glassy-nav-icon {
+  color:#d85f12 !important;
+  background:#fff0e4 !important;
+  border:1px solid #ffd5b7 !important;
+}
+.khedmty-side-drawer .glassy-nav-icon svg { color:inherit !important; stroke:currentColor !important; }
+.khedmty-side-drawer .glassy-nav-tab.is-active .glassy-nav-icon {
+  color:#ffffff !important;
+  background:linear-gradient(135deg,#f47721,#d9570b) !important;
+  border-color:#f47721 !important;
+}
+.khedmty-side-drawer .ios-icon-glass {
+  color:#d85f12 !important;
+  background:#fff0e4 !important;
+  border-color:#ffd5b7 !important;
+}
+html[data-theme="dark"] .khedmty-menu-trigger {
+  background:linear-gradient(135deg,#ff9a43 0%,#e96313 100%) !important;
+  color:#101b2d !important;
+  border-color:#ffbd83 !important;
+}
+html[data-theme="dark"] .khedmty-menu-trigger svg { color:#101b2d !important; stroke:#101b2d !important; }
+html[data-theme="dark"] .khedmty-side-drawer .glassy-nav-icon {
+  color:#ffbd83 !important;
+  background:#38291f !important;
+  border-color:#75472c !important;
+}
+html[data-theme="dark"] .khedmty-side-drawer .glassy-nav-tab.is-active .glassy-nav-icon {
+  color:#ffffff !important;
+  background:linear-gradient(135deg,#f47721,#d9570b) !important;
+  border-color:#ffad70 !important;
+}
+html[data-theme="dark"] .khedmty-side-drawer .ios-icon-glass {
+  color:#ffbd83 !important;
+  background:#26344a !important;
+  border-color:#465873 !important;
+}
