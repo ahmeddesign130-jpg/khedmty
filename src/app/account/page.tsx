@@ -75,7 +75,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         </Link>
       </div>
       <section id="provider-application" className="mt-8 rounded-3xl border border-orange-100 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex items-start gap-3"><span className="ui-icon-tile"><UiIcon name="briefcase-business" size={25}/></span><div><h2 className="text-xl font-black text-[#14213d]">تغيير نوع الحساب إلى مقدم خدمة</h2><p className="mt-2 text-sm leading-7 text-slate-600">قدّم بياناتك مرة واحدة. سيظل حسابك كعميل حتى تراجع الإدارة الطلب وتوافق عليه.</p></div></div>
+        <div className="flex items-start gap-3"><span className="ui-icon-tile"><UiIcon name="briefcase" size={25}/></span><div><h2 className="text-xl font-black text-[#14213d]">تغيير نوع الحساب إلى مقدم خدمة</h2><p className="mt-2 text-sm leading-7 text-slate-600">قدّم بياناتك مرة واحدة. سيظل حسابك كعميل حتى تراجع الإدارة الطلب وتوافق عليه.</p></div></div>
         {rejection && <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-900"><h3 className="font-black">تم رفض طلبك السابق</h3><p className="mt-2 leading-7">سبب الرفض: {rejection}</p><p className="mt-2 text-sm">يمكنك تعديل بياناتك وإرسال طلب جديد.</p></div>}
         {applicationPending && <div role="status" className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 font-bold text-amber-900">طلبك قيد المراجعة حاليًا. سنُفعّل حساب مقدم الخدمة بعد موافقة الإدارة.</div>}
         {params.providerStatus === "pending" && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 font-bold text-green-800">تم إرسال طلبك بنجاح وهو الآن قيد المراجعة.</p>}
