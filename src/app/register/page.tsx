@@ -6,6 +6,7 @@ const errors: Record<string, string> = {
   exists: "هذا البريد مسجل بالفعل. جرّب تسجيل الدخول.",
   server: "تعذر إنشاء الحساب حاليًا. حاول مرة أخرى.",
   google_not_configured: "تسجيل Google يحتاج إكمال إعداداته أولًا.",
+  google_account_required: "الحساب ده مش مسجل في خِدمتي. أنشئ حسابك الأول بنفس بريد Google، وبعدها ارجع وسجّل الدخول.",
   google_failed: "تعذر إنشاء الحساب باستخدام Google. حاول مرة أخرى.",
   google_state: "انتهت جلسة Google أو لم تصل ملفات التحقق. جرّب مرة أخرى.",
   google_config: "إعدادات Google غير مكتملة في نسخة التجربة.",
