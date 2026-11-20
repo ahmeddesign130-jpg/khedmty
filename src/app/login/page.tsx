@@ -18,11 +18,11 @@ const errors: Record<string, string> = {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; registered?: string }> }) {
   const params = await searchParams;
   return (
-    <main dir="rtl" className="glass-auth-page flex min-h-screen items-center justify-center px-5 py-10">
-      <section className="glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
+    <main dir="rtl" className="auth-v7-page flex min-h-screen items-center justify-center px-5 py-10">
+      <section className="auth-v7-card glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
         <Link href="/" className="block text-center text-3xl font-black text-orange-600">خِدمتي</Link>
-        <h1 className="mt-8 text-center text-2xl font-black text-[#14213d]">تسجيل الدخول</h1>
-        <p className="mt-3 text-center text-sm leading-7 text-slate-500">كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.</p>
+        <h1 className="mt-8 text-center text-2xl font-black text-white">تسجيل الدخول</h1>
+        <p className="mt-3 text-center text-sm leading-7 text-slate-300">كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.</p>
         {params.registered === "1" && <p role="status" className="mt-5 rounded-xl bg-green-50 p-4 text-sm font-bold text-green-700">تم إنشاء حسابك بنجاح. سجّل الدخول الآن.</p>}
         {params.error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">{errors[params.error] || errors.server}</p>}
         <a href="/api/auth/google" className="group mt-7 flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
@@ -35,8 +35,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <div><label htmlFor="password" className="mb-2 block text-sm font-bold text-slate-700">كلمة المرور</label><input id="password" name="password" type="password" autoComplete="current-password" required placeholder="أدخل كلمة المرور" className="w-full px-4 py-3.5 text-left" dir="ltr"/></div>
           <button type="submit" className="w-full rounded-xl bg-orange-500 px-5 py-4 font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600">دخول</button>
         </form>
-        <p className="mt-7 text-center text-sm text-slate-600">ليس لديك حساب؟ <Link href="/register" className="font-black text-orange-600">إنشاء حساب</Link></p>
-        <Link href="/" className="mt-5 block text-center text-sm font-bold text-slate-500">العودة للرئيسية</Link>
+        <p className="mt-7 text-center text-sm text-slate-300">ليس لديك حساب؟ <Link href="/register" className="font-black text-orange-600">إنشاء حساب</Link></p>
+        <Link href="/" className="mt-5 block text-center text-sm font-bold text-slate-300">العودة للرئيسية</Link>
       </section>
     </main>
   );
