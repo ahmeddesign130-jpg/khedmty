@@ -10,7 +10,7 @@ const steps = [
 export default function HomePage() {
   return (
     <main dir="rtl" className="min-h-screen bg-[#f6f7fb] pt-[148px] text-[#14213d]">
-      <header className="home-nav-header fixed inset-x-0 top-[66px] z-40 px-3">
+      <header className="home-nav-header absolute inset-x-0 top-[66px] z-40 px-3">
         <nav className="home-nav-shell mx-auto flex w-full max-w-2xl items-center justify-center gap-1.5 rounded-2xl border border-white/80 p-2 shadow-lg backdrop-blur-xl sm:gap-3 sm:p-2.5" aria-label="التنقل الرئيسي">
           <Link href="/services" className="home-nav-link flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 py-2 text-center text-xs font-black sm:text-sm">تصفح الخدمات</Link>
           <Link href="/register" className="home-nav-link flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 py-2 text-center text-xs font-black sm:text-sm">إنشاء حساب</Link>
