@@ -28,6 +28,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (parsed.data.decision === "RELEASE_TO_PROVIDER" && order.escrowStatus === "HELD" && order.status !== "COMPLETED") {
       return NextResponse.json({ message: "لا يمكن صرف المستحقات قبل تأكيد استلام العميل أو حسم النزاع لصالح مقدم الخدمة." }, { status: 409 });
     }
+    if (parsed.data.decision === "REFUND_CUSTOMER" && order.escrowStatus !== "DISPUTED") {
+      return NextResponse.json({ message: "لا يمكن تسجيل رد المبلغ إلا بعد فتح نزاع ومراجعته." }, { status: 409 });
+    }
     if (order.escrowStatus === "DISPUTED" && !order.dispute) {
       return NextResponse.json({ message: "حالة النزاع غير مكتملة؛ أوقف التسوية وراجع السجلات." }, { status: 409 });
     }
