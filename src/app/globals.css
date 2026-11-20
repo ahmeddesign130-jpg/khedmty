@@ -1730,7 +1730,7 @@ html[data-theme="dark"] .site-creator-footer span {
 /* Final contrast system: keep dark panels readable without inverting their buttons. */
 :root { color-scheme: light; }
 html[data-theme="dark"] { color-scheme: dark; }
-html:not([data-theme="dark"]) main :where(.bg-white,.bg-slate-50,.bg-gray-50,.bg-slate-100,.bg-gray-100,.bg-\\[\\#f7f8fa\\],.bg-\\[\\#f6f7fb\\],.bg-\\[\\#f5f6f8\\]) :where(.text-white,[class*="text-slate-100"],[class*="text-slate-200"]) {
+html:not([data-theme="dark"]) main :where(.bg-white,.bg-slate-50,.bg-gray-50,.bg-slate-100,.bg-gray-100,.bg-\[\#f7f8fa\],.bg-\[\#f6f7fb\],.bg-\[\#f5f6f8\]) :where(.text-white,[class*="text-slate-100"],[class*="text-slate-200"]) {
   color:#243451 !important;
   -webkit-text-fill-color:#243451 !important;
 }
@@ -1739,7 +1739,7 @@ html[data-theme="dark"] main { color:#edf3fc; background-color:transparent !impo
 html[data-theme="dark"] main :where(h1,h2,h3,h4,h5,h6,p,span,label,small,strong,em,li,dt,dd) {
   text-shadow:none;
 }
-html[data-theme="dark"] main :where(.text-\\[\\#14213d\\],.text-slate-900,.text-slate-800,.text-slate-700,.text-gray-900,.text-gray-800,.text-gray-700,.text-slate-600,.text-gray-600) {
+html[data-theme="dark"] main :where(.text-\[\#14213d\],.text-slate-900,.text-slate-800,.text-slate-700,.text-gray-900,.text-gray-800,.text-gray-700,.text-slate-600,.text-gray-600) {
   color:#e8eef8 !important;
   -webkit-text-fill-color:#e8eef8 !important;
 }
@@ -1747,15 +1747,15 @@ html[data-theme="dark"] main :where(.text-slate-500,.text-gray-500,.text-slate-4
   color:#b5c1d3 !important;
   -webkit-text-fill-color:#b5c1d3 !important;
 }
-html[data-theme="dark"] main :where(.bg-white,.bg-slate-50,.bg-gray-50,.bg-slate-100,.bg-gray-100,.bg-\\[\\#f7f8fa\\],.bg-\\[\\#f6f7fb\\],.bg-\\[\\#f5f6f8\\]) {
+html[data-theme="dark"] main :where(.bg-white,.bg-slate-50,.bg-gray-50,.bg-slate-100,.bg-gray-100,.bg-\[\#f7f8fa\],.bg-\[\#f6f7fb\],.bg-\[\#f5f6f8\]) {
   background-color:#17243a !important;
   border-color:#354761 !important;
 }
-html[data-theme="dark"] main :where(.bg-\\[\\#14213d\\],.bg-slate-900,.bg-gray-900,.bg-slate-800,.bg-gray-800,.bg-\\[\\#101d35\\]) {
+html[data-theme="dark"] main :where(.bg-\[\#14213d\],.bg-slate-900,.bg-gray-900,.bg-slate-800,.bg-gray-800,.bg-\[\#101d35\]) {
   background-color:#101b2d !important;
   color:#f8fafc !important;
 }
-html[data-theme="dark"] main :where(.bg-\\[\\#14213d\\],.bg-slate-900,.bg-gray-900,.bg-slate-800,.bg-gray-800,.bg-\\[\\#101d35\\]) :where(h1,h2,h3,h4,p,span,label,small,strong,li,a:not([class*="bg-white"])) {
+html[data-theme="dark"] main :where(.bg-\[\#14213d\],.bg-slate-900,.bg-gray-900,.bg-slate-800,.bg-gray-800,.bg-\[\#101d35\]) :where(h1,h2,h3,h4,p,span,label,small,strong,li,a:not([class*="bg-white"])) {
   color:#f1f5fb !important;
   -webkit-text-fill-color:#f1f5fb !important;
 }
