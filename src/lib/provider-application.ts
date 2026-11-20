@@ -24,9 +24,8 @@ export function encryptProviderApplication(data: ProviderApplicationData) {
 
 export function decryptProviderApplication(value: string): ProviderApplicationData | null {
   try {
-    const [version, ivText, tagText, encryptedText] = value.split(":");
-    if (version !== "enc" || ivText !== "v1" || !tagText || !encryptedText) return null;
     const parts = value.split(":");
+    if (parts.length !== 5 || parts[0] !== "enc" || parts[1] !== "v1" || !parts[2] || !parts[3] || !parts[4]) return null;
     const iv = Buffer.from(parts[2], "base64url");
     const tag = Buffer.from(parts[3], "base64url");
     const ciphertext = Buffer.from(parts[4], "base64url");
