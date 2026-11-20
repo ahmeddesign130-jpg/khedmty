@@ -1641,3 +1641,25 @@ html[data-theme="dark"] .auth-readable :where(textarea)::placeholder {
   color:#64748b !important;
   -webkit-text-fill-color:#64748b !important;
 }
+
+
+/* Strong, legible Arabic typography for authentication screens. */
+.auth-readable {
+  font-family:"Alexandria","IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif !important;
+  font-weight:700 !important;
+  letter-spacing:0 !important;
+}
+.auth-readable :where(p,span,label,a,button,input,select,textarea) {
+  font-weight:700 !important;
+}
+.auth-readable :where(h1,h2,h3) {
+  font-weight:900 !important;
+  letter-spacing:-.025em !important;
+}
+.auth-readable :where(button,a) { font-weight:800 !important; }
+.auth-readable :where(input,select,textarea) { font-weight:700 !important; }
+.auth-readable :where(input,select,textarea)::placeholder { font-weight:600 !important; }
+.auth-readable :where(.text-sm) { font-size:15px !important; }
+.auth-readable :where(.text-base) { font-size:17px !important; }
+.auth-readable :where(.text-lg) { font-size:19px !important; }
+.auth-readable :where(.text-3xl) { font-size:32px !important; }
