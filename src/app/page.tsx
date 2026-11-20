@@ -9,15 +9,13 @@ const steps = [
 
 export default function HomePage() {
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f6f7fb] pt-[76px] text-[#14213d]">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 py-3 pr-[72px] pl-3 sm:gap-6 sm:pr-[76px] sm:pl-5 sm:py-4">
-          
-          <nav className="flex shrink-0 items-center gap-2 sm:gap-4" aria-label="التنقل الرئيسي">
-            <Link href="/login" className="whitespace-nowrap rounded-lg px-2 py-2 text-xs font-bold text-[#14213d] hover:bg-slate-50 sm:px-3 sm:text-sm">دخول</Link>
-            <Link href="/services" className="whitespace-nowrap rounded-xl bg-orange-500 px-3 py-2.5 text-xs font-black text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600 sm:px-5 sm:py-3 sm:text-sm">اكتشف الخدمات</Link>
-          </nav>
-        </div>
+    <main dir="rtl" className="min-h-screen bg-[#f6f7fb] pt-[148px] text-[#14213d]">
+      <header className="home-nav-header fixed inset-x-0 top-[66px] z-40 px-3">
+        <nav className="home-nav-shell mx-auto flex w-full max-w-2xl items-center justify-center gap-1.5 rounded-2xl border border-white/80 p-2 shadow-lg backdrop-blur-xl sm:gap-3 sm:p-2.5" aria-label="التنقل الرئيسي">
+          <Link href="/services" className="home-nav-link flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 py-2 text-center text-xs font-black sm:text-sm">تصفح الخدمات</Link>
+          <Link href="/register" className="home-nav-link flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 py-2 text-center text-xs font-black sm:text-sm">إنشاء حساب</Link>
+          <Link href="/login" className="home-nav-login flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 py-2 text-center text-xs font-black sm:text-sm">تسجيل</Link>
+        </nav>
       </header>
 
       <section className="relative isolate overflow-hidden">
@@ -79,7 +77,7 @@ export default function HomePage() {
           <Link href="/services" className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-500 px-7 py-3 font-black text-white transition hover:bg-orange-600">اكتشف الخدمات</Link>
         </div>
       </section>
-      <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500"><p>خِدمتي — مهارتك تستحق التميز</p><p className="mt-2 text-xs">© 2026 AHMED ZAKRAIA ALI — جميع الحقوق محفوظة.</p></footer>
+      <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500"><p>خِدمتي — مهارتك تستحق التميز</p><p className="mt-2 text-xs">© 2026 — جميع الحقوق محفوظة.</p></footer>
     </main>
   );
 }
