@@ -5,7 +5,7 @@ import { UiIcon } from "@/components/ui-icon";
 
 const management = [
   { title: "مقدمو الخدمات", description: "راجع طلبات الانضمام واعتمد الحسابات أو ارفضها.", href: "/admin/providers", icon: "users" as const, action: "إدارة مقدمي الخدمات", tag: "الحسابات" },
-  { title: "العملاء والحظر", description: "اعرض حسابات العملاء ومقدمي الخدمات وتحكم في الحظر وإعادة التفعيل.", href: "/admin/users", icon: "shield-ban" as const, action: "إدارة الحسابات", tag: "الحسابات" },
+  { title: "العملاء والحظر", description: "اعرض حسابات العملاء ومقدمي الخدمات وتحكم في الحظر وإعادة التفعيل.", href: "/admin/users", icon: "shield" as const, action: "إدارة الحسابات", tag: "الحسابات" },
   { title: "الخدمات", description: "افحص تفاصيل الخدمات والصور والأسعار قبل نشرها.", href: "/admin/services", icon: "badge-check" as const, action: "مراجعة الخدمات", tag: "المحتوى" },
   { title: "الطلبات", description: "تابع حالة الطلبات ومراحل تنفيذها بين الطرفين.", href: "/admin/orders", icon: "clipboard-list" as const, action: "فتح الطلبات", tag: "التشغيل" },
   { title: "المدفوعات", description: "راجع إثباتات التحويل وتأكد من المبالغ قبل الاعتماد.", href: "/admin/payments", icon: "wallet" as const, action: "مراجعة المدفوعات", tag: "المعاملات" },
@@ -35,7 +35,6 @@ export default async function AdminPage() {
           </div>
         </div>
       </header>
-
       <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
         <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#14213d] via-[#1c3153] to-[#263b5d] p-6 text-white shadow-xl sm:p-9">
           <div className="pointer-events-none absolute -left-12 -top-20 h-64 w-64 rounded-full bg-orange-400/10 blur-3xl"/>
@@ -51,7 +50,6 @@ export default async function AdminPage() {
             </div>
           </div>
         </section>
-
         <section className="mt-8">
           <div className="mb-4 flex items-end justify-between gap-3">
             <div><p className="text-xs font-extrabold tracking-wide text-orange-600">اختصارات سريعة</p><h2 className="mt-1 text-xl font-black text-[#14213d]">ابدأ من هنا</h2></div>
@@ -64,7 +62,6 @@ export default async function AdminPage() {
             </Link>)}
           </div>
         </section>
-
         <section className="mt-9">
           <div className="mb-4"><p className="text-xs font-extrabold tracking-wide text-orange-600">إدارة وتشغيل</p><h2 className="mt-1 text-xl font-black text-[#14213d]">أقسام لوحة التحكم</h2><p className="mt-1 text-sm leading-6 text-slate-500">اختر القسم المطلوب لإدارة تفاصيله ومراجعته.</p></div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -79,7 +76,6 @@ export default async function AdminPage() {
             </Link>)}
           </div>
         </section>
-
         <footer className="mt-9 flex flex-col justify-between gap-2 border-t border-slate-200 py-5 text-xs text-slate-500 sm:flex-row sm:items-center">
           <span>خِدمتي — مهارتك تستحق التميز</span><span>لوحة الإدارة · الإصدار الثاني</span>
         </footer>
