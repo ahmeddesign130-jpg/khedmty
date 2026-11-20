@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap");
+500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
 :root { --background:#f6f7fb; --foreground:#17233d; --primary:#f47721; --primary-dark:#df6415; --navy:#14213d; --muted:#68758b; --surface:#fff; --border:#e8ebf1; --radius:18px; }
@@ -1426,5 +1426,62 @@ html[data-theme="dark"] .auth-v7-card input::placeholder {
   .auth-v7-card * {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+
+/* Auth form contrast: dark card copy is always light; white form controls retain dark text. */
+.auth-v7-card,
+.auth-v7-card h1,
+.auth-v7-card h2,
+.auth-v7-card label,
+.auth-v7-card p,
+.auth-v7-card .text-slate-700,
+.auth-v7-card .text-slate-300,
+.auth-v7-card .text-slate-400,
+.auth-v7-card .text-gray-700 {
+  color: #f8fafc !important;
+}
+.auth-v7-card input:not([type="checkbox"]),
+.auth-v7-card select,
+.auth-v7-card textarea {
+  background-color: #fff !important;
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+  border-color: #cbd5e1 !important;
+}
+.auth-v7-card input::placeholder,
+.auth-v7-card textarea::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+  opacity: 1 !important;
+}
+.auth-v7-card select option {
+  background: #fff !important;
+  color: #172033 !important;
+}
+.auth-v7-card a[href^="/api/auth/google"] {
+  background: #202735 !important;
+  color: #fff !important;
+  border-color: #46536a !important;
+}
+.auth-v7-card a[href="/register"],
+.auth-v7-card a[href="/login"] { color: #ffc078 !important; }
+.auth-v7-card a[href="/"] { color: #d5dbe5 !important; }
+.auth-v7-card [role="alert"] { color: #991b1b !important; }
+.auth-v7-card [role="status"] { color: #166534 !important; }
+
+/* Faster first paint on phones: avoid remote font blocking, blur, and page-wide entrance animation. */
+html, body { font-family: Arial, Tahoma, "Noto Sans Arabic", sans-serif !important; }
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  html { scroll-behavior: auto; }
+  main > header, main > aside, main > section, main > footer,
+  main a[class*="rounded-2xl"], main a[class*="rounded-3xl"], main article {
+    animation: none !important;
+  }
+  .auth-v7-card, .glass-surface, .ios-icon-glass, .glassy-nav-icon,
+  .glassy-nav-tab, .khedmty-side-drawer {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 }
