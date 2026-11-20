@@ -17,7 +17,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
     include: { payments: { orderBy: { createdAt: "desc" } } },
   });
   if (!order || order.customerId !== user.id) notFound();
-  if (order.status !== "PENDING_PAYMENT") redirect(`/orders/${order.id}`);
+  if (order.status !== "PENDING_PAYMENT") redirect("/orders/" + order.id);
 
   // One receiving wallet for the platform. Customers may transfer from any bank,
   // wallet, or supported transfer app; the destination remains this wallet.
@@ -29,7 +29,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
       <header className="bg-[#14213d] px-5 py-5 text-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <Link href="/" className="text-2xl font-black text-orange-400">خِدمتي</Link>
-          <Link href={`/orders/${order.id}`} className="font-bold">تفاصيل الطلب</Link>
+          <Link href={"/orders/" + order.id} className="font-bold">تفاصيل الطلب</Link>
         </div>
       </header>
       <section className="mx-auto max-w-3xl px-5 py-10">
@@ -40,6 +40,9 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
             حوّل من أي بنك أو محفظة أو تطبيق تحويل يناسبك إلى محفظة خِدمتي الموضحة أدناه،
             ثم ارفع صورة إيصال التحويل. لن يبدأ تنفيذ الطلب إلا بعد مراجعة الإدارة والتأكد من وصول المبلغ كاملًا.
           </p>
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">
+            بعد اعتماد التحويل، سيُسجل إجمالي الطلب كرصيد محجوز محاسبيًا داخل خِدمتي فقط. لا يوجد حساب ضمان منفصل أو حفظ أموال لدى جهة مستقلة؛ ولا يُسجل الصرف اليدوي لمقدم الخدمة إلا بعد تأكيد استلامك أو حسم نزاع الإدارة.
+          </div>
 
           <div className="mt-7 rounded-2xl bg-[#14213d] p-6 text-white">
             <p className="text-sm text-slate-300">رقم الطلب</p>
