@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS public."Order" ADD COLUMN IF NOT EXISTS "customerContact" TEXT;

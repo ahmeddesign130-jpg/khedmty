@@ -1,7 +1,7 @@
 # Khedmty setup: Supabase Storage and database
 
 ## Adjustable commission
-The platform commission remains a percentage, not a fixed 100 EG amount. The administrator can change it at `/admin/settings` from 0 to 100 percent. New orders save a snapshot of the percentage and amount; existing orders are not recalculated.
+The platform commission is a fixed EG amount per order. The default is 100 EG and the administrator can change it at `/admin/settings` from 0 to 100,000 EG. New orders save a snapshot of the fee; existing orders are not recalculated.
 
 ## Supabase Storage setup
 1. Create a Supabase project.

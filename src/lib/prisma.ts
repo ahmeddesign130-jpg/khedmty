@@ -4,7 +4,27 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const basePrisma = globalForPrisma.prisma ?? new PrismaClient();
+function prismaDatabaseUrl() {
+  const raw = process.env.DATABASE_URL;
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    // Supabase transaction pooler (port 6543) runs in PgBouncer transaction mode.
+    // Disable Prisma's prepared-statement reuse to prevent "prepared statement s0 already exists".
+    if (url.port === "6543" || url.hostname.includes(".pooler.supabase.com")) {
+      url.searchParams.set("pgbouncer", "true");
+      url.searchParams.set("statement_cache_size", "0");
+      if (!url.searchParams.has("connection_limit")) url.searchParams.set("connection_limit", "1");
+    }
+    return url.toString();
+  } catch {
+    return raw;
+  }
+}
+
+const basePrisma = globalForPrisma.prisma ?? new PrismaClient({
+  datasources: { db: { url: prismaDatabaseUrl() } },
+});
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = basePrisma;
@@ -23,6 +43,28 @@ async function ensureCompatibilitySchema() {
       );
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Service"
+         ADD COLUMN IF NOT EXISTS "price" INTEGER NOT NULL DEFAULT 0`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ADD COLUMN IF NOT EXISTS "orderNo" TEXT`
+      );
+      // Backfill order numbers for legacy rows without changing existing values.
+      await basePrisma.$executeRawUnsafe(
+        `UPDATE public."Order"
+         SET "orderNo" = 'KH-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 16))
+         WHERE "orderNo" IS NULL`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Order_orderNo_key"
+         ON public."Order" ("orderNo")`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ALTER COLUMN "orderNo" SET NOT NULL`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "mediaUrls" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`
       );
       await basePrisma.$executeRawUnsafe(
@@ -33,6 +75,10 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "serviceNo" TEXT`
       );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ADD COLUMN IF NOT EXISTS "customerContact" TEXT`
+      );
       // Backfill only missing numbers. Existing service numbers are preserved.
       await basePrisma.$executeRawUnsafe(
         `UPDATE public."Service"
@@ -42,6 +88,10 @@ async function ensureCompatibilitySchema() {
       await basePrisma.$executeRawUnsafe(
         `CREATE UNIQUE INDEX IF NOT EXISTS "Service_serviceNo_key"
          ON public."Service" ("serviceNo")`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Service"
+         ALTER COLUMN "serviceNo" SET NOT NULL`
       );
     })().catch((error) => {
       compatibilitySchemaPromise = undefined;

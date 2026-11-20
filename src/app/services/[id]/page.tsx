@@ -7,10 +7,13 @@ export const dynamic = "force-dynamic";
 
 export default async function ServiceDetailsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const query = await searchParams;
   const viewer = await getCurrentUser();
   if (!viewer) redirect("/login");
   if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
@@ -32,7 +35,7 @@ export default async function ServiceDetailsPage({
     notFound();
   }
 
-  async function createOrder() {
+  async function createOrder(formData: FormData) {
     "use server";
 
     const user = await getCurrentUser();
@@ -43,10 +46,21 @@ export default async function ServiceDetailsPage({
       redirect("/account");
     }
 
+    const customerContact = String(formData.get("customerContact") || "").trim();
+    if (customerContact.length < 5 || customerContact.length > 160) {
+      redirect(`/services/${id}?error=contact`);
+    }
+
     let orderId: string;
 
     try {
       orderId = await prisma.$transaction(async (tx) => {
+        const [completedCount, activeCount] = await Promise.all([
+          tx.order.count({ where: { customerId: user.id, status: "COMPLETED" } }),
+          tx.order.count({ where: { customerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED", "REJECTED"] } } }),
+        ]);
+        const capacity = 5 + Math.floor(completedCount / 5) * 5;
+        if (activeCount >= capacity) throw new Error("ORDER_CAPACITY_REACHED");
         // Re-read all purchase-critical data together so the order uses
         // the current approved service, active provider, and commission.
         const currentService = await tx.service.findUnique({
@@ -74,9 +88,9 @@ export default async function ServiceDetailsPage({
           select: { commissionRate: true },
         });
 
-        const commissionRate = settings?.commissionRate ?? 10;
+        const commissionRate = settings?.commissionRate ?? 100;
         const servicePrice = currentService.price;
-        const commission = Math.round((servicePrice * commissionRate) / 100);
+        const commission = commissionRate;
 
         const order = await tx.order.create({
           data: {
@@ -85,6 +99,7 @@ export default async function ServiceDetailsPage({
               .toUpperCase()}`,
             serviceId: currentService.id,
             customerId: user.id,
+            customerContact,
             providerId: currentService.providerId,
             servicePrice,
             commissionRate,
@@ -96,8 +111,11 @@ export default async function ServiceDetailsPage({
         });
 
         return order.id;
-      });
+      }, { isolationLevel: "Serializable" });
     } catch (error) {
+      if (error instanceof Error && error.message === "ORDER_CAPACITY_REACHED") {
+        redirect(`/services/${id}?error=capacity`);
+      }
       if (error instanceof Error && error.message === "SERVICE_NOT_AVAILABLE") {
         redirect("/services");
       }
@@ -112,8 +130,8 @@ export default async function ServiceDetailsPage({
     select: { commissionRate: true },
   });
 
-  const commissionRate = commissionRateSetting?.commissionRate ?? 10;
-  const commission = Math.round((service.price * commissionRate) / 100);
+  const commissionRate = commissionRateSetting?.commissionRate ?? 100;
+  const commission = commissionRate;
   const total = service.price + commission;
 
   return (
@@ -139,13 +157,10 @@ export default async function ServiceDetailsPage({
 
         <article className="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm">
           <div className="grid gap-2 bg-slate-100 sm:grid-cols-2">
-            {service.mediaUrls.length ? service.mediaUrls.map((url,index)=> /\.(mp4|webm|mov)(\?|$)/i.test(url) ? <video key={url} src={url} controls className="max-h-[420px] w-full bg-black object-contain"/> : <img key={url} src={url} alt={`${service.title} - ${index+1}`} className="max-h-[420px] w-full object-contain"/>) : <div className="flex h-44 items-center justify-center text-slate-400">لا توجد صور مرفقة</div>}
+            {service.mediaUrls.length ? service.mediaUrls.map((url,index)=> /\.(mp4|webm|mov)(\?|$)/i.test(url) ? <video key={url} src={url} aria-label={`فيديو ${service.title} رقم ${index+1}`} controls preload="none" playsInline className="max-h-[420px] w-full bg-black object-contain"/> : <img key={url} src={url} alt={`${service.title} - ${index+1}`} loading={index === 0 ? "eager" : "lazy"} decoding="async" fetchPriority={index === 0 ? "high" : "low"} className="max-h-[420px] w-full object-contain"/>) : <div className="flex h-44 items-center justify-center text-slate-400">لا توجد صور مرفقة</div>}
           </div>
 
           <div className="p-6 md:p-10">
-            <span className="rounded-lg bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700">
-              رقم الخدمة: {service.serviceNo}
-            </span>
 
             <h1 className="mt-5 text-3xl font-black text-[#14213d]">
               {service.title}
@@ -160,14 +175,7 @@ export default async function ServiceDetailsPage({
               </p>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-100 p-5">
-              <p className="text-sm text-slate-500">
-                مقدم الخدمة
-              </p>
-              <p className="mt-2 text-lg font-black text-[#14213d]">
-                {service.provider.displayName}
-              </p>
-            </div>
+            <div className="mt-6 rounded-2xl border border-slate-100 p-5"><p className="text-sm text-slate-500">مقدم الخدمة</p><p className="mt-2 text-lg font-black text-[#14213d]">{service.provider.displayName}</p></div>
 
             <div className="mt-6 rounded-2xl bg-[#14213d] p-6 text-white">
               <h2 className="text-xl font-black">
@@ -184,7 +192,7 @@ export default async function ServiceDetailsPage({
 
                 <div className="flex justify-between gap-3">
                   <span className="text-slate-300">
-                    عمولة المنصة ({commissionRate}%)
+                    عمولة المنصة الثابتة
                   </span>
                   <span className="font-bold">
                     {commission.toLocaleString("en-US")} EG
@@ -201,7 +209,12 @@ export default async function ServiceDetailsPage({
                 </div>
               </div>
 
+              {query.error === "contact" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">اكتب وسيلة تواصل صحيحة قبل إنشاء الطلب.</p>}
+              {query.error === "capacity" && <p role="alert" className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">اكتملت الأماكن المتاحة لطلباتك. أكمل طلبًا جاريًا أولًا حتى يتوفر مكان جديد.</p>}
               <form action={createOrder}>
+                <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
+                  <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
+                </label>
                 <button
                   type="submit"
                   className="mt-7 w-full rounded-xl bg-orange-500 px-6 py-4 font-black text-white transition hover:bg-orange-600"
@@ -211,7 +224,7 @@ export default async function ServiceDetailsPage({
               </form>
 
               <p className="mt-4 text-center text-xs leading-6 text-slate-300">
-                لن يتم اعتماد الدفع إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ.
+                لن يتم اعتماد الدفع إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ. لا يبدأ التواصل مع مقدم الخدمة إلا بعد تأكيد الدفع.
               </p>
             </div>
           </div>

@@ -5,17 +5,24 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function ServicesPage() {
+export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const query = await searchParams;
+  const searchTerm = (query.q || "").trim().slice(0, 80);
   const viewer = await getCurrentUser();
   if (!viewer) redirect("/login");
   if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
     redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");
   }
   const services = await prisma.service.findMany({
-    where: { status: "APPROVED" },
+    where: {
+      status: "APPROVED",
+      ...(searchTerm ? { OR: [
+        { title: { contains: searchTerm, mode: "insensitive" as const } },
+        { description: { contains: searchTerm, mode: "insensitive" as const } },
+      ] } : {}),
+    },
     select: {
       id: true,
-      serviceNo: true,
       title: true,
       description: true,
       price: true,
@@ -39,14 +46,7 @@ export default async function ServicesPage() {
             خِدمتي
           </Link>
 
-          <div className="flex gap-4 text-sm font-bold">
-            <Link href="/login" className="hover:text-orange-400">
-              تسجيل الدخول
-            </Link>
-            <Link href="/register" className="hover:text-orange-400">
-              إنشاء حساب
-            </Link>
-          </div>
+
         </div>
       </header>
 
@@ -61,12 +61,18 @@ export default async function ServicesPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl leading-8 text-slate-300">
-            اختار الخدمة المناسبة لك وتواصل مع مقدمها لبدء تنفيذ مشروعك.
+            اختَر الخدمة واطلبها من خلال خِدمتي، وتابع التنفيذ والتسليم بأمان من حسابك.
           </p>
 
-          <div className="mt-7 inline-flex rounded-xl bg-white/10 px-5 py-3">
+          <form action="/services" method="GET" className="mt-7 flex max-w-2xl flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 sm:flex-row">
+            <label htmlFor="serviceSearch" className="sr-only">اكتب اسم الخدمة أو المجال اللي محتاجه — مثل تصميم أو مونتاج — وهتلاقي الخيارات المتاحة.</label>
+            <input id="serviceSearch" name="q" defaultValue={searchTerm} placeholder="مثال: صنع فيديو، تصميم شعار، كتابة محتوى..." dir="rtl" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-4 py-3 text-right font-semibold text-[#14213d] outline-none placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-300" />
+            <button type="submit" className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 font-black text-white shadow-lg transition hover:bg-orange-400">اعثر على الخدمة</button>
+            {searchTerm && <Link href="/services" className="inline-flex items-center justify-center rounded-xl border border-white/30 px-4 py-3 font-bold text-white">عرض كل الخدمات</Link>}
+          </form>
+          <div className="mt-4 inline-flex rounded-xl bg-white/10 px-5 py-3">
             <span className="font-bold">
-              {services.length} خدمة متاحة
+              {services.length.toLocaleString("en-US")} {searchTerm ? "نتيجة بحث" : "خدمة متاحة"}
             </span>
           </div>
         </div>
@@ -77,10 +83,10 @@ export default async function ServicesPage() {
           <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
             <div className="text-4xl">✦</div>
             <h2 className="mt-4 text-xl font-black text-[#14213d]">
-              لا توجد خدمات متاحة حاليًا
+              {searchTerm ? `لم نعثر على خدمة باسم أو وصف يحتوي على «${searchTerm}».` : "لا توجد خدمات متاحة حاليًا"}
             </h2>
             <p className="mt-3 text-gray-500">
-              نعمل على إضافة خدمات جديدة قريبًا.
+              {searchTerm ? "جرّب كلمات بحث أخرى مثل صنع فيديو أو تصميم شعار." : "نعمل على إضافة خدمات جديدة قريبًا."}
             </p>
             <Link
               href="/"
@@ -97,7 +103,7 @@ export default async function ServicesPage() {
                 className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
                 <div className="h-48 overflow-hidden bg-slate-100">
-                  {service.mediaUrls[0] ? ( /\.(mp4|webm|mov)(\?|$)/i.test(service.mediaUrls[0]) ? <video src={service.mediaUrls[0]} controls className="h-full w-full object-cover"/> : <img src={service.mediaUrls[0]} alt={service.title} className="h-full w-full object-cover"/>) : <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400">لا توجد صورة للخدمة</div>}
+                  {service.mediaUrls[0] ? ( /\.(mp4|webm|mov)(\?|$)/i.test(service.mediaUrls[0]) ? <video src={service.mediaUrls[0]} aria-label={`معاينة فيديو الخدمة: ${service.title}`} controls preload="none" playsInline className="h-full w-full object-cover"/> : <img src={service.mediaUrls[0]} alt={service.title} loading="lazy" decoding="async" fetchPriority="low" className="h-full w-full object-cover"/>) : <div className="flex h-full items-center justify-center text-sm font-bold text-slate-400">لا توجد صورة للخدمة</div>}
                 </div>
 
                 <div className="p-5">
@@ -106,9 +112,6 @@ export default async function ServicesPage() {
                       {service.title}
                     </h2>
 
-                    <span className="shrink-0 rounded-lg bg-orange-50 px-2 py-1 text-xs font-bold text-orange-700">
-                      #{service.serviceNo}
-                    </span>
                   </div>
 
                   <p className="mt-3 min-h-20 whitespace-pre-wrap text-sm leading-7 text-gray-500">
@@ -121,9 +124,7 @@ export default async function ServicesPage() {
                     <p className="text-xs text-gray-400">
                       مقدم الخدمة
                     </p>
-                    <p className="mt-1 font-bold text-gray-700">
-                      {service.provider.displayName}
-                    </p>
+                    <p className="mt-1 font-bold text-gray-700">{service.provider.displayName}</p>
                   </div>
 
                   <div className="mt-5 flex items-center justify-between gap-3">
@@ -140,7 +141,7 @@ export default async function ServicesPage() {
                       href={`/services/${service.id}`}
                       className="rounded-xl bg-[#14213d] px-4 py-3 text-sm font-bold text-white transition hover:bg-orange-500"
                     >
-                      عرض الخدمة
+                      اطلب الخدمة
                     </Link>
                   </div>
                 </div>

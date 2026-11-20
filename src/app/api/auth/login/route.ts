@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (user.role === "SUPER_ADMIN") return redirect303(req, "/admin");
     if (user.role === "PROVIDER" && user.status === "PENDING") return redirect303(req, "/pending");
     if (user.role === "PROVIDER") return redirect303(req, "/provider");
-    return redirect303(req, "/account");
+    return redirect303(req, "/services");
   } catch (error) {
     console.error("Login error:", error);
     return redirect303(req, "/login?error=server");

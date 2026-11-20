@@ -44,6 +44,12 @@ export default async function AdminOrdersPage() {
     },
   });
 
+  const serviceRecords = await prisma.service.findMany({
+    where: { id: { in: [...new Set(orders.map((order) => order.serviceId))] } },
+    select: { id: true, title: true, serviceNo: true },
+  });
+  const serviceById = new Map(serviceRecords.map((service) => [service.id, service]));
+
   const money = (amount: number) =>
     `${amount.toLocaleString("en-US")} EG`;
 
@@ -127,6 +133,11 @@ export default async function AdminOrdersPage() {
 
                 <div className="grid gap-5 py-5 md:grid-cols-2">
                   <div>
+                    <p className="mb-2 text-sm font-bold text-slate-800">الخدمة</p>
+                    <p className="text-sm text-slate-600">{serviceById.get(order.serviceId)?.title || "الخدمة"}</p>
+                    <p className="mt-1 text-xs text-slate-400">رقم الخدمة للإدارة: {serviceById.get(order.serviceId)?.serviceNo || "غير متاح"}</p>
+                  </div>
+                  <div>
                     <p className="mb-2 text-sm font-bold text-slate-800">
                       بيانات العميل
                     </p>
@@ -136,6 +147,7 @@ export default async function AdminOrdersPage() {
                     <p className="text-xs text-slate-400">
                       {order.customer.email}
                     </p>
+                    <p className="mt-2 text-sm text-slate-600" dir="auto">وسيلة التواصل: {order.customerContact || "غير محددة"}</p>
                   </div>
 
                   <div>
