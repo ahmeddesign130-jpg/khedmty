@@ -1080,13 +1080,15 @@ html[data-locale="en"] .khedmty-menu-trigger {
 .auth-v7-card p { color:#cbd0d8; }
 .auth-v7-card input:not([type="checkbox"]),.auth-v7-card select {
   min-height:48px;
-  border:1px solid rgba(255,255,255,.17) !important;
+  border:1px solid rgba(255,255,255,.58) !important;
   border-radius:12px !important;
-  background:rgba(255,255,255,.075) !important;
-  color:#fff !important;
-  box-shadow:inset 0 1px 3px rgba(0,0,0,.12);
+  background:rgba(255,255,255,.96) !important;
+  color:#242833 !important;
+  caret-color:#bd642d;
+  box-shadow:inset 0 1px 3px rgba(20,25,35,.06);
 }
-.auth-v7-card input::placeholder { color:rgba(226,232,240,.52); }
+.auth-v7-card input::placeholder { color:#737985 !important; opacity:1; }
+.auth-v7-card select option { color:#242833; background:#fff; }
 .auth-v7-card input:focus,.auth-v7-card select:focus {
   border-color:#f4b928 !important;
   box-shadow:0 0 0 3px rgba(244,185,40,.16) !important;
