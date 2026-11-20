@@ -1571,3 +1571,73 @@ html[data-theme="dark"] .auth-v7-card a[href^="/api/auth/google"] span { color:#
 html[data-theme="dark"] .auth-v7-card a[href="/register"],
 html[data-theme="dark"] .auth-v7-card a[href="/login"],
 html[data-theme="dark"] .auth-v7-card a[href="/"] { color:#ffb477 !important; }
+
+
+/* Definitive auth readability layer: overrides legacy conflicting theme rules. */
+.auth-readable {
+  background:#ffffff !important;
+  color:#17233d !important;
+  border:1px solid #d8e0ec !important;
+}
+.auth-readable :where(h1,h2,h3,label,p,small,li,div,span) {
+  color:#263650 !important;
+  opacity:1 !important;
+  -webkit-text-fill-color:currentColor !important;
+}
+.auth-readable :where(label) { font-size:15px !important; font-weight:800 !important; }
+.auth-readable :where(h1) { color:#17233d !important; font-size:clamp(25px,6vw,32px) !important; font-weight:900 !important; }
+.auth-readable :where(p) { color:#45546b !important; font-size:15px !important; line-height:1.9 !important; }
+.auth-readable :where(a[href^="/api/auth/google"]) {
+  background:#f8fafc !important;
+  color:#17233d !important;
+  border:1px solid #cbd5e1 !important;
+}
+.auth-readable :where(a[href^="/api/auth/google"] span) { color:#17233d !important; }
+.auth-readable :where(a[href="/register"],a[href="/login"],a[href="/"]) {
+  color:#c6530c !important;
+  font-weight:800 !important;
+}
+.auth-readable :where(input:not([type="checkbox"]),select,textarea) {
+  background:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border:1px solid #b8c4d5 !important;
+  font-size:16px !important;
+}
+.auth-readable :where(input)::placeholder,
+.auth-readable :where(textarea)::placeholder {
+  color:#64748b !important;
+  -webkit-text-fill-color:#64748b !important;
+  opacity:1 !important;
+}
+.auth-readable :where(button[type="submit"]) { color:#ffffff !important; }
+.auth-readable :where([role="alert"]) { color:#991b1b !important; }
+.auth-readable :where([role="status"]) { color:#166534 !important; }
+html[data-theme="dark"] .auth-readable {
+  background:#17243a !important;
+  color:#f8fafc !important;
+  border-color:#40516b !important;
+}
+html[data-theme="dark"] .auth-readable :where(h1,h2,h3,label,p,small,li,div,span) {
+  color:#edf3fc !important;
+  -webkit-text-fill-color:currentColor !important;
+}
+html[data-theme="dark"] .auth-readable :where(p) { color:#cbd6e6 !important; }
+html[data-theme="dark"] .auth-readable :where(a[href^="/api/auth/google"]) {
+  background:#ffffff !important;
+  color:#17233d !important;
+  border-color:#d7dfeb !important;
+}
+html[data-theme="dark"] .auth-readable :where(a[href^="/api/auth/google"] span) { color:#17233d !important; }
+html[data-theme="dark"] .auth-readable :where(a[href="/register"],a[href="/login"],a[href="/"]) { color:#ffbd83 !important; }
+html[data-theme="dark"] .auth-readable :where(input:not([type="checkbox"]),select,textarea) {
+  background:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border-color:#aab8ca !important;
+}
+html[data-theme="dark"] .auth-readable :where(input)::placeholder,
+html[data-theme="dark"] .auth-readable :where(textarea)::placeholder {
+  color:#64748b !important;
+  -webkit-text-fill-color:#64748b !important;
+}
