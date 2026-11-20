@@ -175,7 +175,7 @@ export default async function ServiceDetailsPage({
               </p>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-100 p-5"><p className="text-sm text-slate-500">مقدم الخدمة</p><p className="mt-2 text-lg font-black text-[#14213d]">{service.provider.displayName}</p></div>      </Link>
+            <div className="mt-6 rounded-2xl border border-slate-100 p-5"><p className="text-sm text-slate-500">مقدم الخدمة</p><p className="mt-2 text-lg font-black text-[#14213d]">{service.provider.displayName}</p></div>
 
             <div className="mt-6 rounded-2xl bg-[#14213d] p-6 text-white">
               <h2 className="text-xl font-black">
