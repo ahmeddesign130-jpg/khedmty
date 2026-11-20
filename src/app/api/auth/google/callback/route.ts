@@ -13,9 +13,9 @@ function googleRedirectUri(req: NextRequest) {
   return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
 }
 
-function fail(req: NextRequest, code: string) {
-  const response = NextResponse.redirect(new URL("/login?error=" + code, req.url));
-  for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role"]) {
+function fail(req: NextRequest, code: string, destination: "/login" | "/register" = "/login") {
+  const response = NextResponse.redirect(new URL(destination + "?error=" + code, req.url));
+  for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent"]) {
     response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
   }
   return response;
@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     const savedState = req.cookies.get("khedmty_google_state")?.value;
     const verifier = req.cookies.get("khedmty_google_verifier")?.value;
     const requestedRole = req.cookies.get("khedmty_google_role")?.value === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
+    const intent = req.cookies.get("khedmty_google_intent")?.value === "login" ? "login" : "register";
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = googleRedirectUri(req);
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest) {
 
     const email = profile.email.trim().toLowerCase();
     let user = await prisma.user.findUnique({ where: { email } });
+    if (!user && intent === "login") return fail(req, "google_account_required", "/register");
     if (!user) {
       const passwordHash = await bcrypt.hash(randomBytes(48).toString("hex"), 12);
       try {
@@ -87,7 +89,7 @@ export async function GET(req: NextRequest) {
       : user.role === "PROVIDER" && user.status === "PENDING" ? "/pending"
       : user.role === "PROVIDER" ? "/provider" : "/services";
     const response = NextResponse.redirect(new URL(destination, req.url));
-    for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role"]) {
+    for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent"]) {
       response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
     }
     return response;
