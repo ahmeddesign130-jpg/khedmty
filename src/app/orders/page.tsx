@@ -44,7 +44,7 @@ export default async function OrdersPage() {
       </section>
       {orders.length === 0 ? <section className="mt-8 rounded-2xl bg-white p-10 text-center shadow-sm">
         <h2 className="text-xl font-bold">لسه ما طلبتش خدمة؟ ابدأ باكتشاف الخدمات المناسبة ليك.</h2>
-        <a href="/services" className="mt-5 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-600 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">تصفح الخدمات</a>
+        <Link href="/services" className="mt-5 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-600 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">تصفح الخدمات</Link>
       </section> : <div className="mt-7 space-y-4">{orders.map(order => <article key={order.id} className="rounded-2xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3"><div><strong>{order.orderNo}</strong><p className="mt-1 text-sm text-slate-500">{serviceTitles.get(order.serviceId) || "الخدمة"}</p><p className="mt-1 text-xs text-slate-400">{order.createdAt.toLocaleDateString("en-GB")}</p></div><span className="rounded-full bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700">{labels[order.status] || order.status}</span></div>
         <p className="mt-4 text-sm text-slate-500">الإجمالي</p><p className="mt-1 text-xl font-black text-orange-600">{order.total.toLocaleString("en-US")} EG</p>
