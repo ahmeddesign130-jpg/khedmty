@@ -82,7 +82,7 @@ export default async function AdminProvidersPage() {
   }) : [];
   const latestReviews = new Map<string, typeof reviews[number]>();
   for (const review of reviews) if (!latestReviews.has(review.targetId)) latestReviews.set(review.targetId, review);
-  const pendingApplications = [...latestSubmissions.values()].filter((item) => !latestReviews.has(item.targetId));
+  const pendingApplications = [...latestSubmissions.values()].filter((item) => { const review = latestReviews.get(item.targetId); return !review || review.createdAt < item.createdAt; });
   const applicants = pendingApplications.map((item) => ({
     ...item,
     data: item.details ? decryptProviderApplication(item.details) : null,
