@@ -1128,12 +1128,12 @@ html[data-locale="en"] .khedmty-menu-trigger {
 
 /* Keep the public brand header pinned while the page scrolls. */
 body:has(.auth-v7-page) .khedmty-menu-trigger {
-  right: max(20px, calc(50% - 220px + 10px)) !important;
+  right: var(--auth-menu-right, 20px) !important;
   left: auto !important;
-  top: max(12px, env(safe-area-inset-top)) !important;
+  top: var(--auth-menu-top, 12px) !important;
   z-index: 75 !important;
 }
 html[data-locale="en"] body:has(.auth-v7-page) .khedmty-menu-trigger {
-  left: max(20px, calc(50% - 220px + 10px)) !important;
+  left: var(--auth-menu-right, 20px) !important;
   right: auto !important;
 }
