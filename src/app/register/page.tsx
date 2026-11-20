@@ -48,6 +48,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
         </form>
         <p className="mt-7 text-center text-base text-slate-600">لديك حساب بالفعل؟ <Link href="/login" className="font-black text-orange-600">تسجيل الدخول</Link></p>
         <Link href="/" className="mt-5 block text-center text-base font-bold text-slate-600">العودة للرئيسية</Link>
+        <p className="mt-8 border-t border-slate-200/70 pt-5 text-center text-xs font-extrabold tracking-[0.16em] text-slate-500">AHMED ZAKRAIA ALI</p>
       </section>
     </main>
   );
