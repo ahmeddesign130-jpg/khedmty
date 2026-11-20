@@ -35,6 +35,8 @@ enum OrderStatus {
   DELIVERED
   REVISION_REQUESTED
   COMPLETED
+  DISPUTED
+  REFUNDED
   CANCELLED
   REJECTED
 }
@@ -43,6 +45,31 @@ enum PaymentStatus {
   PENDING_REVIEW
   APPROVED
   REJECTED
+}
+
+enum EscrowStatus {
+  HELD
+  RELEASED
+  REFUNDED
+  DISPUTED
+}
+
+enum EscrowLedgerType {
+  HOLD
+  PROVIDER_RELEASE
+  PLATFORM_FEE
+  CUSTOMER_REFUND
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+}
+
+enum DisputeResolution {
+  RELEASE_TO_PROVIDER
+  REFUND_CUSTOMER
 }
 
 model User {
@@ -91,22 +118,25 @@ model Service {
 }
 
 model Order {
-  id             String      @id @default(cuid())
-  orderNo        String      @unique
-  serviceId      String
-  customerId     String
-  customerContact String?    @db.Text
-  providerId     String
-  servicePrice   Int
-  commissionRate Int         @default(100)
-  commission     Int
-  total          Int
-  status         OrderStatus @default(PENDING_PAYMENT)
+  id              String      @id @default(cuid())
+  orderNo         String      @unique
+  serviceId       String
+  customerId      String
+  customerContact String?     @db.Text
+  providerId      String
+  servicePrice    Int
+  commissionRate  Int         @default(100)
+  commission      Int
+  total           Int
+  status          OrderStatus @default(PENDING_PAYMENT)
 
-  customer  User      @relation("CustomerOrders", fields: [customerId], references: [id])
-  provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
-  payments  Payment[]
-  createdAt DateTime  @default(now())
+  customer           User                 @relation("CustomerOrders", fields: [customerId], references: [id])
+  provider           User                 @relation("ProviderOrders", fields: [providerId], references: [id])
+  payments           Payment[]
+  escrow             OrderEscrow?
+  dispute            OrderDispute?
+  escrowLedgerEntries EscrowLedgerEntry[]
+  createdAt          DateTime             @default(now())
 }
 
 model Payment {
@@ -119,8 +149,64 @@ model Payment {
   reviewNote  String?
   reviewedAt  DateTime?
 
-  order     Order    @relation(fields: [orderId], references: [id])
-  createdAt DateTime @default(now())
+  order     Order        @relation(fields: [orderId], references: [id])
+  escrow    OrderEscrow?
+  createdAt DateTime     @default(now())
+}
+
+model OrderEscrow {
+  id                String       @id @default(cuid())
+  orderId           String       @unique
+  paymentId         String       @unique
+  amount            Int
+  providerAmount    Int
+  platformFee       Int
+  status            EscrowStatus @default(HELD)
+  resolutionNote    String?      @db.Text
+  externalReference String?
+  resolvedById      String?
+  resolvedAt        DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  order         Order               @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  payment       Payment             @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  ledgerEntries EscrowLedgerEntry[]
+}
+
+model EscrowLedgerEntry {
+  id                String           @id @default(cuid())
+  escrowId          String
+  orderId           String
+  type              EscrowLedgerType
+  amount            Int
+  idempotencyKey    String           @unique
+  actorId           String
+  externalReference String?
+  details           String?          @db.Text
+  createdAt         DateTime         @default(now())
+
+  escrow OrderEscrow @relation(fields: [escrowId], references: [id], onDelete: Restrict)
+  order  Order       @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([orderId, createdAt])
+  @@index([escrowId, createdAt])
+}
+
+model OrderDispute {
+  id             String             @id @default(cuid())
+  orderId        String             @unique
+  openedById     String
+  reason         String             @db.Text
+  status         DisputeStatus      @default(OPEN)
+  resolution     DisputeResolution?
+  resolutionNote String?            @db.Text
+  resolvedById   String?
+  resolvedAt     DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
 }
 
 model PlatformSettings {

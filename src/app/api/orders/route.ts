@@ -10,8 +10,8 @@ const orderSchema = z.object({
   customerContact: z.string().trim().min(5).max(160),
 });
 
-// Return only role-appropriate fields. Receipt object paths and review notes are
-// private administrative data and must never be exposed to customers/providers.
+// Return only role-appropriate fields. Contact details, receipt object paths,
+// transfer references and internal review notes remain private to administrators.
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -31,6 +31,8 @@ export async function GET() {
         customer: { select: { id: true, displayName: true, email: true } },
         provider: { select: { id: true, displayName: true, email: true } },
         payments: true,
+        escrow: true,
+        dispute: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -47,6 +49,25 @@ export async function GET() {
         status: payment.status,
         createdAt: payment.createdAt,
       })),
+      escrow: order.escrow ? {
+        id: order.escrow.id,
+        amount: order.escrow.amount,
+        providerAmount: order.escrow.providerAmount,
+        platformFee: order.escrow.platformFee,
+        status: order.escrow.status,
+        createdAt: order.escrow.createdAt,
+        resolvedAt: order.escrow.resolvedAt,
+        resolutionNote: order.escrow.resolutionNote,
+      } : null,
+      dispute: order.dispute ? {
+        id: order.dispute.id,
+        reason: order.dispute.reason,
+        status: order.dispute.status,
+        resolution: order.dispute.resolution,
+        resolutionNote: order.dispute.resolutionNote,
+        createdAt: order.dispute.createdAt,
+        resolvedAt: order.dispute.resolvedAt,
+      } : null,
     }));
 
     return NextResponse.json({ success: true, orders: safeOrders }, {
@@ -96,13 +117,13 @@ export async function POST(request: Request) {
     const order = await prisma.$transaction(async (tx) => {
       const [completedCount, activeCount] = await Promise.all([
         tx.order.count({ where: { customerId: user.id, status: "COMPLETED" } }),
-        tx.order.count({ where: { customerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED", "REJECTED"] } } }),
+        tx.order.count({ where: { customerId: user.id, status: { notIn: ["COMPLETED", "CANCELLED", "REJECTED", "REFUNDED"] } } }),
       ]);
       const capacity = 5 + Math.floor(completedCount / 5) * 5;
       if (activeCount >= capacity) throw new Error("ORDER_CAPACITY_REACHED");
       return tx.order.create({
         data: {
-          orderNo: `KH-${Date.now()}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`,
+          orderNo: "KH-" + Date.now() + "-" + crypto.randomUUID().slice(0, 6).toUpperCase(),
           serviceId: service.id,
           customerId: user.id,
           customerContact: validation.data.customerContact,
