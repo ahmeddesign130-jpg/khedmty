@@ -45,6 +45,27 @@ enum PaymentStatus {
   REJECTED
 }
 
+enum EscrowStatus {
+  NOT_FUNDED
+  HELD
+  DISPUTED
+  RELEASED
+  REFUNDED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_FOR_CUSTOMER
+  RESOLVED_FOR_PROVIDER
+}
+
+enum EscrowEntryType {
+  HOLD
+  RELEASE
+  REFUND
+}
+
 model User {
   id             String     @id @default(cuid())
   email          String     @unique
@@ -102,11 +123,17 @@ model Order {
   commission     Int
   total          Int
   status         OrderStatus @default(PENDING_PAYMENT)
+  escrowStatus   EscrowStatus @default(NOT_FUNDED)
+  escrowAmount   Int          @default(0)
+  escrowHeldAt   DateTime?
+  escrowReleasedAt DateTime?
 
-  customer  User      @relation("CustomerOrders", fields: [customerId], references: [id])
-  provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
-  payments  Payment[]
-  createdAt DateTime  @default(now())
+  customer      User             @relation("CustomerOrders", fields: [customerId], references: [id])
+  provider      User             @relation("ProviderOrders", fields: [providerId], references: [id])
+  payments      Payment[]
+  escrowEntries EscrowLedger[]
+  dispute       Dispute?
+  createdAt     DateTime         @default(now())
 }
 
 model Payment {
@@ -136,4 +163,34 @@ model AuditLog {
   targetId  String
   details   String?
   createdAt DateTime @default(now())
+}
+
+
+model EscrowLedger {
+  id        String          @id @default(cuid())
+  orderId   String
+  entryType EscrowEntryType
+  amount    Int
+  note      String?         @db.Text
+  actorId   String
+  createdAt DateTime        @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, entryType])
+  @@index([createdAt])
+}
+
+model Dispute {
+  id         String        @id @default(cuid())
+  orderId    String        @unique
+  openedById String
+  reason     String        @db.Text
+  status     DisputeStatus @default(OPEN)
+  adminNote  String?       @db.Text
+  resolvedAt DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
 }
