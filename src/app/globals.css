@@ -1243,3 +1243,45 @@ html[data-locale="en"] body:has(.auth-v7-page) .khedmty-menu-trigger {
   right: max(12px, env(safe-area-inset-right)) !important;
   left: auto !important;
 }
+
+
+/* Accessible text contrast for both themes, without recoloring buttons or hero text. */
+html:not([data-theme="dark"]) main :where(.text-slate-400,.text-gray-400,.text-zinc-400) { color:#596579 !important; }
+html:not([data-theme="dark"]) main :where(.text-slate-500,.text-gray-500,.text-zinc-500) { color:#526075 !important; }
+html:not([data-theme="dark"]) main :where(.text-slate-600,.text-gray-600,.text-zinc-600) { color:#3f4d63 !important; }
+html:not([data-theme="dark"]) main :where(.text-slate-700,.text-gray-700,.text-zinc-700) { color:#344258 !important; }
+
+html[data-theme="dark"] main :where([class~="text-[#14213d]"],[class~="text-[#243451]"],.text-slate-800,.text-slate-900,.text-gray-800,.text-gray-900,.text-zinc-800,.text-zinc-900,.text-black) {
+  color:#edf2fb !important;
+}
+html[data-theme="dark"] main :where(.text-slate-400,.text-slate-500,.text-slate-600,.text-slate-700,.text-gray-400,.text-gray-500,.text-gray-600,.text-gray-700,.text-zinc-400,.text-zinc-500,.text-zinc-600,.text-zinc-700) {
+  color:#c2ccda !important;
+}
+html[data-theme="dark"] main :where(.text-orange-500,.text-orange-600,.text-amber-500,.text-amber-600) {
+  color:#ffb477 !important;
+}
+html[data-theme="dark"] main :where(button,a)[class*="bg-orange"] { color:#fff !important; }
+html[data-theme="dark"] main :where(button,a)[class*="bg-amber"] { color:#211b0b !important; }
+
+.home-nav-shell {
+  background:rgba(255,255,255,.94);
+  border-color:rgba(255,255,255,.92);
+  box-shadow:0 12px 32px rgba(20,33,61,.12),inset 0 1px 0 rgba(255,255,255,.9);
+}
+.home-nav-link { color:#243451; transition:background-color .2s ease,color .2s ease,transform .2s ease; }
+.home-nav-link:hover { background:#fff1e7; color:#c65a12; }
+.home-nav-login { color:#fff; background:linear-gradient(120deg,#f47721,#e96313); box-shadow:0 6px 16px rgba(233,99,19,.22); }
+.home-nav-login:hover { color:#fff; filter:brightness(1.06); }
+html[data-theme="dark"] .home-nav-shell {
+  background:rgba(24,34,51,.96);
+  border-color:rgba(255,255,255,.14);
+  box-shadow:0 12px 32px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.06);
+}
+html[data-theme="dark"] .home-nav-link { color:#edf2fb; }
+html[data-theme="dark"] .home-nav-link:hover { background:rgba(255,180,119,.13); color:#ffd0a9; }
+html[data-theme="dark"] .home-nav-login { color:#fff !important; }
+html[data-theme="dark"] .home-nav-login:hover { color:#fff !important; }
+@media (max-width:380px) {
+  .home-nav-shell { gap:4px; padding:6px; }
+  .home-nav-link,.home-nav-login { padding-inline:5px; font-size:11px; }
+}
