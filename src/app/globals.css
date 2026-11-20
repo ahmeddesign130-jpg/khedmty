@@ -1663,3 +1663,39 @@ html[data-theme="dark"] .auth-readable :where(textarea)::placeholder {
 .auth-readable :where(.text-base) { font-size:17px !important; }
 .auth-readable :where(.text-lg) { font-size:19px !important; }
 .auth-readable :where(.text-3xl) { font-size:32px !important; }
+
+
+/* Final authentication typography: load and visibly apply Alexandria. */
+.auth-readable,
+.auth-readable :where(*) {
+  font-family: "Alexandria", "IBM Plex Sans Arabic", "Noto Sans Arabic", Tahoma, sans-serif !important;
+}
+.auth-readable :where(h1) {
+  font-size: clamp(28px, 7vw, 36px) !important;
+  line-height: 1.35 !important;
+  font-weight: 900 !important;
+}
+.auth-readable :where(p, label, a, button, input, select, textarea) {
+  font-weight: 800 !important;
+}
+.auth-readable :where(label) {
+  font-size: 16px !important;
+}
+.auth-readable :where(input, select, textarea) {
+  font-size: 17px !important;
+  min-height: 54px;
+}
+.auth-readable :where(button[type="submit"]) {
+  font-size: 19px !important;
+  font-weight: 900 !important;
+}
+.auth-readable .auth-creator-name {
+  color: #d45b13 !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: .12em !important;
+  line-height: 1.8 !important;
+}
+html[data-theme="dark"] .auth-readable .auth-creator-name {
+  color: #ffb36f !important;
+}
