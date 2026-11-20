@@ -1336,3 +1336,95 @@ html[data-theme="dark"] .auth-v7-card select {
 html[data-theme="dark"] .auth-v7-card input::placeholder {
   color: #9aa9bf !important;
 }
+
+
+/* Auth contrast fix: dark panels always use light readable text; white fields use dark text. */
+.auth-v7-card {
+  background: #101318 !important;
+  border-color: #394252 !important;
+  color: #f8fafc !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 18px 42px rgba(0,0,0,.22) !important;
+}
+.auth-v7-card h1,
+.auth-v7-card label,
+.auth-v7-card .text-slate-700,
+.auth-v7-card .text-slate-300,
+.auth-v7-card .text-slate-400 {
+  color: #f8fafc !important;
+}
+.auth-v7-card p:not([role="alert"]):not([role="status"]) {
+  color: #d5dbe5 !important;
+}
+.auth-v7-card input:not([type="checkbox"]),
+.auth-v7-card select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #cbd5e1 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+.auth-v7-card input::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+.auth-v7-card select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+.auth-v7-card a[href^="/api/auth/google"] {
+  background: #202735 !important;
+  color: #ffffff !important;
+  border-color: #46536a !important;
+}
+.auth-v7-card a[href^="/api/auth/google"] span {
+  color: #ffffff !important;
+}
+.auth-v7-card a[href="/register"],
+.auth-v7-card a[href="/login"] {
+  color: #ffb36f !important;
+}
+.auth-v7-card a[href="/"] {
+  color: #d5dbe5 !important;
+}
+.auth-v7-card [role="alert"] { color: #991b1b !important; }
+.auth-v7-card [role="status"] { color: #166534 !important; }
+
+/* Mobile performance: remove costly blur layers and decorative motion. */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  *,
+  *::before,
+  *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  body {
+    background: #f5f7fb !important;
+    background-attachment: scroll !important;
+  }
+  html[data-theme="dark"] body {
+    background: #0b1220 !important;
+  }
+  main > header,
+  main > aside,
+  main > section,
+  main > footer,
+  main a[class*="rounded-2xl"],
+  main a[class*="rounded-3xl"],
+  main article {
+    animation: none !important;
+  }
+  main a[class*="rounded-2xl"]:hover,
+  main a[class*="rounded-3xl"]:hover,
+  main article:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-v7-card,
+  .auth-v7-card * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
