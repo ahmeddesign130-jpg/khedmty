@@ -8,7 +8,7 @@ type Role = "CUSTOMER" | "PROVIDER" | "SUPER_ADMIN";
 type Locale = "ar" | "en";
 type Theme = "light" | "dark";
 
-const items: Record<Role, { href: string; label: string; icon: "search" | "clipboard-list" | "settings" | "grid" | "briefcase" | "users" | "badge-check" | "wallet" }[]> = {
+const items: Record<Role, { href: string; label: string; icon: "search" | "clipboard-list" | "settings" | "grid" | "briefcase" | "users" | "badge-check" | "wallet" | "user-cog" }[]> = {
   CUSTOMER: [
     { href: "/services", label: "السوق", icon: "search" },
     { href: "/orders", label: "طلباتي", icon: "clipboard-list" },
