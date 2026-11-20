@@ -16,11 +16,11 @@ test("a held order cannot be refunded without an active dispute", () => {
   assert.equal(canResolveEscrow("HELD", "DISPUTED", "OPEN", "REFUND_CUSTOMER"), false);
 });
 
-test("an active dispute can be resolved by release or refund", () => {
-  for (const disputeStatus of ["OPEN", "UNDER_REVIEW"]) {
-    assert.equal(canResolveEscrow("DISPUTED", "DISPUTED", disputeStatus, "RELEASE_TO_PROVIDER"), true);
-    assert.equal(canResolveEscrow("DISPUTED", "DISPUTED", disputeStatus, "REFUND_CUSTOMER"), true);
-  }
+test("dispute resolution requires the administrator review stage", () => {
+  assert.equal(canResolveEscrow("DISPUTED", "DISPUTED", "OPEN", "RELEASE_TO_PROVIDER"), false);
+  assert.equal(canResolveEscrow("DISPUTED", "DISPUTED", "OPEN", "REFUND_CUSTOMER"), false);
+  assert.equal(canResolveEscrow("DISPUTED", "DISPUTED", "UNDER_REVIEW", "RELEASE_TO_PROVIDER"), true);
+  assert.equal(canResolveEscrow("DISPUTED", "DISPUTED", "UNDER_REVIEW", "REFUND_CUSTOMER"), true);
 });
 
 test("resolved or inconsistent dispute states cannot be resolved again", () => {

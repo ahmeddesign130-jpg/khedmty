@@ -1,20 +1,18 @@
-const activeDisputeStatuses = ["OPEN", "UNDER_REVIEW"];
-
 /**
  * HELD is an internal accounting state only. A release or refund can be
  * recorded only after a manual external transfer has actually been made.
  */
 export function canResolveEscrow(escrowStatus, orderStatus, disputeStatus, decision) {
-  const disputed = escrowStatus === "DISPUTED"
+  const disputedAndReviewed = escrowStatus === "DISPUTED"
     && orderStatus === "DISPUTED"
-    && activeDisputeStatuses.includes(disputeStatus);
+    && disputeStatus === "UNDER_REVIEW";
 
   if (decision === "RELEASE_TO_PROVIDER") {
-    return (escrowStatus === "HELD" && orderStatus === "COMPLETED" && !disputeStatus) || disputed;
+    return (escrowStatus === "HELD" && orderStatus === "COMPLETED" && !disputeStatus) || disputedAndReviewed;
   }
 
   if (decision === "REFUND_CUSTOMER") {
-    return disputed;
+    return disputedAndReviewed;
   }
 
   return false;

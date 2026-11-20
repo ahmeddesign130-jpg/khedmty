@@ -64,8 +64,8 @@ export function AdminEscrowActions({ orderId, escrowStatus, orderStatus, dispute
   }
 
   const canRelease = (escrowStatus === "HELD" && orderStatus === "COMPLETED")
-    || (escrowStatus === "DISPUTED" && orderStatus === "DISPUTED" && ["OPEN", "UNDER_REVIEW"].includes(disputeStatus || ""));
-  const canRefund = escrowStatus === "DISPUTED" && orderStatus === "DISPUTED" && ["OPEN", "UNDER_REVIEW"].includes(disputeStatus || "");
+    || (escrowStatus === "DISPUTED" && orderStatus === "DISPUTED" && disputeStatus === "UNDER_REVIEW");
+  const canRefund = escrowStatus === "DISPUTED" && orderStatus === "DISPUTED" && disputeStatus === "UNDER_REVIEW";
 
   if (escrowStatus === "RELEASED" || escrowStatus === "REFUNDED") {
     return <p className="mt-4 rounded-xl bg-slate-100 p-3 text-sm font-bold text-slate-700">تم إغلاق السجل المالي لهذا الطلب؛ لا يمكن تكرار الصرف أو الاسترداد.</p>;
@@ -88,6 +88,7 @@ export function AdminEscrowActions({ orderId, escrowStatus, orderStatus, dispute
         </>
       )}
       {escrowStatus === "HELD" && orderStatus !== "COMPLETED" && <p className="rounded-xl bg-slate-100 p-3 text-sm text-slate-700">لا يمكن تسجيل الصرف قبل تأكيد العميل للاستلام أو فتح نزاع وحسمه.</p>}
+      {escrowStatus === "DISPUTED" && disputeStatus === "OPEN" && <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">ابدأ مراجعة النزاع أولًا؛ لن يظهر إجراء الصرف أو الاسترداد قبل تسجيل مرحلة المراجعة.</p>}
       {message && <p role="status" className="rounded-xl bg-slate-100 p-3 text-sm font-bold text-slate-700">{message}</p>}
     </div>
   );
