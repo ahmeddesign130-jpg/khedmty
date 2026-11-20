@@ -13,6 +13,7 @@ const errors: Record<string, string> = {
   google_profile: "لم نتمكن من قراءة بيانات حساب Google الموثّق.",
   google_session: "تم التحقق من Google لكن تعذر إنشاء جلسة الدخول.",
   google_denied: "تم إلغاء تسجيل الدخول باستخدام Google.",
+  google_account_required: "حساب Google ده مش مرتبط بحساب موجود في خِدمتي. أنشئ حسابًا أولًا أو اختَر حساب الأدمن المسجّل بالفعل.",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; registered?: string }> }) {
