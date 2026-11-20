@@ -37,6 +37,15 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         {children}
         <footer className="site-creator-footer" dir="ltr" aria-label="Website creator">
           <span>AHMED ZAKRAIA ALI</span>
+          <a
+            href="https://www.tiktok.com/@ahahmed130"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="تابع خِدمتي على تيك توك"
+            className="mr-3 inline-flex items-center rounded-full border border-current/20 px-3 py-1 text-xs font-bold transition hover:opacity-75"
+          >
+            TikTok @ahahmed130
+          </a>
         </footer>
         <SideNavigation role={activeRole} userId={user?.id ?? "guest"} />
       </body>
