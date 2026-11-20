@@ -41,8 +41,6 @@ async function reviewCustomerApplication(formData: FormData) {
   if (latest?.action !== "PROVIDER_APPLICATION_SUBMITTED") return;
   await prisma.$transaction(async (tx) => {
     if (action === "APPROVE") {
-      const changed = await tx.user.updateMany({ where: { id, role: "CUSTOMER", status: "ACTIVE" }, data: { role: "PROVIDER" } });
-      if (changed.count !== 1) throw new Error("APPLICATION_REVIEW_CONFLICT");
       const application = await tx.auditLog.findFirst({
         where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
         orderBy: { createdAt: "desc" },
@@ -50,6 +48,8 @@ async function reviewCustomerApplication(formData: FormData) {
       });
       const details = application?.details ? decryptProviderApplication(application.details) : null;
       if (!details) throw new Error("APPLICATION_DATA_UNAVAILABLE");
+      const changed = await tx.user.updateMany({ where: { id, role: "CUSTOMER", status: "ACTIVE" }, data: { role: "PROVIDER", displayName: details.fullName } });
+      if (changed.count !== 1) throw new Error("APPLICATION_REVIEW_CONFLICT");
       await tx.profile.upsert({
         where: { userId: id },
         update: { displayName: details.fullName, phone: details.phone, bio: details.bio, skills: [details.profession] },
