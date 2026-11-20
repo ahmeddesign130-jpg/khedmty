@@ -1285,3 +1285,54 @@ html[data-theme="dark"] .home-nav-login:hover { color:#fff !important; }
   .home-nav-shell { gap:4px; padding:6px; }
   .home-nav-link,.home-nav-login { padding-inline:5px; font-size:11px; }
 }
+
+
+/* Requested polish: top controls scroll with the document; remove icon glow. */
+.khedmty-global-brand,
+.khedmty-menu-trigger {
+  position: absolute !important;
+}
+.khedmty-menu-trigger,
+.khedmty-menu-trigger:hover,
+.ui-icon-tile,
+.ios-icon-glass,
+.glassy-nav-icon,
+.glassy-nav-tab:hover .glassy-nav-icon,
+.glassy-nav-tab.is-active .glassy-nav-icon {
+  box-shadow: none !important;
+}
+svg.ui-icon,
+.ios-icon-glass svg,
+.ui-icon-v4 {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+.auth-v7-card h1,
+.auth-v7-card label {
+  color: #17233d !important;
+}
+.auth-v7-card > p,
+.auth-v7-card p {
+  color: #536176 !important;
+}
+.auth-v7-card input,
+.auth-v7-card select {
+  color: #17233d !important;
+}
+html[data-theme="dark"] .auth-v7-card h1,
+html[data-theme="dark"] .auth-v7-card label {
+  color: #f1f5fb !important;
+}
+html[data-theme="dark"] .auth-v7-card > p,
+html[data-theme="dark"] .auth-v7-card p {
+  color: #c4cfdf !important;
+}
+html[data-theme="dark"] .auth-v7-card input,
+html[data-theme="dark"] .auth-v7-card select {
+  color: #f1f5fb !important;
+  background: #101a2b !important;
+  border-color: #465873 !important;
+}
+html[data-theme="dark"] .auth-v7-card input::placeholder {
+  color: #9aa9bf !important;
+}
