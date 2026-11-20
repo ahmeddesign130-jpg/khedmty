@@ -25,7 +25,9 @@ export default async function ServiceDetailsPage({
     include: {
       provider: {
         select: {
+          id: true,
           displayName: true,
+          profile: { select: { avatarUrl: true, bio: true, skills: true } },
         },
       },
     },
@@ -175,14 +177,10 @@ export default async function ServiceDetailsPage({
               </p>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-100 p-5">
-              <p className="text-sm text-slate-500">
-                مقدم الخدمة
-              </p>
-              <p className="mt-2 text-lg font-black text-[#14213d]">
-                {service.provider.displayName}
-              </p>
-            </div>
+            <Link href={`/providers/${service.provider.id}`} className="mt-6 flex items-center gap-4 rounded-2xl border border-slate-100 p-5 transition hover:border-orange-300 hover:shadow-sm">
+              {service.provider.profile?.avatarUrl ? <img src={service.provider.profile.avatarUrl} alt={`صورة ${service.provider.displayName}`} className="h-16 w-16 rounded-full object-cover"/> : <span className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 text-2xl font-black text-orange-700">{service.provider.displayName.slice(0,1)}</span>}
+              <span className="min-w-0 flex-1"><span className="block text-xs text-slate-500">مقدم الخدمة</span><strong className="mt-1 block text-lg text-[#14213d]">{service.provider.displayName}</strong><span className="mt-1 block text-sm text-orange-600">شاهد الملف الشخصي وكل الأعمال ←</span></span>
+            </Link>
 
             <div className="mt-6 rounded-2xl bg-[#14213d] p-6 text-white">
               <h2 className="text-xl font-black">
