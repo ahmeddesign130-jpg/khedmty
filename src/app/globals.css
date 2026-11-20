@@ -1485,3 +1485,90 @@ html, body { font-family: Arial, Tahoma, "Noto Sans Arabic", sans-serif !importa
     backdrop-filter: none !important;
   }
 }
+
+
+/* Auth visual refresh: navy gradient, orange accents, clean white form card. */
+.auth-v7-page {
+  background:
+    radial-gradient(ellipse at 12% 18%, rgba(244,119,33,.22), transparent 34%),
+    radial-gradient(ellipse at 88% 82%, rgba(59,130,246,.16), transparent 36%),
+    linear-gradient(135deg,#101d35 0%,#172b4d 52%,#0d1830 100%) !important;
+  color:#17233d !important;
+}
+.auth-v7-card {
+  background:#ffffff !important;
+  border:1px solid rgba(255,255,255,.72) !important;
+  color:#17233d !important;
+  box-shadow:0 24px 70px rgba(3,10,25,.30) !important;
+}
+.auth-v7-card h1,
+.auth-v7-card h2,
+.auth-v7-card label,
+.auth-v7-card p,
+.auth-v7-card .text-slate-700,
+.auth-v7-card .text-slate-300,
+.auth-v7-card .text-slate-400,
+.auth-v7-card .text-gray-700 {
+  color:#263650 !important;
+}
+.auth-v7-card input:not([type="checkbox"]),
+.auth-v7-card select,
+.auth-v7-card textarea {
+  background:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border:1px solid #d7dfeb !important;
+}
+.auth-v7-card input::placeholder,
+.auth-v7-card textarea::placeholder { color:#77849a !important; }
+.auth-v7-card a[href^="/api/auth/google"] {
+  background:#ffffff !important;
+  color:#17233d !important;
+  border:1px solid #d7dfeb !important;
+}
+.auth-v7-card a[href^="/api/auth/google"] span { color:#17233d !important; }
+.auth-v7-card a[href="/register"],
+.auth-v7-card a[href="/login"],
+.auth-v7-card a[href="/"] { color:#df681c !important; }
+.auth-v7-card button[type="submit"] {
+  background:linear-gradient(115deg,#f47721,#e85f12) !important;
+  color:#ffffff !important;
+  box-shadow:0 8px 20px rgba(233,99,19,.22) !important;
+}
+.auth-v7-card [role="alert"] { color:#991b1b !important; }
+.auth-v7-card [role="status"] { color:#166534 !important; }
+
+html[data-theme="dark"] .auth-v7-card {
+  background:#17243a !important;
+  border-color:#354761 !important;
+  color:#f4f7fc !important;
+}
+html[data-theme="dark"] .auth-v7-card h1,
+html[data-theme="dark"] .auth-v7-card h2,
+html[data-theme="dark"] .auth-v7-card label,
+html[data-theme="dark"] .auth-v7-card p,
+html[data-theme="dark"] .auth-v7-card .text-slate-700,
+html[data-theme="dark"] .auth-v7-card .text-slate-300,
+html[data-theme="dark"] .auth-v7-card .text-slate-400,
+html[data-theme="dark"] .auth-v7-card .text-gray-700 {
+  color:#f1f5fb !important;
+}
+html[data-theme="dark"] .auth-v7-card input:not([type="checkbox"]),
+html[data-theme="dark"] .auth-v7-card select,
+html[data-theme="dark"] .auth-v7-card textarea {
+  background:#101a2b !important;
+  color:#f1f5fb !important;
+  -webkit-text-fill-color:#f1f5fb !important;
+  border-color:#465873 !important;
+}
+html[data-theme="dark"] .auth-v7-card input::placeholder,
+html[data-theme="dark"] .auth-v7-card textarea::placeholder { color:#9aa9bf !important; }
+html[data-theme="dark"] .auth-v7-card a[href^="/api/auth/google"] {
+  background:#ffffff !important;
+  color:#17233d !important;
+  border-color:#d7dfeb !important;
+}
+html[data-theme="dark"] .auth-v7-card a[href^="/api/auth/google"] span { color:#17233d !important; }
+html[data-theme="dark"] .auth-v7-card a[href="/register"],
+html[data-theme="dark"] .auth-v7-card a[href="/login"],
+html[data-theme="dark"] .auth-v7-card a[href="/"] { color:#ffb477 !important; }
