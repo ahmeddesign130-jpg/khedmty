@@ -29,14 +29,13 @@ async function updateProfile(formData: FormData) {
   const displayName = String(formData.get("displayName") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const bio = String(formData.get("bio") || "").trim();
-  const avatarUrl = String(formData.get("avatarUrl") || "").trim();
   const skills = String(formData.get("skills") || "").split(",").map((item) => item.trim()).filter(Boolean).slice(0, 10);
-  if (displayName.length < 2 || displayName.length > 70 || phone.length > 30 || bio.length > 600 || avatarUrl.length > 500 || (avatarUrl && !/^https:\/\//i.test(avatarUrl)) || skills.some((item) => item.length > 40)) redirect("/settings?error=invalid_profile");
+  if (displayName.length < 2 || displayName.length > 70 || phone.length > 30 || bio.length > 600 || skills.some((item) => item.length > 40)) redirect("/settings?error=invalid_profile");
   await prisma.$transaction(async (tx) => {
     await tx.user.update({ where: { id: session.id }, data: { displayName } });
     await tx.profile.upsert({
       where: { userId: session.id },
-      update: { displayName, phone: phone || null, bio: bio || null, avatarUrl: avatarUrl || null, skills },
+      update: { displayName, phone: phone || null, bio: bio || null, skills },
       create: { userId: session.id, displayName, phone: phone || null, bio: bio || null, avatarUrl: avatarUrl || null, skills },
     });
   });
@@ -52,7 +51,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   if (!session) redirect("/login");
   const user = await prisma.user.findUnique({
     where: { id: session.id },
-    select: { email: true, displayName: true, role: true, profile: { select: { phone: true, bio: true, avatarUrl: true, skills: true } } },
+    select: { email: true, displayName: true, role: true, profile: { select: { phone: true, bio: true, skills: true } } },
   });
   if (!user) redirect("/login");
 
@@ -96,9 +95,6 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <form action={updateProfile} className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-bold text-slate-700">الاسم الظاهر
             <input name="displayName" required minLength={2} maxLength={70} defaultValue={user.displayName} className="mt-2 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-orange-500"/>
-          </label>
-          <label className="block text-sm font-bold text-slate-700 sm:col-span-2">رابط صورة البروفايل (HTTPS)
-            <input name="avatarUrl" type="url" maxLength={500} defaultValue={user.profile?.avatarUrl || ""} placeholder="https://..." dir="ltr" className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500"/>
           </label>
           <label className="block text-sm font-bold text-slate-700">رقم الهاتف أو وسيلة التواصل
             <input name="phone" maxLength={30} defaultValue={user.profile?.phone || ""} dir="ltr" className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500"/>
