@@ -1173,3 +1173,54 @@ html[data-theme="dark"] main :where(.text-orange-500,.text-orange-600,.text-ambe
 html[data-theme="dark"] main :where(.border-slate-100,.border-slate-200,.border-gray-100,.border-gray-200) {
   border-color: #51463a !important;
 }
+
+
+/* Final contrast audit: enforce readable foregrounds on all common page surfaces. */
+html:not([data-theme="dark"]) main :where(.text-slate-400,.text-gray-400,.text-zinc-400) {
+  color:#64748b !important;
+}
+html:not([data-theme="dark"]) main :where(.text-slate-500,.text-gray-500,.text-zinc-500) {
+  color:#586579 !important;
+}
+html:not([data-theme="dark"]) main :where(.text-slate-600,.text-gray-600,.text-zinc-600) {
+  color:#475569 !important;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] main {
+  background-color:#171b24 !important;
+  color:#f5f2ed !important;
+}
+html[data-theme="dark"] main :where(
+  [class~="bg-white"],[class~="bg-slate-50"],[class~="bg-slate-100"],
+  [class~="bg-gray-50"],[class~="bg-gray-100"],[class~="bg-zinc-50"],
+  [class~="bg-[#f6f7fb]"],[class~="bg-[#f7f8fa]"],[class~="bg-[#f5f6f8]"],
+  [class~="bg-[#fff]"],[class~="bg-[#ffffff]"]
+) {
+  background-color:#252b36 !important;
+  color:#f5f2ed !important;
+}
+html[data-theme="dark"] main :where(.text-slate-400,.text-slate-500,.text-slate-600,.text-slate-700,.text-gray-400,.text-gray-500,.text-gray-600,.text-gray-700,.text-zinc-400,.text-zinc-500,.text-zinc-600,.text-zinc-700) {
+  color:#c5ccd7 !important;
+}
+html[data-theme="dark"] main :where(.text-[#14213d],.text-slate-800,.text-slate-900,.text-gray-800,.text-gray-900,.text-zinc-800,.text-zinc-900,.text-black) {
+  color:#f5f2ed !important;
+}
+html[data-theme="dark"] main :where(.border-slate-100,.border-slate-200,.border-gray-100,.border-gray-200,.border-zinc-100,.border-zinc-200) {
+  border-color:#485363 !important;
+}
+html[data-theme="dark"] main :where(input,textarea,select) {
+  background-color:#202733 !important;
+  color:#fff !important;
+  border-color:#596579 !important;
+}
+html[data-theme="dark"] main :where(input,textarea,select)::placeholder {
+  color:#c2cad5 !important;
+  opacity:1 !important;
+}
+html[data-theme="dark"] main :where(button,a)[class*="bg-orange"],
+html[data-theme="dark"] main :where(button,a)[class*="bg-amber"] {
+  color:#fff !important;
+}
+html[data-theme="dark"] main :where(.text-orange-400,.text-orange-500,.text-orange-600,.text-amber-400,.text-amber-500,.text-amber-600) {
+  color:#ffbd88 !important;
+}
