@@ -36,7 +36,7 @@ async function updateProfile(formData: FormData) {
     await tx.profile.upsert({
       where: { userId: session.id },
       update: { displayName, phone: phone || null, bio: bio || null, skills },
-      create: { userId: session.id, displayName, phone: phone || null, bio: bio || null, avatarUrl: avatarUrl || null, skills },
+      create: { userId: session.id, displayName, phone: phone || null, bio: bio || null, skills },
     });
   });
   revalidatePath("/settings");
