@@ -1794,3 +1794,40 @@ html[data-theme="dark"] .site-creator-footer { color:#ffb477; }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
 }
+
+
+/* Accessibility typography pass: larger, comfortable reading sizes across the site. */
+html { font-size: 16px; }
+body { font-size: 16px; line-height: 1.75; }
+main :where(p, li, label, input, select, textarea, button) { line-height: 1.65; }
+main :where(.text-xs) { font-size: 13px !important; }
+main :where(.text-sm) { font-size: 15px !important; }
+main :where(.text-base) { font-size: 16px !important; }
+main :where(.text-lg) { font-size: 19px !important; }
+main :where(.text-xl) { font-size: 21px !important; }
+main :where(.text-2xl) { font-size: 25px !important; }
+main :where(.text-3xl) { font-size: 31px !important; }
+main :where(.text-4xl) { font-size: 36px !important; }
+main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  font-size: 16px !important;
+  min-height: 50px;
+}
+main :where(button) { font-size: 15px; }
+@media (max-width: 640px) {
+  body { font-size: 16px !important; }
+  main :where(.text-xs) { font-size: 13px !important; }
+  main :where(.text-sm) { font-size: 15px !important; }
+  main :where(.text-base) { font-size: 17px !important; }
+  main :where(.text-lg) { font-size: 19px !important; }
+  main :where(.text-xl) { font-size: 21px !important; }
+  main :where(.text-2xl) { font-size: 26px !important; }
+  main :where(.text-3xl) { font-size: 32px !important; }
+  main :where(label) { font-size: 15px; }
+  main :where(button) { min-height: 44px; font-size: 16px; }
+}
+@media (max-width: 360px) {
+  body { font-size: 15px !important; }
+  main :where(.text-xs) { font-size: 12px !important; }
+  main :where(.text-sm) { font-size: 14px !important; }
+  main :where(.text-base) { font-size: 16px !important; }
+}
