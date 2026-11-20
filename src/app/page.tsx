@@ -12,7 +12,7 @@ export default function HomePage() {
     <main dir="rtl" className="min-h-screen bg-[#f6f7fb] pt-[76px] text-[#14213d]">
       <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-2 py-3 pr-[72px] pl-3 sm:gap-6 sm:pr-[76px] sm:pl-5 sm:py-4">
-          <Link href="/" aria-label="خِدمتي - الصفحة الرئيسية" className="brand-wordmark shrink-0 whitespace-nowrap text-[21px] font-black leading-none tracking-normal text-orange-600 sm:text-2xl">خِدمتي</Link>
+          
           <nav className="flex shrink-0 items-center gap-2 sm:gap-4" aria-label="التنقل الرئيسي">
             <Link href="/login" className="whitespace-nowrap rounded-lg px-2 py-2 text-xs font-bold text-[#14213d] hover:bg-slate-50 sm:px-3 sm:text-sm">دخول</Link>
             <Link href="/services" className="whitespace-nowrap rounded-xl bg-orange-500 px-3 py-2.5 text-xs font-black text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600 sm:px-5 sm:py-3 sm:text-sm">اكتشف الخدمات</Link>
