@@ -12,8 +12,8 @@ const management = [
 ];
 
 const shortcuts = [
-  { label: "مراجعة الحسابات", href: "/admin/providers", icon: "user-check" as const },
-  { label: "فحص الخدمات", href: "/admin/services", icon: "scan-search" as const },
+  { label: "مراجعة الحسابات", href: "/admin/providers", icon: "users" as const },
+  { label: "فحص الخدمات", href: "/admin/services", icon: "search" as const },
   { label: "تأكيد التحويلات", href: "/admin/payments", icon: "badge-check" as const },
 ];
 
@@ -28,7 +28,7 @@ export default async function AdminPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <Link href="/" className="brand-wordmark text-2xl font-black text-orange-400">خِدمتي</Link>
           <div className="flex items-center gap-2">
-            <span className="hidden items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 sm:inline-flex"><UiIcon name="shield-check" size={16}/> مساحة الإدارة</span>
+            <span className="hidden items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 sm:inline-flex"><UiIcon name="shield" size={16}/> مساحة الإدارة</span>
             <Link href="/settings" className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/20 px-3 text-sm font-bold text-white hover:bg-white/10"><UiIcon name="settings" size={17}/><span className="hidden sm:inline">الإعدادات</span></Link>
             <form action="/api/auth/logout" method="POST"><button className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white/10 px-3 text-sm font-bold text-white hover:bg-white/20"><UiIcon name="log-out" size={17}/><span className="hidden sm:inline">خروج</span></button></form>
           </div>
@@ -40,12 +40,12 @@ export default async function AdminPage() {
           <div className="pointer-events-none absolute -left-12 -top-20 h-64 w-64 rounded-full bg-orange-400/10 blur-3xl"/>
           <div className="relative flex flex-col justify-between gap-7 md:flex-row md:items-end">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-orange-300/30 bg-orange-400/10 px-3 py-1.5 text-xs font-bold text-orange-200"><UiIcon name="layout-dashboard" size={15}/> ADMIN DASHBOARD V2</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-orange-300/30 bg-orange-400/10 px-3 py-1.5 text-xs font-bold text-orange-200"><UiIcon name="grid" size={15}/> ADMIN DASHBOARD V2</span>
               <h1 className="mt-5 text-3xl font-black leading-tight sm:text-4xl">مركز إدارة خِدمتي</h1>
               <p className="mt-3 max-w-xl text-sm leading-8 text-slate-200 sm:text-base">كل أدوات تشغيل المنصة في مكان واحد. راجع الحسابات والخدمات، وتابع الطلبات والمدفوعات، وتحكم في إعدادات السوق.</p>
             </div>
             <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-400 text-[#14213d]"><UiIcon name="shield-check" size={23}/></span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-400 text-[#14213d]"><UiIcon name="shield" size={23}/></span>
               <div><p className="text-sm font-extrabold">وضع المسؤول</p><p className="mt-1 text-xs text-slate-300">صلاحيات إدارة المنصة</p></div>
             </div>
           </div>
