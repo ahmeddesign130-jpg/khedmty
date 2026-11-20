@@ -62,11 +62,25 @@ async function reviewPayment(formData: FormData) {
       if (paymentUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
 
       const orderUpdate = await tx.order.updateMany({
-        where: { id: payment.orderId, status: "PAYMENT_REVIEW" },
-        data: { status: status === "APPROVED" ? "PAID" : "PENDING_PAYMENT" },
+        where: { id: payment.orderId, status: "PAYMENT_REVIEW", escrowStatus: "NOT_FUNDED" },
+        data: status === "APPROVED"
+          ? { status: "PAID", escrowStatus: "HELD", escrowAmount: payment.amount, escrowHeldAt: new Date() }
+          : { status: "PENDING_PAYMENT" },
       });
 
       if (orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
+
+      if (status === "APPROVED") {
+        await tx.escrowLedger.create({
+          data: {
+            orderId: payment.orderId,
+            entryType: "HOLD",
+            amount: payment.amount,
+            actorId: admin.id,
+            note: "تسجيل المبلغ كمحجوز داخليًا بعد اعتماد إثبات التحويل؛ لا يعني حفظه في حساب ضمان مستقل.",
+          },
+        });
+      }
 
       await tx.auditLog.create({
         data: {
