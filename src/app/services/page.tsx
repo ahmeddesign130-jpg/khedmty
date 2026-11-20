@@ -29,9 +29,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
       mediaUrls: true,
       provider: {
         select: {
-          id: true,
           displayName: true,
-          profile: { select: { avatarUrl: true } },
         },
       },
     },
@@ -126,10 +124,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                     <p className="text-xs text-gray-400">
                       مقدم الخدمة
                     </p>
-                    <Link href={`/providers/${service.provider.id}`} className="mt-1 inline-flex items-center gap-3 font-bold text-gray-700 hover:text-orange-600">
-                      {service.provider.profile?.avatarUrl ? <img src={service.provider.profile.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover"/> : <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-sm font-black text-orange-700">{service.provider.displayName.slice(0,1)}</span>}
-                      <span>{service.provider.displayName}</span><span className="text-xs text-orange-600">عرض الملف الشخصي</span>
-                    </Link>
+                    <p className="mt-1 font-bold text-gray-700">{service.provider.displayName}</p>
                   </div>
 
                   <div className="mt-5 flex items-center justify-between gap-3">
