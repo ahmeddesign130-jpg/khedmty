@@ -1137,3 +1137,39 @@ html[data-locale="en"] body:has(.auth-v7-page) .khedmty-menu-trigger {
   left: var(--auth-menu-right, 20px) !important;
   right: auto !important;
 }
+
+
+/* Dark mode contrast pass: keep body copy readable on every dark surface. */
+html[data-theme="dark"] main :where(p,span,label,small,li,dt,dd,td,th,figcaption,legend),
+html[data-theme="dark"] main :where(h1,h2,h3,h4,h5,h6) {
+  color: #f1eee9;
+}
+html[data-theme="dark"] main :where(.text-slate-400,.text-slate-500,.text-slate-600,.text-slate-700,.text-gray-400,.text-gray-500,.text-gray-600,.text-gray-700) {
+  color: #c5c0b9 !important;
+}
+html[data-theme="dark"] main :where(.text-[#14213d],.text-slate-800,.text-slate-900,.text-gray-800,.text-gray-900,.text-black) {
+  color: #f1eee9 !important;
+}
+html[data-theme="dark"] main :where([class~="bg-white"],[class~="bg-slate-50"],[class~="bg-slate-100"],[class~="bg-gray-50"],[class~="bg-gray-100"],[class~="bg-orange-50"],[class~="bg-amber-50"],[class~="bg-[#fff]"],[class~="bg-[#ffffff]"]) {
+  background-color: #29251f !important;
+  color: #f1eee9 !important;
+}
+html[data-theme="dark"] main :where(input,textarea,select) {
+  color: #fff7ed !important;
+}
+html[data-theme="dark"] main :where(input,textarea,select)::placeholder {
+  color: #b8afa4 !important;
+  opacity: 1;
+}
+html[data-theme="dark"] main :where(a:not([class*="bg-"]),button:not([class*="bg-"])) {
+  color: #f1eee9;
+}
+html[data-theme="dark"] main :where(button[class*="bg-orange"],a[class*="bg-orange"],button[class*="bg-[#14213d]"],a[class*="bg-[#14213d]"]) {
+  color: #fff !important;
+}
+html[data-theme="dark"] main :where(.text-orange-500,.text-orange-600,.text-amber-500,.text-amber-600) {
+  color: #ffb477 !important;
+}
+html[data-theme="dark"] main :where(.border-slate-100,.border-slate-200,.border-gray-100,.border-gray-200) {
+  border-color: #51463a !important;
+}
