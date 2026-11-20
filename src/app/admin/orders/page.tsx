@@ -195,6 +195,13 @@ export default async function AdminOrdersPage() {
                   </div>
                 </div>
 
+                <div className="mt-4 rounded-xl border border-orange-100 bg-orange-50 p-4">
+                  <p className="text-sm font-black text-[#14213d]">حالة المبلغ المحجوز: {
+                    ({ NOT_FUNDED: "لم يتم تأكيد الدفع", HELD: "معلّق لحين اكتمال الطلب", DISPUTED: "موقوف بسبب نزاع", RELEASED: "تم تسجيل صرف المستحقات", REFUNDED: "تم تسجيل رد المبلغ" } as Record<string,string>)[order.escrowStatus] || order.escrowStatus
+                  }</p>
+                  <p className="mt-1 text-xs leading-6 text-slate-600">المبلغ المسجل: {money(order.escrowAmount)}. هذا سجل داخلي فقط ولا يعني وجود حساب ضمان أو تحويل تلقائي.</p>
+                  <a href={`/orders/${order.id}`} className="mt-3 inline-block rounded-lg bg-[#14213d] px-4 py-2 text-sm font-bold text-white">مراجعة الطلب وتسوية المبلغ</a>
+                </div>
                 <div className="mt-4 text-xs text-slate-400">
                   تاريخ الطلب:{" "}
                   {new Date(order.createdAt).toLocaleString("en-GB")}
