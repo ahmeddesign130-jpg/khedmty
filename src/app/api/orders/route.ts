@@ -10,21 +10,12 @@ const orderSchema = z.object({
   customerContact: z.string().trim().min(5).max(160),
 });
 
-// Return only role-appropriate fields. Receipt object paths and review notes are
-// private administrative data and must never be exposed to customers/providers.
 export async function GET() {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً" }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً" }, { status: 401 });
 
-    const where = user.role === "SUPER_ADMIN"
-      ? {}
-      : user.role === "PROVIDER"
-        ? { providerId: user.id }
-        : { customerId: user.id };
-
+    const where = user.role === "SUPER_ADMIN" ? {} : user.role === "PROVIDER" ? { providerId: user.id } : { customerId: user.id };
     const orders = await prisma.order.findMany({
       where,
       include: {
@@ -40,12 +31,14 @@ export async function GET() {
       customer: { id: order.customer.id, displayName: order.customer.displayName },
       provider: { id: order.provider.id, displayName: order.provider.displayName },
       customerContact: undefined,
+      servicePrice: user.role === "PROVIDER" ? order.providerNet : order.total,
+      commission: undefined,
+      commissionRate: undefined,
+      providerNet: undefined,
+      total: user.role === "PROVIDER" ? order.providerNet : order.total,
       payments: order.payments.map((payment) => ({
-        id: payment.id,
-        method: payment.method,
-        amount: payment.amount,
-        status: payment.status,
-        createdAt: payment.createdAt,
+        id: payment.id, method: payment.method, amount: payment.amount,
+        status: payment.status, createdAt: payment.createdAt,
       })),
     }));
 
@@ -58,7 +51,6 @@ export async function GET() {
   }
 }
 
-// Create orders from server-owned service pricing and commission settings only.
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -67,31 +59,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "هذه الخاصية للعملاء النشطين فقط" }, { status: 403 });
     }
 
-    const body = await request.json();
-    const validation = orderSchema.safeParse(body);
-    if (!validation.success) return NextResponse.json({ success: false, message: "رقم الخدمة غير صحيح" }, { status: 400 });
+    const validation = orderSchema.safeParse(await request.json());
+    if (!validation.success) return NextResponse.json({ success: false, message: "بيانات الطلب غير صحيحة" }, { status: 400 });
 
     const service = await prisma.service.findUnique({ where: { id: validation.data.serviceId } });
-    if (!service || service.status !== "APPROVED") {
-      return NextResponse.json({ success: false, message: "الخدمة غير موجودة أو غير متاحة" }, { status: 404 });
-    }
-    if (service.providerId === user.id) {
-      return NextResponse.json({ success: false, message: "لا يمكنك شراء خدمتك الخاصة" }, { status: 400 });
-    }
+    if (!service || service.status !== "APPROVED") return NextResponse.json({ success: false, message: "الخدمة غير موجودة أو غير متاحة" }, { status: 404 });
+    if (service.providerId === user.id) return NextResponse.json({ success: false, message: "لا يمكنك شراء خدمتك الخاصة" }, { status: 400 });
 
-    const provider = await prisma.user.findUnique({
-      where: { id: service.providerId },
-      select: { id: true, role: true, status: true },
-    });
+    const provider = await prisma.user.findUnique({ where: { id: service.providerId }, select: { id: true, role: true, status: true } });
     if (!provider || provider.role !== "PROVIDER" || provider.status !== "ACTIVE") {
       return NextResponse.json({ success: false, message: "مقدم الخدمة غير متاح" }, { status: 400 });
     }
 
+    // The service price is the final customer price approved by the admin.
+    // Never accept the price or either share from the browser.
     const settings = await prisma.platformSettings.findUnique({ where: { id: "main" } });
-    const commissionRate = settings?.commissionRate ?? 100;
-    const servicePrice = service.price;
-    const commission = commissionRate;
-    const total = servicePrice + commission;
+    const commissionRate = settings?.commissionRate ?? 20;
+    if (!Number.isInteger(commissionRate) || commissionRate < 0 || commissionRate > 50) {
+      return NextResponse.json({ success: false, message: "إعدادات عمولة المنصة غير صحيحة. راجع الإدارة." }, { status: 503 });
+    }
+    const total = service.price;
+    const commission = Math.round((total * commissionRate) / 100);
+    const providerNet = total - commission;
 
     const order = await prisma.$transaction(async (tx) => {
       const [completedCount, activeCount] = await Promise.all([
@@ -107,9 +96,10 @@ export async function POST(request: Request) {
           customerId: user.id,
           customerContact: validation.data.customerContact,
           providerId: service.providerId,
-          servicePrice,
+          servicePrice: total,
           commissionRate,
           commission,
+          providerNet,
           total,
           status: "PENDING_PAYMENT",
         },
@@ -119,7 +109,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: "تم إنشاء الطلب بنجاح. أكمل الدفع اليدوي.",
-      order,
+      order: { id: order.id, orderNo: order.orderNo, total: order.total, status: order.status },
     }, { status: 201, headers: { "Cache-Control": "private, no-store, max-age=0" } });
   } catch (error) {
     if (error instanceof Error && error.message === "ORDER_CAPACITY_REACHED") {
