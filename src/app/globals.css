@@ -2271,3 +2271,42 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   color:#17233d !important;
   border-color:#f47721 !important;
 }
+
+
+/* Registration terms checkbox: keep the copy in a full-width RTL column on mobile. */
+.auth-v7-page .auth-v7-card .terms-acceptance {
+  display: grid !important;
+  grid-template-columns: 24px minmax(0, 1fr) !important;
+  align-items: start !important;
+  column-gap: 12px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  direction: rtl !important;
+  text-align: right !important;
+}
+.auth-v7-page .auth-v7-card .terms-acceptance > input[type="checkbox"] {
+  display: block !important;
+  width: 22px !important;
+  min-width: 22px !important;
+  max-width: 22px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  margin: 5px 0 0 !important;
+  justify-self: start !important;
+  flex: none !important;
+}
+.auth-v7-page .auth-v7-card .terms-acceptance > span {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  text-align: right !important;
+  line-height: 1.9 !important;
+}
+.auth-v7-page .auth-v7-card .terms-acceptance a {
+  display: inline !important;
+  white-space: nowrap !important;
+}
