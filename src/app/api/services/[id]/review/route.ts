@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 const reviewSchema = z.object({
   action: z.enum(["APPROVE", "REJECT"]),
   reason: z.string().trim().max(1000).optional(),
+  finalPrice: z.number().int().positive().max(100000000).optional(),
 });
 
 type RouteContext = {
@@ -34,7 +35,14 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
-    const { action, reason } = validation.data;
+    const { action, reason, finalPrice } = validation.data;
+
+    if (action === "APPROVE" && !finalPrice) {
+      return NextResponse.json(
+        { success: false, message: "حدد السعر النهائي الذي سيدفعه العميل." },
+        { status: 400 }
+      );
+    }
 
     if (action === "REJECT" && !reason) {
       return NextResponse.json(
@@ -65,6 +73,7 @@ export async function POST(request: Request, context: RouteContext) {
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
           reviewNote: action === "REJECT" ? reason : null,
+          ...(action === "APPROVE" && finalPrice ? { price: finalPrice } : {}),
         },
       });
 
