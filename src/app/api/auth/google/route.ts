@@ -3,24 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const PREVIEW_HOST = "khedmty-git-feature-wallet-checkout-refresh-ahmeddesign130-jpg.vercel.app";
 
 function googleRedirectUri(req: NextRequest) {
-  if (process.env.VERCEL_ENV === "preview") {
-    return `https://${PREVIEW_HOST}/api/auth/google/callback`;
-  }
+  // Configure a stable callback URL in each Vercel environment. Falling back to
+  // the current request origin avoids sending Preview OAuth to an obsolete alias.
   return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
 }
 
 export async function GET(req: NextRequest) {
-  // Start OAuth on the same stable Preview host that receives Google's callback.
-  // This keeps the short-lived state/verifier cookies on the callback's host.
-  if (process.env.VERCEL_ENV === "preview" && req.nextUrl.hostname !== PREVIEW_HOST) {
-    const canonicalUrl = new URL("/api/auth/google", `https://${PREVIEW_HOST}`);
-    canonicalUrl.search = req.nextUrl.search;
-    return NextResponse.redirect(canonicalUrl);
-  }
-
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) return NextResponse.redirect(new URL("/login?error=google_not_configured", req.url));
 
