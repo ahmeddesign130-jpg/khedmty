@@ -36,13 +36,13 @@ export default function ServiceCreateForm(){
   <h2 id="new-service-heading" className="text-xl font-black">إضافة خدمة جديدة</h2>
   <label className="block text-sm font-bold">عنوان الخدمة<input name="title" required minLength={5} maxLength={120} className="mt-2 w-full rounded-xl border p-3"/></label>
   <label className="block text-sm font-bold">وصف الخدمة<textarea name="description" required minLength={20} maxLength={5000} rows={5} className="mt-2 w-full rounded-xl border p-3"/></label>
-  <label className="block text-sm font-bold">السعر (EG)<input name="price" type="number" min="1" step="1" required className="mt-2 w-full rounded-xl border p-3"/></label>
+  <label className="block text-sm font-bold">السعر المقترح من مقدم الخدمة (EG)<input name="price" type="number" min="1" step="1" required className="mt-2 w-full rounded-xl border p-3"/></label>
   <label htmlFor="service-media" className="block text-sm font-bold">صور وفيديوهات الخدمة</label><input id="service-media" aria-describedby="service-media-help" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple onChange={e=>setFiles(Array.from(e.target.files||[]))} className="mt-2 block w-full rounded-xl border p-3 text-sm" />
   <p id="service-media-help" className="text-xs leading-6 text-slate-500">حتى 8 ملفات. الصور بحد أقصى 8 MB والفيديو 40 MB للملف. الصيغ: JPG وPNG وWEBP وMP4 وWEBM وMOV.</p>
   {files.length>0&&<p className="text-sm font-bold text-slate-600">تم اختيار {files.length} ملف</p>}
   {error&&<p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">{error}</p>}
   {progress&&<p role="status" aria-live="polite" aria-atomic="true" className="rounded-xl bg-blue-50 p-3 text-sm font-bold text-blue-700">{progress}</p>}
   <button type="submit" disabled={busy||files.length>8} className="w-full rounded-xl bg-orange-500 p-4 font-black text-white disabled:opacity-50">{busy?"يرجى الانتظار...":"إرسال الخدمة للمراجعة"}</button>
-  <p className="text-xs leading-6 text-slate-500">لن تظهر الخدمة للعملاء إلا بعد موافقة الإدارة.</p>
+  <p className="text-xs leading-6 text-slate-600">هذا سعر مقترح للمراجعة فقط؛ الأدمن يحدد السعر النهائي للعميل. بعد الاعتماد ستظهر لك مستحقاتك الصافية فقط.</p>
  </form>;
 }
