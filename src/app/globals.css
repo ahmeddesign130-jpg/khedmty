@@ -2310,3 +2310,30 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   display: inline !important;
   white-space: nowrap !important;
 }
+
+
+/* Settings page readability and customer provider-application action. */
+.khedmty-settings-page {
+  font-size: 17px;
+}
+.khedmty-settings-page :where(p, label, input, textarea, button, a, strong, span) {
+  font-size: max(1rem, 1em);
+}
+.khedmty-settings-page :where(h1) { font-size: clamp(2rem, 5vw, 2.4rem); }
+.khedmty-settings-page :where(h2) { font-size: clamp(1.35rem, 4vw, 1.6rem); }
+.khedmty-settings-page :where(label) { line-height: 1.9; }
+.khedmty-settings-page :where(input, textarea) {
+  min-height: 54px;
+  font-size: 17px !important;
+}
+.khedmty-settings-page .settings-password-title {
+  color: #fff !important;
+  background: #14213d !important;
+  font-size: 1.35rem !important;
+  line-height: 1.6 !important;
+}
+.khedmty-settings-page .settings-provider-cta {
+  color: #fff !important;
+  font-size: 1.15rem !important;
+  line-height: 1.6 !important;
+}
