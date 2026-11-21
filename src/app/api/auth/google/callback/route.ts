@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
       : user.role === "PROVIDER" && user.status === "PENDING" ? "/pending"
       : user.role === "PROVIDER" ? "/provider" : "/services";
     const response = NextResponse.redirect(new URL(destination, req.url));
-    for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent"]) {
+    for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent", "khedmty_google_terms"]) {
       response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
     }
     return response;
