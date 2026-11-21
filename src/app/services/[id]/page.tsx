@@ -88,9 +88,11 @@ export default async function ServiceDetailsPage({
           select: { commissionRate: true },
         });
 
-        const commissionRate = settings?.commissionRate ?? 100;
-        const servicePrice = currentService.price;
-        const commission = commissionRate;
+        const commissionRate = settings?.commissionRate ?? 20;
+        if (!Number.isInteger(commissionRate) || commissionRate < 0 || commissionRate > 50) throw new Error("INVALID_COMMISSION_RATE");
+        const total = currentService.price;
+        const commission = Math.round((total * commissionRate) / 100);
+        const providerNet = total - commission;
 
         const order = await tx.order.create({
           data: {
@@ -101,10 +103,11 @@ export default async function ServiceDetailsPage({
             customerId: user.id,
             customerContact,
             providerId: currentService.providerId,
-            servicePrice,
+            servicePrice: total,
             commissionRate,
             commission,
-            total: servicePrice + commission,
+            providerNet,
+            total,
             status: "PENDING_PAYMENT",
           },
           select: { id: true },
@@ -130,9 +133,8 @@ export default async function ServiceDetailsPage({
     select: { commissionRate: true },
   });
 
-  const commissionRate = commissionRateSetting?.commissionRate ?? 100;
-  const commission = commissionRate;
-  const total = service.price + commission;
+  const commissionRate = commissionRateSetting?.commissionRate ?? 20;
+  const total = service.price;
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f6f8]">
@@ -183,29 +185,9 @@ export default async function ServiceDetailsPage({
               </h2>
 
               <div className="mt-5 space-y-3 text-sm">
-                <div className="flex justify-between gap-3">
-                  <span className="text-slate-300">سعر الخدمة</span>
-                  <span className="font-bold">
-                    {service.price.toLocaleString("en-US")} EG
-                  </span>
-                </div>
-
-                <div className="flex justify-between gap-3">
-                  <span className="text-slate-300">
-                    عمولة المنصة الثابتة
-                  </span>
-                  <span className="font-bold">
-                    {commission.toLocaleString("en-US")} EG
-                  </span>
-                </div>
-
-                <div className="border-t border-white/20 pt-4">
-                  <div className="flex justify-between gap-3">
-                    <span className="font-bold">الإجمالي المطلوب</span>
-                    <span className="text-2xl font-black text-orange-400">
-                      {total.toLocaleString("en-US")} EG
-                    </span>
-                  </div>
+                <div className="flex justify-between gap-3 border-t border-white/20 pt-4">
+                  <span className="font-bold">السعر النهائي المطلوب</span>
+                  <span className="text-2xl font-black text-orange-400">{total.toLocaleString("en-US")} EG</span>
                 </div>
               </div>
 
