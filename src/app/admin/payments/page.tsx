@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createStorageDownload, storageReady } from "@/lib/storage";
+import PaymentReviewForm from "./PaymentReviewForm";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,16 @@ async function reviewPayment(formData: FormData) {
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   const reviewNote = String(formData.get("reviewNote") || "").trim();
+  const transferReference = String(formData.get("transferReference") || "").trim();
+  const rawTransferDate = String(formData.get("transferDate") || "").trim();
+  const transferDate = rawTransferDate ? new Date(rawTransferDate) : null;
 
   if (
     !id ||
     !["APPROVED", "REJECTED"].includes(status) ||
     reviewNote.length > 1000 ||
+    transferReference.length > 120 ||
+    (transferDate && Number.isNaN(transferDate.getTime())) ||
     (status === "REJECTED" && !reviewNote)
   ) return;
 
@@ -56,6 +62,8 @@ async function reviewPayment(formData: FormData) {
           status: status as "APPROVED" | "REJECTED",
           reviewNote: reviewNote || null,
           reviewedAt: new Date(),
+          transferReference: transferReference || null,
+          transferDate,
         },
       });
 
@@ -209,21 +217,7 @@ export default async function AdminPaymentsPage() {
                 )}
 
                 {payment.status === "PENDING_REVIEW" && (
-                  <form action={reviewPayment} className="mt-5 space-y-3">
-                    <input type="hidden" name="id" value={payment.id} />
-                    <label className="block text-sm font-bold">
-                      ملاحظة أو سبب الرفض
-                      <textarea name="reviewNote" rows={2} maxLength={1000} className="mt-2 w-full rounded-xl border p-3" />
-                    </label>
-                    <div className="flex flex-wrap gap-3">
-                      <button name="status" value="APPROVED" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">
-                        تأكيد استلام المبلغ
-                      </button>
-                      <button name="status" value="REJECTED" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">
-                        رفض الإيصال
-                      </button>
-                    </div>
-                  </form>
+                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} />
                 )}
 
                 <p className="mt-4 text-xs text-slate-400">
