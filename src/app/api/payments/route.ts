@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const paymentSchema = z.object({
   orderId: z.string().min(1),
-  method: z.literal("WALLET_TRANSFER"),
+  method: z.enum(["INSTAPAY", "E_AND_MONEY", "ETISALAT_CASH", "OTHER"]),
   receiptUrl: z.string().min(1).max(500),
   amount: z.number().int().positive(),
 });
