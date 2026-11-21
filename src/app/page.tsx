@@ -42,11 +42,11 @@ export default function HomePage() {
                 </div>
                 <div className="mt-7 rounded-2xl bg-gradient-to-l from-orange-500 to-orange-400 p-5 text-white">
                   <p className="text-sm text-orange-50">وعد خِدمتي</p>
-                  <p className="mt-2 text-2xl font-black">خلّي مهارتك توصل للي محتاجها</p>
+                  <p className="home-hero-promise mt-2 font-black">خلّي مهارتك توصل للي محتاجها</p>
                 </div>
                 <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-slate-50 p-4"><span className="text-xs text-slate-500">للعملاء</span><p className="mt-2 font-black">اختار بوضوح</p></div>
-                  <div className="rounded-2xl bg-slate-50 p-4"><span className="text-xs text-slate-500">للمستقلين</span><p className="mt-2 font-black">اعرض مهارتك</p></div>
+                  <div className="home-hero-feature rounded-2xl bg-slate-50 p-3 sm:p-4"><span className="text-xs text-slate-500">للعملاء</span><p className="home-hero-feature-title mt-2 font-black">اختار بوضوح</p></div>
+                  <div className="home-hero-feature rounded-2xl bg-slate-50 p-3 sm:p-4"><span className="text-xs text-slate-500">للمستقلين</span><p className="home-hero-feature-title mt-2 font-black">اعرض مهارتك</p></div>
                 </div>
               </div>
             </div>
