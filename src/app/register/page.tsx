@@ -35,7 +35,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
         <p className="mt-3 text-center text-base leading-8 text-slate-300">حساب واحد يوصلك للخدمة اللي تحتاجها أو يفتح مهارتك لعملاء جدد.</p>
         {params.error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">{errors[params.error] || errors.server}</p>}
         <form action="/api/auth/google" method="GET" className="mt-7 grid gap-3">
-          <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold leading-7 text-slate-700">
+          <label className="terms-acceptance rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold leading-7 text-slate-700">
             <input type="checkbox" name="termsAccepted" value="yes" required className="mt-2 h-5 w-5 shrink-0 accent-orange-500"/>
             <span>قرأت وأوافق على <Link href="/terms" target="_blank" className="font-black text-orange-700 underline">شروط الخدمة</Link> وسياسة الاستخدام.</span>
           </label>
@@ -48,7 +48,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
           <div><label htmlFor="email" className="mb-2 block text-sm font-bold text-slate-700">البريد الإلكتروني</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="name@example.com" dir="ltr" className="w-full px-4 py-4 text-base text-left"/></div>
           <div><label htmlFor="password" className="mb-2 block text-sm font-bold text-slate-700">كلمة المرور</label><input id="password" name="password" type="password" autoComplete="new-password" minLength={10} maxLength={72} required placeholder="10 أحرف على الأقل" dir="ltr" className="w-full px-4 py-3.5 text-left"/></div>
           <div><label htmlFor="role" className="mb-2 block text-sm font-bold text-slate-700">نوع الحساب</label><select id="role" name="role" defaultValue="CUSTOMER" required className="w-full px-4 py-3.5"><option value="CUSTOMER">عميل - أريد شراء الخدمات</option><option value="PROVIDER">مقدم خدمة - أريد عرض خدماتي</option></select></div>
-          <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold leading-7 text-slate-700">
+          <label className="terms-acceptance rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold leading-7 text-slate-700">
             <input type="checkbox" name="termsAccepted" value="yes" required className="mt-2 h-5 w-5 shrink-0 accent-orange-500"/>
             <span>قرأت وأوافق على <Link href="/terms" target="_blank" className="font-black text-orange-700 underline">شروط الخدمة</Link> وسياسة الاستخدام.</span>
           </label>
