@@ -5,8 +5,8 @@ export function calculateOrderPricing(finalPrice) {
 
   const total = finalPrice;
   const commissionRate = 20;
-  const commission = Math.round((total * commissionRate) / 100);
-  const providerNet = total - commission;
+  const commission = (total * commissionRate / 100).toFixed(2);
+  const providerNet = (total - Number(commission)).toFixed(2);
 
   return {
     servicePrice: total,
