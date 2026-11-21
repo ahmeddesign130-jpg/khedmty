@@ -2337,3 +2337,27 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   font-size: 1.15rem !important;
   line-height: 1.6 !important;
 }
+
+
+/* Mobile home hero: keep Arabic words intact and prevent cramped card wrapping. */
+.home-hero-promise {
+  font-size: clamp(1.2rem, 4.8vw, 1.5rem);
+  line-height: 1.55;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+.home-hero-feature {
+  min-width: 0;
+  overflow: visible;
+}
+.home-hero-feature-title {
+  font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+  line-height: 1.65;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  white-space: normal;
+  text-wrap: balance;
+}
