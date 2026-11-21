@@ -81,7 +81,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   const roleLabel = user.role === "SUPER_ADMIN" ? "مدير المنصة" : user.role === "PROVIDER" ? "مقدم خدمة" : "عميل";
 
-  return <main dir="rtl" className="min-h-screen bg-[#f7f8fa]">
+  return <main dir="rtl" className="khedmty-settings-page min-h-screen bg-[#f7f8fa]">
     <header className="bg-white shadow-sm">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-5 py-5">
         <Link href="/" className="text-2xl font-black text-orange-500">خِدمتي</Link>
@@ -137,8 +137,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       </section>
       <section className="mt-7 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
         <span className="ui-icon-tile"><UiIcon name="shield" size={26}/></span>
-        <h2 className="mt-4 text-xl font-black text-[#14213d]">تغيير كلمة المرور</h2>
-        <p className="mt-2 text-sm leading-7 text-slate-500">استخدم كلمة مرور قوية لا تقل عن 10 أحرف.</p>
+        <h2 className="settings-password-title mt-4 inline-flex rounded-xl bg-[#14213d] px-4 py-2 text-xl font-black text-white">تغيير كلمة المرور</h2>
+        <p className="mt-2 text-base font-semibold leading-8 text-slate-700">استخدم كلمة مرور قوية لا تقل عن 10 أحرف.</p>
         <form action={changePassword} className="mt-5 grid gap-4 sm:grid-cols-2">
           <label className="block text-sm font-bold text-slate-700 sm:col-span-2">كلمة المرور الحالية
             <input name="currentPassword" type="password" autoComplete="current-password" required maxLength={72} className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500" dir="ltr"/>
@@ -156,8 +156,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       {user.role === "CUSTOMER" && <section className="mt-7 rounded-2xl border border-orange-200 bg-white p-6 shadow-sm">
         <span className="ui-icon-tile"><UiIcon name="briefcase" size={26}/></span>
         <h2 className="mt-4 text-xl font-black text-[#14213d]">تغيير نوع الحساب</h2>
-        <p className="mt-2 text-sm leading-7 text-slate-600">لو عايز تعرض خدماتك بدل شراء الخدمات، قدّم طلب التحويل لمقدم خدمة. هتفضل عميل لحد موافقة الإدارة.</p>
-        <Link href="/account#provider-application" className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-500 px-5 py-3 font-black text-white">التحويل إلى مقدم خدمة</Link>
+        <p className="mt-2 text-base font-semibold leading-8 text-slate-700">تقدر تقدم طلب للانضمام كمقدم خدمة وعرض خدماتك على المنصة. حسابك هيفضل حساب عميل لحد ما الإدارة تراجع طلبك وتوافق عليه.</p>
+        <Link href="/account#provider-application" className="settings-provider-cta mt-5 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-orange-500 px-6 py-4 text-lg font-black text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 sm:w-auto"><UiIcon name="briefcase" size={22}/> أريد أن أصبح مقدم خدمة <UiIcon name="arrow-left" size={20}/></Link>
       </section>}
       {user.role === "CUSTOMER" && <section className="mt-7 rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
         <span className="ui-icon-tile"><UiIcon name="user" size={26}/></span>
