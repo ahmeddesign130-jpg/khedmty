@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function PaymentSubmissionForm({ orderId, amount }: { orderId: string; amount: number }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
+  const [method, setMethod] = useState("INSTAPAY");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,7 +30,7 @@ export default function PaymentSubmissionForm({ orderId, amount }: { orderId: st
       const response = await fetch("/api/payments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, method: "WALLET_TRANSFER", receiptUrl: sign.objectPath, amount }),
+        body: JSON.stringify({ orderId, method, receiptUrl: sign.objectPath, amount }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "تعذر إرسال إثبات التحويل.");
