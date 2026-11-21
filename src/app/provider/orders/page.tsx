@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import DeliveryUploadForm from "./DeliveryUploadForm";
 
 export const dynamic = "force-dynamic";
 async function changeStatus(formData:FormData) {
@@ -38,5 +39,5 @@ export default async function ProviderOrdersPage() {
  return <main dir="rtl" className="min-h-screen bg-slate-50 p-5 md:p-9"><section aria-labelledby="provider-orders-title" className="mx-auto max-w-5xl"><header className="mb-5"><Link href="/provider" className="font-bold text-orange-600">← لوحة مقدم الخدمة</Link></header><h1 id="provider-orders-title" className="mt-5 text-3xl font-black">طلبات العملاء</h1>
  {orders.length===0?<p className="mt-7 rounded-2xl bg-white p-8 text-center">لا توجد طلبات حتى الآن.</p>:<div className="mt-7 space-y-4">{orders.map(o=><article key={o.id} className="rounded-2xl bg-white p-5 shadow-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{o.orderNo}</strong><span className="text-sm font-bold text-orange-600">{labels[o.status]}</span></div><p className="mt-3 text-sm text-slate-600">العميل: {o.customer.displayName}</p><p className="mt-2 text-xs text-slate-500">بيانات التواصل مخفية — تسليم العمل يتم للإدارة.</p><p className="mt-2 font-black">صافي مستحقاتك: {o.providerNet.toLocaleString("en-US")} EG</p><Link href={`/orders/${o.id}`} className="mt-4 inline-block text-sm font-bold text-orange-600">تفاصيل الطلب</Link>
  {o.status==="PAID"||o.status==="REVISION_REQUESTED"?<form action={changeStatus} className="mt-4 flex flex-wrap gap-2"><input type="hidden" name="id" value={o.id}/><button name="status" value="IN_PROGRESS" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">بدء التنفيذ</button>{o.status==="PAID"?null:<button name="status" value="DELIVERED" className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white">تسليم الخدمة</button>}</form>:null}
- {o.status==="IN_PROGRESS"?<form action={changeStatus} className="mt-4"><input type="hidden" name="id" value={o.id}/><button name="status" value="DELIVERED" className="rounded-lg bg-green-600 px-4 py-3 font-bold text-white">إرسال العمل للإدارة للمراجعة</button></form>:null}</article>)}</div>}</section></main>;
+ {o.status==="IN_PROGRESS"||o.status==="REVISION_REQUESTED"?<DeliveryUploadForm orderId={o.id}/>:null}</article>)}</div>}</section></main>;
 }
