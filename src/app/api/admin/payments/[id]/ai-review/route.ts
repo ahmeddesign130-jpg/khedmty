@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { createStorageDownload, storageReady } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
+
+type ResponsesApiPayload = {
+  output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
+};
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
@@ -35,12 +39,12 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
       }),
       cache: "no-store",
     });
-    const payload = await response.json().catch(() => ({}));
+    const payload = await response.json().catch(() => ({})) as ResponsesApiPayload;
     if (!response.ok) {
       console.error("RECEIPT_AI_REVIEW_ERROR", response.status, payload);
       return NextResponse.json({ message: "تعذر إجراء الفحص حالياً." }, { status: 502 });
     }
-    const outputText = (payload.output || []).flatMap((item: any) => item.content || []).find((part: any) => part.type === "output_text")?.text || "";
+    const outputText = payload.output?.flatMap((item) => item.content ?? []).find((part) => part.type === "output_text")?.text ?? "";
     let parsed: { status?: string; summary?: string };
     try { parsed = JSON.parse(outputText); } catch { parsed = { status: "NEEDS_REVIEW", summary: "لم تُرجع أداة الفحص نتيجة منظمة؛ يلزم فحص يدوي." }; }
     const allowed = new Set(["SUSPICIOUS", "NEEDS_REVIEW", "NO_CLEAR_SIGNS"]);
