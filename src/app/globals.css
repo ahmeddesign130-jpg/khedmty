@@ -2386,3 +2386,7 @@ html[data-theme="dark"] main [class*="bg-blue-50"] { background-color:#1b3048!im
 html[data-theme="dark"] .dark-control-shell { color:#edf2f8!important; }
 html[data-theme="dark"] .settings-surface h2,
 html[data-theme="dark"] .settings-surface h3 { color:#edf2f8!important; }
+
+/* Keep small orange links readable on light surfaces without changing orange buttons. */
+html:not([data-theme="dark"]) main [class*="text-orange-500"],
+html:not([data-theme="dark"]) main [class*="text-orange-600"] { color:#b84c0d!important; }
