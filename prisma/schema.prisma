@@ -160,6 +160,7 @@ model OrderDeliveryFile {
   sizeBytes   Int
   createdAt   DateTime @default(now())
   order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@index([orderId, createdAt])
 }
 
 model Notification {
@@ -171,4 +172,5 @@ model Notification {
   readAt    DateTime?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
 }
