@@ -45,6 +45,30 @@ async function updateProfile(formData: FormData) {
   redirect("/settings?success=profile");
 }
 
+
+async function requestAccountDeletion(formData: FormData) {
+  "use server";
+  const session = await getCurrentUser();
+  if (!session || session.status !== "ACTIVE" || session.role !== "CUSTOMER") redirect("/login");
+  const confirmation = String(formData.get("confirmation") || "").trim();
+  if (confirmation !== "حذف حسابي") redirect("/settings?error=delete_confirmation");
+  const activeOrders = await prisma.order.count({
+    where: { customerId: session.id, status: { notIn: ["COMPLETED", "CANCELLED", "REJECTED"] } },
+  });
+  if (activeOrders > 0) redirect("/settings?error=delete_active_orders");
+  const previous = await prisma.auditLog.findFirst({
+    where: { targetId: session.id, action: "ACCOUNT_DELETION_REQUESTED" },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+  if (previous) redirect("/settings?success=delete_pending");
+  await prisma.auditLog.create({
+    data: { actorId: session.id, targetId: session.id, action: "ACCOUNT_DELETION_REQUESTED", details: "طلب العميل حذف الحساب؛ يحتاج مراجعة الإدارة والتأكد من عدم وجود التزامات مالية أو نزاعات." },
+  });
+  revalidatePath("/settings");
+  redirect("/settings?success=delete_pending");
+}
+
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ success?: string; error?: string }> }) {
   const params = await searchParams;
   const session = await getCurrentUser();
@@ -70,6 +94,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       {params.error === "password_invalid" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">تأكد من تطابق كلمتي المرور وأن الجديدة 10 أحرف على الأقل.</p>}
       {params.error === "password_current" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">كلمة المرور الحالية غير صحيحة.</p>}
       {params.error === "invalid_profile" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">راجع البيانات المدخلة وحاول مرة أخرى.</p>}
+      {params.error === "delete_confirmation" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">اكتب «حذف حسابي» كما هي لتأكيد طلب الحذف.</p>}
+      {params.error === "delete_active_orders" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-700">لا يمكن طلب حذف الحساب قبل انتهاء الطلبات النشطة وتسوية أي التزامات.</p>}
+      {params.success === "delete_pending" && <p role="status" className="mb-5 rounded-xl bg-amber-50 p-4 font-bold text-amber-900">تم تسجيل طلب حذف حسابك للمراجعة الإدارية. سيظل الحساب موجودًا حتى تراجع الإدارة الطلب وتتأكد من تسوية الالتزامات.</p>}
       <div className="rounded-3xl bg-[#14213d] p-7 text-white shadow-lg">
         <span className="ui-icon-tile ui-icon-tile-dark"><UiIcon name="settings" size={28}/></span>
         <p className="mt-4 text-orange-300">تحكم في تفضيلاتك</p>
@@ -125,6 +152,24 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           <button type="submit" className="rounded-xl bg-[#14213d] px-5 py-3.5 font-black text-white transition hover:bg-orange-600 sm:col-span-2">تحديث كلمة المرور</button>
         </form>
       </section>
+
+      {user.role === "CUSTOMER" && <section className="mt-7 rounded-2xl border border-orange-200 bg-white p-6 shadow-sm">
+        <span className="ui-icon-tile"><UiIcon name="briefcase" size={26}/></span>
+        <h2 className="mt-4 text-xl font-black text-[#14213d]">تغيير نوع الحساب</h2>
+        <p className="mt-2 text-sm leading-7 text-slate-600">لو عايز تعرض خدماتك بدل شراء الخدمات، قدّم طلب التحويل لمقدم خدمة. هتفضل عميل لحد موافقة الإدارة.</p>
+        <Link href="/account#provider-application" className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-500 px-5 py-3 font-black text-white">التحويل إلى مقدم خدمة</Link>
+      </section>}
+      {user.role === "CUSTOMER" && <section className="mt-7 rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
+        <span className="ui-icon-tile"><UiIcon name="user-x" size={26}/></span>
+        <h2 className="mt-4 text-xl font-black text-red-700">حذف الحساب</h2>
+        <p className="mt-2 text-sm leading-7 text-slate-600">يرسل هذا الإجراء طلب حذف إلى الإدارة. لا يتم حذف سجلات الطلبات والمدفوعات تلقائيًا، ويجب تسوية الطلبات النشطة والنزاعات أولًا.</p>
+        <form action={requestAccountDeletion} className="mt-4 space-y-3">
+          <label className="block text-sm font-bold text-slate-700">اكتب «حذف حسابي» لتأكيد الطلب
+            <input name="confirmation" required autoComplete="off" placeholder="حذف حسابي" className="mt-2 w-full rounded-xl border border-slate-200 p-3"/>
+          </label>
+          <button type="submit" className="min-h-12 rounded-xl bg-red-600 px-5 py-3 font-black text-white">إرسال طلب حذف الحساب</button>
+        </form>
+      </section>}
       <div className="mt-5"><AppearanceLanguageControls userId={session.id} /></div>
     </section>
   </main>;
