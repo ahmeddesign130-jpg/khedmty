@@ -126,8 +126,6 @@ model Payment {
   reviewedAt  DateTime?
   transferReference String?
   transferDate DateTime?
-  aiReviewStatus String?
-  aiReviewSummary String? @db.Text
 
   order     Order    @relation(fields: [orderId], references: [id])
   createdAt DateTime @default(now())
