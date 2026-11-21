@@ -1,8 +1,8 @@
 export type OrderPriceSnapshot = {
   servicePrice: number;
   commissionRate: 20;
-  commission: number;
-  providerNet: number;
+  commission: string;
+  providerNet: string;
   total: number;
 };
 export function calculateOrderPricing(finalPrice: number): OrderPriceSnapshot;
