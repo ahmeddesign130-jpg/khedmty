@@ -160,7 +160,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <Link href="/account#provider-application" className="mt-4 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-500 px-5 py-3 font-black text-white">التحويل إلى مقدم خدمة</Link>
       </section>}
       {user.role === "CUSTOMER" && <section className="mt-7 rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-        <span className="ui-icon-tile"><UiIcon name="user-x" size={26}/></span>
+        <span className="ui-icon-tile"><UiIcon name="user" size={26}/></span>
         <h2 className="mt-4 text-xl font-black text-red-700">حذف الحساب</h2>
         <p className="mt-2 text-sm leading-7 text-slate-600">يرسل هذا الإجراء طلب حذف إلى الإدارة. لا يتم حذف سجلات الطلبات والمدفوعات تلقائيًا، ويجب تسوية الطلبات النشطة والنزاعات أولًا.</p>
         <form action={requestAccountDeletion} className="mt-4 space-y-3">
