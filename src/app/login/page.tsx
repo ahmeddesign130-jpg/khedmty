@@ -21,8 +21,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <main dir="rtl" className="auth-v7-page flex min-h-screen items-center justify-center px-5 py-10">
       <section className="auth-v7-card auth-readable glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
-        <Link href="/" className="block text-center text-3xl font-black text-orange-600">خِدمتي</Link>
-        <h1 className="mt-8 text-center text-3xl font-black text-white">تسجيل الدخول</h1>
+        <h1 className="mt-3 text-center text-3xl font-black text-white">تسجيل الدخول</h1>
         <p className="mt-3 text-center text-base leading-8 text-slate-300">كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.</p>
         {params.registered === "1" && <p role="status" className="mt-5 rounded-xl bg-green-50 p-4 text-sm font-bold text-green-700">تم إنشاء حسابك بنجاح. سجّل الدخول الآن.</p>}
         {params.error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">{errors[params.error] || errors.server}</p>}
