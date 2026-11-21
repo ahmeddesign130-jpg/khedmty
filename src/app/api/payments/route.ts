@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const parsed = paymentSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ message: "بيانات الدفع غير صحيحة." }, { status: 400 });
 
-    const { orderId, receiptUrl, amount } = parsed.data;
+    const { orderId, receiptUrl, amount, method } = parsed.data;
     const walletConfigured = Boolean((process.env.PAYMENT_WALLET_NUMBER || process.env.ETISALAT_CASH_NUMBER || "").trim());
     if (!walletConfigured) return NextResponse.json({ message: "محفظة الاستقبال غير مفعّلة حاليًا." }, { status: 503 });
     if (!receiptUrl.startsWith(`${user.id}/`) || receiptUrl.includes("..") || receiptUrl.startsWith("/")) {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const payment = await prisma.$transaction(async (tx) => {
       const claimed = await tx.order.updateMany({ where: { id: orderId, customerId: user.id, status: "PENDING_PAYMENT" }, data: { status: "PAYMENT_REVIEW" } });
       if (claimed.count !== 1) throw new Error("PAYMENT_SUBMISSION_CONFLICT");
-      const created = await tx.payment.create({ data: { orderId, method: "WALLET_TRANSFER", receiptUrl, amount, status: "PENDING_REVIEW" } });
+      const created = await tx.payment.create({ data: { orderId, method, receiptUrl, amount, status: "PENDING_REVIEW" } });
       await tx.auditLog.create({ data: { actorId: user.id, action: "PAYMENT_SUBMITTED", targetId: created.id, details: `تم إرسال إيصال تحويل المحفظة للطلب ${order.orderNo} بمبلغ ${amount}` } });
       return created;
     });
