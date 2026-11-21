@@ -2005,13 +2005,9 @@ main :where(label,p,li,td,th,small) { line-height:1.8; }
 }
 
 /* Light theme: never allow pale copy on white or pale cards. */
-html:not([data-theme="dark"]) main :where(.text-white,.text-slate-100,.text-slate-200,.text-gray-100,.text-gray-200) {
-  color:#243451;
-}
 html:not([data-theme="dark"]) main :where(.bg-white,.bg-slate-50,.bg-slate-100,.bg-gray-50,.bg-gray-100,.bg-\[\#f7f8fa\],.bg-\[\#f6f7fb\]) :where(.text-white,.text-slate-100,.text-slate-200,.text-slate-300,.text-gray-100,.text-gray-200,.text-gray-300) {
   color:#344258 !important; -webkit-text-fill-color:#344258 !important;
 }
-html:not([data-theme="dark"]) main :where(.text-slate-300,.text-gray-300,.text-zinc-300) { color:#47566d !important; }
 html:not([data-theme="dark"]) main :where(.text-slate-400,.text-gray-400,.text-zinc-400) { color:#596579 !important; }
 
 /* Dark theme: pale cards become dark surfaces and all ordinary copy becomes light. */
