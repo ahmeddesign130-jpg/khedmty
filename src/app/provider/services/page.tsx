@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateOrderPricing } from "@/lib/pricing.mjs";
 import ServiceCreateForm from "./ServiceCreateForm";
 export const dynamic="force-dynamic";
 export default async function ProviderServicesPage(){
@@ -16,6 +17,6 @@ export default async function ProviderServicesPage(){
  <h1 id="provider-services-title" className="mt-5 text-3xl font-black text-slate-900">خدماتي</h1>
  <ServiceCreateForm/>
  <h2 className="mt-9 text-xl font-black">الخدمات المضافة ({services.length})</h2>
- <div className="mt-4 space-y-3">{services.map(s=><article key={s.id} className="rounded-2xl bg-white p-5 shadow-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{s.title}</strong><span className="text-sm font-bold text-orange-600">{status[s.status]}</span></div>{s.reviewNote&&<p className="mt-3 rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">ملاحظة الإدارة: {s.reviewNote}</p>}<p className="mt-2 font-black">{s.price.toLocaleString("en-US")} EG</p>{s.mediaUrls.length>0&&<div className="mt-4 flex flex-wrap gap-3">{s.mediaUrls.map((url,i)=><a key={url} href={url} target="_blank" rel="noreferrer" className="text-sm font-bold text-orange-600">فتح الملف {i+1}</a>)}</div>}</article>)}</div>
+ <div className="mt-4 space-y-3">{services.map(s=><article key={s.id} className="rounded-2xl bg-white p-5 shadow-sm"><div className="flex flex-wrap justify-between gap-2"><strong>{s.title}</strong><span className="text-sm font-bold text-orange-600">{status[s.status]}</span></div>{s.reviewNote&&<p className="mt-3 rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">ملاحظة الإدارة: {s.reviewNote}</p>}{s.status==="APPROVED"?<p className="mt-2 font-black">صافي مستحقاتك: {calculateOrderPricing(s.price).providerNet.toLocaleString("en-US")} EG</p>:<p className="mt-2 text-sm text-slate-600">السعر النهائي يحدده الأدمن عند اعتماد الخدمة.</p>}{s.mediaUrls.length>0&&<div className="mt-4 flex flex-wrap gap-3">{s.mediaUrls.map((url,i)=><a key={url} href={url} target="_blank" rel="noreferrer" className="text-sm font-bold text-orange-600">فتح الملف {i+1}</a>)}</div>}</article>)}</div>
  </section></main>;
 }
