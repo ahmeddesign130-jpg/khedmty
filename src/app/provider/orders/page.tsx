@@ -12,15 +12,15 @@ async function changeStatus(formData:FormData) {
   if (!user || user.role !== "PROVIDER" || user.status !== "ACTIVE") redirect("/login");
   const id = String(formData.get("id") || "");
   const next = String(formData.get("status") || "");
-  if (!id || !["IN_PROGRESS","DELIVERED"].includes(next)) return;
+  if (!id || next !== "IN_PROGRESS") return;
   const order = await prisma.order.findFirst({where:{id,providerId:user.id}});
   if (!order) return;
-  const allowed = order.status === "PAID" && next === "IN_PROGRESS" || order.status === "IN_PROGRESS" && next === "DELIVERED" || order.status === "REVISION_REQUESTED" && ["IN_PROGRESS","DELIVERED"].includes(next);
+  const allowed = order.status === "PAID" && next === "IN_PROGRESS" || order.status === "REVISION_REQUESTED" && next === "IN_PROGRESS";
   if (!allowed) return;
   await prisma.$transaction(async (tx) => {
     const updated = await tx.order.updateMany({
       where: { id, providerId: user.id, status: order.status },
-      data: { status: next as "IN_PROGRESS" | "DELIVERED" },
+      data: { status: "IN_PROGRESS" },
     });
     if (updated.count !== 1) throw new Error("ORDER_STATUS_CONFLICT");
     await tx.auditLog.create({
