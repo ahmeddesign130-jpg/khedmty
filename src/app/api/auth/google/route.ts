@@ -26,6 +26,9 @@ export async function GET(req: NextRequest) {
 
   const requestedRole = req.nextUrl.searchParams.get("role") === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
   const intent = req.nextUrl.searchParams.get("intent") === "login" ? "login" : "register";
+  const termsAccepted = req.nextUrl.searchParams.get("termsAccepted") === "yes";
+  if (intent === "register" && !termsAccepted) return NextResponse.redirect(new URL("/register?error=terms_required", req.url));
+  const intent = req.nextUrl.searchParams.get("intent") === "login" ? "login" : "register";
   const state = randomBytes(32).toString("hex");
   const verifier = randomBytes(48).toString("base64url");
   const challenge = createHash("sha256").update(verifier).digest("base64url");
@@ -47,5 +50,6 @@ export async function GET(req: NextRequest) {
   response.cookies.set("khedmty_google_verifier", verifier, cookieOptions);
   response.cookies.set("khedmty_google_role", requestedRole, cookieOptions);
   response.cookies.set("khedmty_google_intent", intent, cookieOptions);
+  if (intent === "register") response.cookies.set("khedmty_google_terms", "2026-11-21", cookieOptions);
   return response;
 }
