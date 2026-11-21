@@ -101,7 +101,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <span className="ui-icon-tile ui-icon-tile-dark"><UiIcon name="settings" size={28}/></span>
         <p className="mt-4 text-orange-300">تحكم في تفضيلاتك</p>
         <h1 className="mt-2 text-3xl font-black">الإعدادات</h1>
-        <p className="mt-3 leading-8 text-slate-300">إعدادات الحساب واللغة والمظهر في مكان واحد.</p>
+        <p className="mt-3 leading-8 text-slate-300">إعدادات الحساب ولغة الموقع في مكان واحد.</p>
       </div>
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <section className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
