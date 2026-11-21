@@ -91,17 +91,19 @@ model Service {
 }
 
 model Order {
-  id             String      @id @default(cuid())
-  orderNo        String      @unique
-  serviceId      String
-  customerId     String
-  customerContact String?    @db.Text
-  providerId     String
-  servicePrice   Int
-  commissionRate Int         @default(100)
-  commission     Int
-  total          Int
-  status         OrderStatus @default(PENDING_PAYMENT)
+  id              String      @id @default(cuid())
+  orderNo         String      @unique
+  serviceId       String
+  customerId      String
+  customerContact String?     @db.Text
+  providerId      String
+  // Immutable snapshots of the final customer price and its split at purchase time.
+  servicePrice    Int
+  commissionRate  Int         @default(20)
+  commission      Int
+  providerNet     Int         @default(0)
+  total           Int
+  status          OrderStatus @default(PENDING_PAYMENT)
 
   customer  User      @relation("CustomerOrders", fields: [customerId], references: [id])
   provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
@@ -125,7 +127,8 @@ model Payment {
 
 model PlatformSettings {
   id             String   @id @default("main")
-  commissionRate Int      @default(100)
+  // Percentage of the final customer price; default platform share is 20%.
+  commissionRate Int      @default(20)
   updatedAt      DateTime @updatedAt
 }
 
