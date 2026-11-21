@@ -14,16 +14,17 @@ async function reviewExistingProvider(formData: FormData) {
   const id = String(formData.get("id") || "");
   const action = String(formData.get("action") || "");
   const reason = String(formData.get("reason") || "").trim();
-  if (!id || !["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && !reason)) return;
+  if (!id || !["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && reason.length < 3)) redirect("/admin/providers?review=invalid");
   const provider = await prisma.user.findFirst({ where: { id, role: "PROVIDER", status: "PENDING" } });
-  if (!provider) return;
-  await prisma.$transaction(async (tx) => {
+  if (!provider) redirect("/admin/providers?review=not_found");
+  try { await prisma.$transaction(async (tx) => {
     const updated = await tx.user.updateMany({ where: { id, role: "PROVIDER", status: "PENDING" }, data: { status: action === "APPROVE" ? "ACTIVE" : "SUSPENDED" } });
     if (updated.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
     await tx.auditLog.create({ data: { actorId: admin.id, action: action === "APPROVE" ? "PROVIDER_APPROVED" : "PROVIDER_REJECTED", targetId: id, details: action === "REJECT" ? reason : "تمت الموافقة" } });
-  });
+  }); } catch (error) { console.error("Provider account review failed:", error); redirect("/admin/providers?review=failed"); }
   revalidatePath("/admin/providers");
   revalidatePath("/admin");
+  redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
 }
 
 async function reviewCustomerApplication(formData: FormData) {
@@ -33,13 +34,13 @@ async function reviewCustomerApplication(formData: FormData) {
   const id = String(formData.get("id") || "");
   const action = String(formData.get("action") || "");
   const reason = String(formData.get("reason") || "").trim();
-  if (!id || !["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) return;
+  if (!id || !["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers?review=invalid");
   const latest = await prisma.auditLog.findFirst({
     where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_SUBMITTED", "PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
     orderBy: { createdAt: "desc" }, select: { action: true },
   });
-  if (latest?.action !== "PROVIDER_APPLICATION_SUBMITTED") return;
-  await prisma.$transaction(async (tx) => {
+  if (latest?.action !== "PROVIDER_APPLICATION_SUBMITTED") redirect("/admin/providers?review=not_found");
+  try { await prisma.$transaction(async (tx) => {
     if (action === "APPROVE") {
       const application = await tx.auditLog.findFirst({
         where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
@@ -59,13 +60,15 @@ async function reviewCustomerApplication(formData: FormData) {
     await tx.auditLog.create({
       data: { actorId: admin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? reason : "تمت الموافقة على طلب التحويل إلى مقدم خدمة." },
     });
-  });
+  }); } catch (error) { console.error("Customer-to-provider review failed:", error); redirect("/admin/providers?review=failed"); }
   revalidatePath("/admin/providers");
   revalidatePath("/account");
   revalidatePath("/admin");
+  redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
 }
 
-export default async function AdminProvidersPage() {
+export default async function AdminProvidersPage({ searchParams }: { searchParams: Promise<{ review?: string }> }) {
+  const params = await searchParams;
   const admin = await getCurrentUser();
   if (!admin) redirect("/login");
   if (admin.role !== "SUPER_ADMIN") redirect("/account");
@@ -109,6 +112,11 @@ export default async function AdminProvidersPage() {
     <section aria-labelledby="admin-providers-title" className="mx-auto max-w-5xl">
       <header className="mb-5"><Link href="/admin" className="font-bold text-orange-600">← لوحة الإدارة</Link></header>
       <h1 id="admin-providers-title" className="mt-5 text-3xl font-black text-[#14213d]">مراجعة مقدمي الخدمات</h1>
+      {params.review === "approved" && <p role="status" className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4 font-bold text-green-800">تمت الموافقة وتحديث الحساب بنجاح.</p>}
+      {params.review === "rejected" && <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 font-bold text-amber-900">تم تسجيل رفض الطلب مع السبب.</p>}
+      {params.review === "failed" && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 font-bold text-red-800">لم تتم العملية. لم يتم تغيير الحساب. راجع السجلات وحاول مرة أخرى.</p>}
+      {params.review === "invalid" && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 font-bold text-red-800">البيانات غير مكتملة أو سبب الرفض قصير.</p>}
+      {params.review === "not_found" && <p role="alert" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 font-bold text-amber-900">الطلب لم يعد قيد المراجعة أو تمت معالجته من قبل.</p>}
       <p className="mt-2 text-slate-600">راجع طلبات التحويل وطلبات الانضمام الجديدة. الرقم القومي يظهر للمسؤولين فقط.</p>
 
       <h2 className="mt-8 text-xl font-black text-[#14213d]">طلبات تحويل العملاء إلى مقدمي خدمة ({applicants.length})</h2>
@@ -129,7 +137,7 @@ export default async function AdminProvidersPage() {
             <form action={reviewCustomerApplication} className="mt-4 space-y-3">
               <input type="hidden" name="id" value={item.targetId}/>
               <label className="block text-sm font-bold text-slate-700">سبب الرفض (مطلوب عند الرفض)<textarea name="reason" maxLength={1000} rows={2} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
-              <div className="flex flex-wrap gap-3"><button name="action" value="APPROVE" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">الموافقة وتحويله لمقدم خدمة</button><button name="action" value="REJECT" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">رفض الطلب</button></div>
+              <div className="flex flex-wrap gap-3"><button type="submit" name="action" value="APPROVE" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">الموافقة وتحويله لمقدم خدمة</button><button type="submit" name="action" value="REJECT" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">رفض الطلب</button></div>
             </form>
           </article>;
         })}</div>
