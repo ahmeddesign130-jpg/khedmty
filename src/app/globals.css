@@ -1964,3 +1964,129 @@ html[data-theme="dark"] .khedmty-side-drawer .menu-preference-button.is-active {
   background: #49301f !important;
   border-color: #ff9a43 !important;
 }
+
+
+/* Khedmty global accessibility + typography contract (all routes, both themes). */
+@import url("https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap");
+html { font-size:16px; }
+body, body :where(button,input,select,textarea) {
+  font-family:"Alexandria","Noto Sans Arabic",Tahoma,Arial,sans-serif !important;
+}
+html[lang="en"] body, html[data-locale="en"] body,
+html[lang="en"] body :where(button,input,select,textarea),
+html[data-locale="en"] body :where(button,input,select,textarea) {
+  font-family:"DM Sans","Segoe UI",Arial,sans-serif !important;
+}
+body { font-size:17px !important; line-height:1.8 !important; }
+main :where(.text-xs) { font-size:14px !important; line-height:1.65 !important; }
+main :where(.text-sm) { font-size:15.5px !important; line-height:1.75 !important; }
+main :where(.text-base) { font-size:17px !important; line-height:1.8 !important; }
+main :where(.text-lg) { font-size:19px !important; line-height:1.75 !important; }
+main :where(.text-xl) { font-size:21px !important; line-height:1.65 !important; }
+main :where(.text-2xl) { font-size:26px !important; line-height:1.5 !important; }
+main :where(.text-3xl) { font-size:32px !important; line-height:1.4 !important; }
+main :where(.text-4xl) { font-size:38px !important; line-height:1.3 !important; }
+main :where(h1) { font-size:clamp(28px,6vw,40px) !important; line-height:1.35 !important; font-weight:900 !important; }
+main :where(h2) { font-size:clamp(24px,5vw,32px) !important; line-height:1.45 !important; font-weight:850 !important; }
+main :where(h3) { font-size:clamp(20px,4.3vw,27px) !important; line-height:1.5 !important; font-weight:800 !important; }
+main :where(button,a,[role="button"]) { font-weight:750; }
+main :where(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  font-size:17px !important; line-height:1.6 !important; min-height:54px;
+}
+main :where(input,textarea)::placeholder { font-size:15px !important; opacity:1 !important; }
+main :where(label,p,li,td,th,small) { line-height:1.8; }
+@media (max-width:640px) {
+  body { font-size:17px !important; }
+  main :where(.text-xs) { font-size:14px !important; }
+  main :where(.text-sm) { font-size:15.5px !important; }
+  main :where(.text-base) { font-size:17px !important; }
+  main :where(.text-lg) { font-size:19px !important; }
+  main :where(.text-xl) { font-size:21px !important; }
+}
+
+/* Light theme: never allow pale copy on white or pale cards. */
+html:not([data-theme="dark"]) main :where(.text-white,.text-slate-100,.text-slate-200,.text-gray-100,.text-gray-200) {
+  color:#243451;
+}
+html:not([data-theme="dark"]) main :where(.bg-white,.bg-slate-50,.bg-slate-100,.bg-gray-50,.bg-gray-100,.bg-\[\#f7f8fa\],.bg-\[\#f6f7fb\]) :where(.text-white,.text-slate-100,.text-slate-200,.text-slate-300,.text-gray-100,.text-gray-200,.text-gray-300) {
+  color:#344258 !important; -webkit-text-fill-color:#344258 !important;
+}
+html:not([data-theme="dark"]) main :where(.text-slate-300,.text-gray-300,.text-zinc-300) { color:#47566d !important; }
+html:not([data-theme="dark"]) main :where(.text-slate-400,.text-gray-400,.text-zinc-400) { color:#596579 !important; }
+
+/* Dark theme: pale cards become dark surfaces and all ordinary copy becomes light. */
+html[data-theme="dark"] body { color:#edf3fc !important; background:#0b1220 !important; }
+html[data-theme="dark"] main { color:#edf3fc !important; }
+html[data-theme="dark"] main :where(.bg-white,.bg-slate-50,.bg-slate-100,.bg-gray-50,.bg-gray-100,.bg-zinc-50,.bg-\[\#f7f8fa\],.bg-\[\#f6f7fb\],.bg-\[\#f5f6f8\]) {
+  background-color:#17243a !important; border-color:#354761 !important;
+}
+html[data-theme="dark"] main :where(.text-\[\#14213d\],.text-slate-900,.text-slate-800,.text-slate-700,.text-gray-900,.text-gray-800,.text-gray-700,.text-slate-600,.text-gray-600,.text-black) {
+  color:#edf3fc !important; -webkit-text-fill-color:#edf3fc !important;
+}
+html[data-theme="dark"] main :where(.text-slate-500,.text-slate-400,.text-gray-500,.text-gray-400,.text-zinc-500,.text-zinc-400,.text-slate-300,.text-gray-300) {
+  color:#c4cfdf !important; -webkit-text-fill-color:#c4cfdf !important;
+}
+html[data-theme="dark"] main :where(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  background:#101a2b !important; color:#f1f5fb !important; -webkit-text-fill-color:#f1f5fb !important; border-color:#465873 !important;
+}
+html[data-theme="dark"] main :where(input,textarea)::placeholder { color:#a8b6ca !important; -webkit-text-fill-color:#a8b6ca !important; }
+html[data-theme="dark"] main :where(button,a)[class*="bg-white"],
+html[data-theme="dark"] main :where(button,a)[class*="bg-slate-50"],
+html[data-theme="dark"] main :where(button,a)[class*="bg-gray-50"] {
+  background:#fff !important; color:#17233d !important; -webkit-text-fill-color:#17233d !important;
+}
+html[data-theme="dark"] main :where(button,a)[class*="bg-orange"],
+html[data-theme="dark"] main :where(button,a)[class*="bg-green"],
+html[data-theme="dark"] main :where(button,a)[class*="bg-red"],
+html[data-theme="dark"] main :where(button,a)[class*="bg-gradient-to-"] {
+  color:#fff !important; -webkit-text-fill-color:#fff !important;
+}
+
+/* Drawer, menu choices, navigation tabs and icons. */
+html[data-theme="dark"] .khedmty-side-drawer,
+html[data-theme="dark"] #khedmty-side-menu { background:#121d30 !important; color:#edf3fc !important; border-color:#354761 !important; }
+html[data-theme="dark"] .khedmty-side-drawer :where(p,span,a,button,label,small,strong),
+html[data-theme="dark"] #khedmty-side-menu :where(p,span,a,button,label,small,strong) { color:#edf3fc !important; }
+html[data-theme="dark"] .glassy-nav-tab,
+html[data-theme="dark"] #khedmty-side-menu .glassy-nav-tab {
+  background:linear-gradient(135deg,#26364f,#1a2940) !important; color:#f1f5fb !important; border-color:#465873 !important;
+}
+html[data-theme="dark"] .glassy-nav-tab.is-active,
+html[data-theme="dark"] .glassy-nav-tab:hover {
+  background:linear-gradient(120deg,#49301f,#26364f) !important; color:#fff !important; border-color:#f47721 !important;
+}
+html[data-theme="dark"] .glassy-nav-icon,
+html[data-theme="dark"] .ui-icon-tile,
+html[data-theme="dark"] .ios-icon-glass {
+  background:#26364f !important; color:#ffbd83 !important; border-color:#465873 !important;
+}
+html[data-theme="dark"] .menu-preference-button {
+  background:#1b2a41 !important; color:#edf3fc !important; border-color:#465873 !important;
+}
+html[data-theme="dark"] .menu-preference-button.is-active {
+  background:#49301f !important; color:#fff !important; border-color:#ff9a43 !important;
+}
+
+/* Google sign-in is intentionally white in both themes with dark readable text. */
+.auth-readable :where(a[href^="/api/auth/google"]) {
+  background:#fff !important; color:#17233d !important; border:1px solid #cbd5e1 !important;
+}
+.auth-readable :where(a[href^="/api/auth/google"] span) { color:#17233d !important; }
+html[data-theme="dark"] .auth-readable :where(a[href^="/api/auth/google"]) {
+  background:#fff !important; color:#17233d !important; border-color:#d7dfeb !important;
+}
+html[data-theme="dark"] .auth-readable :where(a[href^="/api/auth/google"] span) { color:#17233d !important; }
+
+/* Auth cards use their own surface contract: dark text on light, light text on dark. */
+.auth-readable :where(h1,h2,h3,label,p,small,li) { color:#263650 !important; -webkit-text-fill-color:#263650 !important; opacity:1 !important; }
+html[data-theme="dark"] .auth-readable :where(h1,h2,h3,label,p,small,li) { color:#edf3fc !important; -webkit-text-fill-color:#edf3fc !important; }
+.auth-readable :where(input,select,textarea) { background:#fff !important; color:#17233d !important; -webkit-text-fill-color:#17233d !important; }
+html[data-theme="dark"] .auth-readable :where(input,select,textarea) { background:#fff !important; color:#17233d !important; -webkit-text-fill-color:#17233d !important; }
+.auth-readable :where(a[href="/register"],a[href="/login"],a[href="/"]) { color:#c6530c !important; -webkit-text-fill-color:#c6530c !important; }
+html[data-theme="dark"] .auth-readable :where(a[href="/register"],a[href="/login"],a[href="/"]) { color:#ffbd83 !important; -webkit-text-fill-color:#ffbd83 !important; }
+
+/* Reduce mobile interaction cost: avoid large blur and page-wide animations. */
+@media (max-width:768px), (hover:none) and (pointer:coarse) {
+  .khedmty-side-drawer,.glass-surface,.ios-icon-glass,.glassy-nav-icon,.glassy-nav-tab { -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+  main > header,main > aside,main > section,main > footer,main article { animation:none !important; }
+}
