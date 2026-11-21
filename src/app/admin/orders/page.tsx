@@ -50,8 +50,8 @@ export default async function AdminOrdersPage() {
   });
   const serviceById = new Map(serviceRecords.map((service) => [service.id, service]));
 
-  const money = (amount: number) =>
-    `${amount.toLocaleString("en-US")} EG`;
+  const money = (amount: number) => `${amount.toLocaleString("en-US")} EG`;
+  const moneyExact = (amount: number | string | { toString(): string }) => `${Number(amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EG`;
 
   return (
     <main dir="rtl" className="min-h-screen bg-slate-50 p-4 md:p-8">
@@ -176,13 +176,13 @@ export default async function AdminOrdersPage() {
                       العمولة ({order.commissionRate}%)
                     </p>
                     <p className="mt-1 font-bold text-slate-800">
-                      {money(order.commission)}
+                      {moneyExact(order.commission)}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-xs text-slate-500">صافي مقدم الخدمة</p>
-                    <p className="mt-1 font-bold text-slate-800">{money(order.providerNet)}</p>
+                    <p className="mt-1 font-bold text-slate-800">{moneyExact(order.providerNet)}</p>
                   </div>
 
                   <div>
