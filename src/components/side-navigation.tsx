@@ -6,7 +6,6 @@ import { UiIcon } from "@/components/ui-icon";
 
 type Role = "CUSTOMER" | "PROVIDER" | "SUPER_ADMIN";
 type Locale = "ar" | "en";
-type Theme = "light" | "dark";
 
 const items: Record<Role, { href: string; label: string; icon: "search" | "clipboard-list" | "settings" | "grid" | "briefcase" | "users" | "badge-check" | "wallet" | "user-cog" }[]> = {
   CUSTOMER: [
@@ -35,7 +34,6 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [locale, setLocale] = useState<Locale>("ar");
-  const [theme, setTheme] = useState<Theme>("light");
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
@@ -60,20 +58,17 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
     try {
       const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}");
       const nextLocale: Locale = saved.locale === "en" ? "en" : "ar";
-      const nextTheme: Theme = saved.theme === "dark" ? "dark" : "light";
       setLocale(nextLocale);
-      setTheme(nextTheme);
       document.documentElement.lang = nextLocale;
       document.documentElement.dir = nextLocale === "ar" ? "rtl" : "ltr";
       document.documentElement.dataset.locale = nextLocale;
-      document.documentElement.dataset.theme = nextTheme;
+      document.documentElement.dataset.theme = "light";
     } catch {}
   }, [userId]);
 
-  function savePreferences(nextLocale: Locale, nextTheme: Theme) {
+  function savePreferences(nextLocale: Locale) {
     setLocale(nextLocale);
-    setTheme(nextTheme);
-    const value = JSON.stringify({ locale: nextLocale, theme: nextTheme });
+    const value = JSON.stringify({ locale: nextLocale, theme: "light" });
     try {
       localStorage.setItem("khedmty-preferences-" + userId, value);
       localStorage.setItem("khedmty-public-preferences", value);
@@ -81,7 +76,7 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
     document.documentElement.lang = nextLocale;
     document.documentElement.dir = nextLocale === "ar" ? "rtl" : "ltr";
     document.documentElement.dataset.locale = nextLocale;
-    document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.dataset.theme = "light";
     window.dispatchEvent(new Event("khedmty-preferences-change"));
   }
 
@@ -123,18 +118,13 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         </nav>
 
         <section className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-          <div className="mb-3 flex items-center gap-2 font-black text-[#14213d]"><UiIcon name="settings" size={19} /> اللغة والمظهر</div>
+          <div className="mb-3 flex items-center gap-2 font-black text-[#14213d]"><UiIcon name="settings" size={19} /> لغة الموقع</div>
           <p className="mb-2 text-xs font-bold text-slate-500">لغة الموقع</p>
           <div className="grid grid-cols-2 gap-2">
-            <button type="button" aria-pressed={locale === "ar"} onClick={() => savePreferences("ar", theme)} className={`menu-preference-button ${locale === "ar" ? "is-active" : ""}`}><UiIcon name="languages" size={17}/> العربية</button>
-            <button type="button" aria-pressed={locale === "en"} onClick={() => savePreferences("en", theme)} className={`menu-preference-button ${locale === "en" ? "is-active" : ""}`}><UiIcon name="globe" size={17}/> English</button>
+            <button type="button" aria-pressed={locale === "ar"} onClick={() => savePreferences("ar")} className={`menu-preference-button ${locale === "ar" ? "is-active" : ""}`}><UiIcon name="languages" size={17}/> العربية</button>
+            <button type="button" aria-pressed={locale === "en"} onClick={() => savePreferences("en")} className={`menu-preference-button ${locale === "en" ? "is-active" : ""}`}><UiIcon name="globe" size={17}/> English</button>
           </div>
-          <p className="mb-2 mt-4 text-xs font-bold text-slate-500">مظهر الموقع</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" aria-pressed={theme === "light"} onClick={() => savePreferences(locale, "light")} className={`menu-preference-button ${theme === "light" ? "is-active" : ""}`}><UiIcon name="sun" size={17}/> فاتح</button>
-            <button type="button" aria-pressed={theme === "dark"} onClick={() => savePreferences(locale, "dark")} className={`menu-preference-button ${theme === "dark" ? "is-active" : ""}`}><UiIcon name="moon" size={17}/> داكن</button>
-          </div>
-        </section>
+       </section>
 
         {role && <form action="/api/auth/logout" method="POST" className="mt-auto border-t border-slate-100 pt-4">
           <button type="submit" className="flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-start font-bold text-red-600 transition hover:bg-red-50">
