@@ -2086,3 +2086,28 @@ html[data-theme="dark"] .auth-readable :where(a[href="/register"],a[href="/login
   .khedmty-side-drawer,.glass-surface,.ios-icon-glass,.glassy-nav-icon,.glassy-nav-tab { -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
   main > header,main > aside,main > section,main > footer,main article { animation:none !important; }
 }
+
+
+/* Google OAuth button: fixed high-contrast surface in both themes. */
+.auth-v7-card a.google-auth-button,
+html[data-theme="dark"] body main .auth-v7-card a.google-auth-button {
+  background:#ffffff !important;
+  background-color:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border:1px solid #cbd5e1 !important;
+  opacity:1 !important;
+  box-shadow:0 4px 14px rgb(15 23 42 / 10%) !important;
+}
+.auth-v7-card a.google-auth-button :where(span),
+html[data-theme="dark"] body main .auth-v7-card a.google-auth-button :where(span) {
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  opacity:1 !important;
+}
+.auth-v7-card a.google-auth-button:hover {
+  background:#f8fafc !important;
+  background-color:#f8fafc !important;
+  border-color:#94a3b8 !important;
+}
+.auth-v7-card a.google-auth-button svg { flex:0 0 auto; opacity:1 !important; }
