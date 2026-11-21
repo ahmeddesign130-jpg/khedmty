@@ -28,7 +28,6 @@ export async function GET(req: NextRequest) {
   const intent = req.nextUrl.searchParams.get("intent") === "login" ? "login" : "register";
   const termsAccepted = req.nextUrl.searchParams.get("termsAccepted") === "yes";
   if (intent === "register" && !termsAccepted) return NextResponse.redirect(new URL("/register?error=terms_required", req.url));
-  const intent = req.nextUrl.searchParams.get("intent") === "login" ? "login" : "register";
   const state = randomBytes(32).toString("hex");
   const verifier = randomBytes(48).toString("base64url");
   const challenge = createHash("sha256").update(verifier).digest("base64url");
