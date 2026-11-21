@@ -1,8 +1,6 @@
 ALTER TABLE "Payment"
   ADD COLUMN "transferReference" TEXT,
-  ADD COLUMN "transferDate" TIMESTAMP(3),
-  ADD COLUMN "aiReviewStatus" TEXT,
-  ADD COLUMN "aiReviewSummary" TEXT;
+  ADD COLUMN "transferDate" TIMESTAMP(3);
 
 CREATE TABLE "OrderDeliveryFile" (
   "id" TEXT NOT NULL,
