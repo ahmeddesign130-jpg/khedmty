@@ -19,7 +19,7 @@ function googleRedirectUri(req: NextRequest) {
 
 function fail(req: NextRequest, code: string, destination: "/login" | "/register" = "/login") {
   const response = NextResponse.redirect(new URL(destination + "?error=" + code, req.url));
-  for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent"]) {
+  for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent", "khedmty_google_terms"]) {
     response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
   }
   return response;
@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
     const verifier = req.cookies.get("khedmty_google_verifier")?.value;
     const requestedRole = req.cookies.get("khedmty_google_role")?.value === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
     const intent = req.cookies.get("khedmty_google_intent")?.value === "login" ? "login" : "register";
+    const acceptedTermsVersion = req.cookies.get("khedmty_google_terms")?.value;
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = googleRedirectUri(req);
@@ -79,6 +80,7 @@ export async function GET(req: NextRequest) {
     const email = profile.email.trim().toLowerCase();
     let user = await prisma.user.findUnique({ where: { email } });
     if (!user && intent === "login") return fail(req, "google_account_required", "/login");
+    if (!user && (!acceptedTermsVersion || intent !== "register")) return fail(req, "terms_required", "/register");
     if (!user) {
       const passwordHash = await bcrypt.hash(randomBytes(48).toString("hex"), 12);
       try {
@@ -89,6 +91,8 @@ export async function GET(req: NextRequest) {
             passwordHash,
             role: requestedRole,
             status: requestedRole === "PROVIDER" ? "PENDING" : "ACTIVE",
+            termsAcceptedAt: new Date(),
+            termsVersion: acceptedTermsVersion,
           },
         });
       } catch {
