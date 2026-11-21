@@ -61,6 +61,7 @@ model User {
   services       Service[]  @relation("ProviderServices")
   customerOrders Order[]    @relation("CustomerOrders")
   providerOrders Order[]    @relation("ProviderOrders")
+  notifications Notification[]
 }
 
 model Profile {
@@ -111,7 +112,6 @@ model Order {
   provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
   payments  Payment[]
   deliveryFiles OrderDeliveryFile[]
-  notifications Notification[] @relation("NotificationRecipient")
   createdAt DateTime  @default(now())
 }
 
@@ -170,5 +170,5 @@ model Notification {
   href      String?
   readAt    DateTime?
   createdAt DateTime @default(now())
-  user      Order    @relation("NotificationRecipient", fields: [userId], references: [customerId], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
