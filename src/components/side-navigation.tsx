@@ -100,7 +100,6 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
         <div className="mb-5 flex items-center justify-between gap-3 border-b border-slate-100 pb-5">
           <div className="min-w-0">
             <p className="whitespace-nowrap text-2xl font-black leading-tight tracking-normal text-[#14213d]">خِدمتي</p>
-            <p className="mt-1 whitespace-nowrap text-xs text-slate-500">القائمة الرئيسية</p>
           </div>
           <button ref={closeRef} type="button" onClick={() => setOpen(false)} aria-label={locale === "en" ? "Close menu" : "إغلاق القائمة"} className="ios-icon-glass relative z-[100] h-10 w-10 shrink-0 cursor-pointer touch-manipulation text-slate-600 hover:bg-orange-50" style={{ pointerEvents: "auto" }}><UiIcon name="x" size={22} /></button>
         </div>
@@ -119,7 +118,6 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
         <section className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4">
           <div className="mb-3 flex items-center gap-2 font-black text-[#14213d]"><UiIcon name="settings" size={19} /> لغة الموقع</div>
-          <p className="mb-2 text-xs font-bold text-slate-500">لغة الموقع</p>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" aria-pressed={locale === "ar"} onClick={() => savePreferences("ar")} className={`menu-preference-button ${locale === "ar" ? "is-active" : ""}`}><UiIcon name="languages" size={17}/> العربية</button>
             <button type="button" aria-pressed={locale === "en"} onClick={() => savePreferences("en")} className={`menu-preference-button ${locale === "en" ? "is-active" : ""}`}><UiIcon name="globe" size={17}/> English</button>
