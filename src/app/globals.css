@@ -2111,3 +2111,39 @@ html[data-theme="dark"] body main .auth-v7-card a.google-auth-button :where(span
   border-color:#94a3b8 !important;
 }
 .auth-v7-card a.google-auth-button svg { flex:0 0 auto; opacity:1 !important; }
+
+
+/* Final auth Google CTA contrast override — keep it visible in every theme implementation. */
+.auth-v7-page .auth-v7-card a.google-auth-button,
+html.dark .auth-v7-page .auth-v7-card a.google-auth-button,
+body.dark .auth-v7-page .auth-v7-card a.google-auth-button,
+[data-theme="dark"] .auth-v7-page .auth-v7-card a.google-auth-button {
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  min-height:58px !important;
+  background:#ffffff !important;
+  background-color:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border:2px solid #d5deea !important;
+  box-shadow:0 5px 18px rgba(0,0,0,.16) !important;
+}
+.auth-v7-page .auth-v7-card a.google-auth-button span,
+html.dark .auth-v7-page .auth-v7-card a.google-auth-button span,
+body.dark .auth-v7-page .auth-v7-card a.google-auth-button span,
+[data-theme="dark"] .auth-v7-page .auth-v7-card a.google-auth-button span {
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  opacity:1 !important;
+  font-weight:800 !important;
+}
+.auth-v7-page .auth-v7-card a.google-auth-button svg,
+.auth-v7-page .auth-v7-card a.google-auth-button svg path {
+  opacity:1 !important;
+}
+.auth-v7-page .auth-v7-card a.google-auth-button:hover {
+  background:#f1f5f9 !important;
+  background-color:#f1f5f9 !important;
+  border-color:#f47721 !important;
+}
