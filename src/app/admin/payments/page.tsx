@@ -76,6 +76,17 @@ async function reviewPayment(formData: FormData) {
 
       if (orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
 
+      await tx.notification.create({
+        data: {
+          userId: payment.order.customerId,
+          title: status === "APPROVED" ? "تم اعتماد الدفع" : "تم رفض إثبات الدفع",
+          body: status === "APPROVED"
+            ? `تم تأكيد استلام مبلغ الطلب ${payment.order.orderNo}. يمكنك متابعة حالة الطلب من حسابك.`
+            : `تم رفض إثبات الدفع للطلب ${payment.order.orderNo}. السبب: ${reviewNote}`,
+          href: `/orders/${payment.orderId}`,
+        },
+      });
+
       await tx.auditLog.create({
         data: {
           actorId: admin.id,
