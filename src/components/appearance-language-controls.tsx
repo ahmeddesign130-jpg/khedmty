@@ -4,101 +4,59 @@ import { useEffect, useState } from "react";
 import { UiIcon } from "@/components/ui-icon";
 
 type Locale = "ar" | "en";
-type Theme = "light" | "dark";
-
-function preferenceKey(userId: string) {
-  return "khedmty-preferences-" + userId;
-}
-
-function applyPreferences(locale: Locale, theme: Theme) {
+function preferenceKey(userId: string) { return "khedmty-preferences-" + userId; }
+function applyPreferences(locale: Locale) {
   document.documentElement.lang = locale;
   document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
   document.documentElement.dataset.locale = locale;
-  document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.theme = "light";
   window.dispatchEvent(new Event("khedmty-preferences-change"));
 }
-
 export function PreferenceInitializer({ userId }: { userId: string }) {
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(preferenceKey(userId)) || "{}") as { locale?: Locale; theme?: Theme };
-      applyPreferences(saved.locale === "en" ? "en" : "ar", saved.theme === "dark" ? "dark" : "light");
-    } catch {
-      applyPreferences("ar", "light");
-    }
+      const saved = JSON.parse(localStorage.getItem(preferenceKey(userId)) || "{}") as { locale?: Locale };
+      applyPreferences(saved.locale === "en" ? "en" : "ar");
+    } catch { applyPreferences("ar"); }
   }, [userId]);
   return null;
 }
-
 export function AppearanceLanguageControls({ userId }: { userId: string }) {
   const [locale, setLocale] = useState<Locale>("ar");
-  const [theme, setTheme] = useState<Theme>("light");
   const [ready, setReady] = useState(false);
-
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(preferenceKey(userId)) || "{}") as { locale?: Locale; theme?: Theme };
+      const saved = JSON.parse(localStorage.getItem(preferenceKey(userId)) || "{}") as { locale?: Locale };
       setLocale(saved.locale === "en" ? "en" : "ar");
-      setTheme(saved.theme === "dark" ? "dark" : "light");
-    } catch {
-      setLocale("ar");
-      setTheme("light");
-    }
+    } catch { setLocale("ar"); }
     setReady(true);
   }, [userId]);
-
-  function save(nextLocale: Locale, nextTheme: Theme) {
+  function save(nextLocale: Locale) {
     setLocale(nextLocale);
-    setTheme(nextTheme);
     try {
-      const value = JSON.stringify({ locale: nextLocale, theme: nextTheme });
+      const value = JSON.stringify({ locale: nextLocale, theme: "light" });
       localStorage.setItem(preferenceKey(userId), value);
       localStorage.setItem("khedmty-public-preferences", value);
-    } catch {
-      // The current page still updates if browser storage is unavailable.
-    }
-    // Save first so the global initializer reads the new values when this event fires.
-    applyPreferences(nextLocale, nextTheme);
+    } catch {}
+    applyPreferences(nextLocale);
   }
-
   if (!ready) return null;
-
   return (
     <section className="settings-surface rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-3">
-        <span className="ui-icon-tile"><UiIcon name="settings" size={25} /></span>
+        <span className="ui-icon-tile"><UiIcon name="languages" size={25} /></span>
         <div>
-          <h2 className="text-xl font-black text-[#14213d]">اللغة والمظهر</h2>
-          <p className="mt-1 text-sm text-slate-500">اختَر تفضيلات العرض، وسيتم حفظها لهذا الحساب على هذا الجهاز.</p>
+          <h2 className="text-xl font-black text-[#14213d]">لغة الموقع</h2>
+          <p className="mt-1 text-sm text-slate-500">اختَر لغة الموقع، وسيتم حفظها لهذا الحساب على هذا الجهاز.</p>
         </div>
       </div>
-
-      <div className="mt-6 grid gap-6 sm:grid-cols-2">
-        <div>
-          <h3 className="mb-3 text-sm font-bold text-[#14213d]">لغة الموقع</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => save("ar", theme)} aria-pressed={locale === "ar"} className={`settings-choice rounded-xl border px-3 py-4 font-bold transition ${locale === "ar" ? "is-selected" : ""}`}>
-              <span className="flex items-center justify-center gap-2"><UiIcon name="languages" size={19}/> العربية</span>
-            </button>
-            <button type="button" onClick={() => save("en", theme)} aria-pressed={locale === "en"} className={`settings-choice rounded-xl border px-3 py-4 font-bold transition ${locale === "en" ? "is-selected" : ""}`}>
-              <span className="flex items-center justify-center gap-2"><UiIcon name="globe" size={19}/> English</span>
-            </button>
-          </div>
-          <p className="mt-2 text-xs leading-6 text-slate-500">تقدر تغيّر لغة الموقع في أي وقت من هنا.</p>
-        </div>
-
-        <div>
-          <h3 className="mb-3 text-sm font-bold text-[#14213d]">مظهر الموقع</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => save(locale, "light")} aria-pressed={theme === "light"} className={`settings-choice rounded-xl border px-3 py-4 font-bold transition ${theme === "light" ? "is-selected" : ""}`}>
-              <span className="flex items-center justify-center gap-2"><UiIcon name="sun" size={19}/> فاتح</span>
-            </button>
-            <button type="button" onClick={() => save(locale, "dark")} aria-pressed={theme === "dark"} className={`settings-choice rounded-xl border px-3 py-4 font-bold transition ${theme === "dark" ? "is-selected" : ""}`}>
-              <span className="flex items-center justify-center gap-2"><UiIcon name="moon" size={19}/> داكن</span>
-            </button>
-          </div>
-          <p className="mt-2 text-xs leading-6 text-slate-500">المظهر يتطبق على الصفحات كلها، ويظل محفوظًا عند التنقل داخل الموقع.</p>
-        </div>
+      <div className="mt-6 grid gap-2 sm:grid-cols-2">
+        <button type="button" onClick={() => save("ar")} aria-pressed={locale === "ar"} className={`settings-choice rounded-xl border px-3 py-4 font-bold transition ${locale === "ar" ? "is-selected" : ""}`}>
+          <span className="flex items-center justify-center gap-2"><UiIcon name="languages" size={19}/> العربية</span>
+        </button>
+        <button type="button" onClick={() => save("en")} aria-pressed={locale === "en"} className={`settings-choice rounded-xl border px-3 py-4 font-bold transition ${locale === "en" ? "is-selected" : ""}`}>
+          <span className="flex items-center justify-center gap-2"><UiIcon name="globe" size={19}/> English</span>
+        </button>
       </div>
     </section>
   );
