@@ -1967,7 +1967,7 @@ html[data-theme="dark"] .khedmty-side-drawer .menu-preference-button.is-active {
 
 
 /* Khedmty global accessibility + typography contract (all routes, both themes). */
-@import url("https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&display=swap");
+
 html { font-size:16px; }
 body, body :where(button,input,select,textarea) {
   font-family:"Alexandria","Noto Sans Arabic",Tahoma,Arial,sans-serif !important;
