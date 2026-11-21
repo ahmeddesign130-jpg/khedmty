@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createStorageDownload, storageReady } from "@/lib/storage";
 import PaymentReviewForm from "./PaymentReviewForm";
+import ReceiptAIReview from "./ReceiptAIReview";
 
 export const dynamic = "force-dynamic";
 
@@ -221,6 +222,9 @@ export default async function AdminPaymentsPage() {
                   </p>
                 ) : null}
 
+                {payment.receiptUrl && <ReceiptAIReview paymentId={payment.id} initialStatus={payment.aiReviewStatus} initialSummary={payment.aiReviewSummary} />}
+                {payment.transferReference && <p className="mt-3 text-sm text-slate-600">الرقم المرجعي الذي راجعته الإدارة: <strong dir="ltr">{payment.transferReference}</strong></p>}
+                {payment.transferDate && <p className="mt-1 text-sm text-slate-600">تاريخ التحويل الذي راجعته الإدارة: {payment.transferDate.toLocaleString("en-GB")}</p>}
                 {payment.reviewNote && (
                   <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm">
                     ملاحظة الإدارة: {payment.reviewNote}
