@@ -31,8 +31,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   return (
     <main dir="rtl" className="auth-v7-page flex min-h-screen items-center justify-center px-5 py-10">
       <section className="auth-v7-card auth-readable glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
-        <Link href="/" className="block text-center text-3xl font-black text-orange-600">خِدمتي</Link>
-        <h1 className="mt-8 text-center text-3xl font-black text-white">إنشاء حساب جديد</h1>
+        <h1 className="mt-3 text-center text-3xl font-black text-white">إنشاء حساب جديد</h1>
         <p className="mt-3 text-center text-base leading-8 text-slate-300">حساب واحد يوصلك للخدمة اللي تحتاجها أو يفتح مهارتك لعملاء جدد.</p>
         {params.error && <p role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">{errors[params.error] || errors.server}</p>}
         <form action="/api/auth/google" method="GET" className="mt-7 grid gap-3">
