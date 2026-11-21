@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
     const email = String(form.get("email") || "").trim().toLowerCase();
     const password = String(form.get("password") || "");
     const requestedRole = String(form.get("role") || "CUSTOMER");
+    const termsAccepted = form.get("termsAccepted") === "yes";
+    if (!termsAccepted) return redirect303(req, "/register?error=terms_required");
 
     if (
       displayName.length < 2 || displayName.length > 70 ||
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
     const status = role === "CUSTOMER" ? "ACTIVE" : "PENDING";
 
     await prisma.user.create({
-      data: { displayName, email, passwordHash, role, status },
+      data: { displayName, email, passwordHash, role, status, termsAcceptedAt: new Date(), termsVersion: "2026-11-21" },
     });
 
     return role === "CUSTOMER"
