@@ -2264,3 +2264,10 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   background:#ecfdf5 !important; color:#166534 !important; border-color:#bbf7d0 !important;
   -webkit-text-fill-color:#166534 !important;
 }
+
+.auth-v7-page .auth-v7-card button.google-auth-button:hover {
+  background:#f1f5f9 !important;
+  background-color:#f1f5f9 !important;
+  color:#17233d !important;
+  border-color:#f47721 !important;
+}
