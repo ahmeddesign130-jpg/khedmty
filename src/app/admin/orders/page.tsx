@@ -163,7 +163,7 @@ export default async function AdminOrdersPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4 md:grid-cols-5">
                   <div>
                     <p className="text-xs text-slate-500">سعر الخدمة</p>
                     <p className="mt-1 font-bold text-slate-800">
@@ -181,7 +181,12 @@ export default async function AdminOrdersPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs text-slate-500">الإجمالي</p>
+                    <p className="text-xs text-slate-500">صافي مقدم الخدمة</p>
+                    <p className="mt-1 font-bold text-slate-800">{money(order.providerNet)}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-slate-500">السعر النهائي للعميل</p>
                     <p className="mt-1 font-black text-orange-600">
                       {money(order.total)}
                     </p>
