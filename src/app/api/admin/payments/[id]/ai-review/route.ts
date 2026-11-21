@@ -28,7 +28,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
         input: [{
           role: "user",
           content: [
-            { type: "input_text", text: "حلّل صورة إيصال التحويل بصرياً فقط بحثاً عن مؤشرات واضحة على تركيب أو تعديل الصورة أو توليدها اصطناعياً. لا تحاول إثبات وصول المال ولا تعتمد على رقم أو مبلغ أو تاريخ. أعد JSON فقط بالشكل {"status":"SUSPICIOUS|NEEDS_REVIEW|NO_CLEAR_SIGNS","summary":"ملخص عربي قصير"}. استخدم SUSPICIOUS فقط عند وجود مؤشرات بصرية قوية، وNEEDS_REVIEW عند عدم الحسم أو وجود علامات ضعيفة، وNO_CLEAR_SIGNS عند عدم ظهور مؤشرات واضحة. لا تدّعِ اليقين؛ لا يمكن إثبات أصالة الإيصال من الصورة وحدها." },
+            { type: "input_text", text: `حلّل صورة إيصال التحويل بصرياً فقط بحثاً عن مؤشرات واضحة على تركيب أو تعديل الصورة أو توليدها اصطناعياً. لا تحاول إثبات وصول المال ولا تعتمد على رقم أو مبلغ أو تاريخ. أعد JSON فقط بالشكل {"status":"SUSPICIOUS|NEEDS_REVIEW|NO_CLEAR_SIGNS","summary":"ملخص عربي قصير"}. استخدم SUSPICIOUS فقط عند وجود مؤشرات بصرية قوية، وNEEDS_REVIEW عند عدم الحسم أو وجود علامات ضعيفة، وNO_CLEAR_SIGNS عند عدم ظهور مؤشرات واضحة. لا تدّعِ اليقين؛ لا يمكن إثبات أصالة الإيصال من الصورة وحدها.` },
             { type: "input_image", image_url: imageUrl, detail: "high" }
           ]
         }]
