@@ -2183,3 +2183,84 @@ body.dark .auth-v7-page .auth-v7-card button.google-auth-button span,
 .auth-v7-page .auth-v7-card button.google-auth-button svg path {
   opacity:1 !important;
 }
+
+
+/* Auth pages final theme contract: the card and every label must follow the selected theme. */
+html:not([data-theme="dark"]) .auth-v7-page .auth-v7-card {
+  background:linear-gradient(145deg,#ffffff 0%,#f8fafc 100%) !important;
+  border:1px solid #dce4ef !important;
+  color:#17233d !important;
+  box-shadow:0 24px 64px rgba(20,33,61,.12),inset 0 1px 0 #fff !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html[data-theme="dark"] .auth-v7-page .auth-v7-card {
+  background:linear-gradient(145deg,#17243a 0%,#101a2b 100%) !important;
+  border:1px solid #354761 !important;
+  color:#edf3fc !important;
+  box-shadow:0 24px 64px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.06) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html:not([data-theme="dark"]) .auth-v7-page .auth-v7-card :where(h1,h2,h3) {
+  color:#14213d !important; -webkit-text-fill-color:#14213d !important;
+}
+html:not([data-theme="dark"]) .auth-v7-page .auth-v7-card :where(p,label,small,li,div) {
+  color:#344258;
+}
+html[data-theme="dark"] .auth-v7-page .auth-v7-card :where(h1,h2,h3,p,label,small,li) {
+  color:#edf3fc !important; -webkit-text-fill-color:#edf3fc !important;
+}
+html[data-theme="dark"] .auth-v7-page .auth-v7-card :where(.text-slate-500,.text-slate-600,.text-slate-700,.text-gray-500,.text-gray-600,.text-gray-700) {
+  color:#c4cfdf !important; -webkit-text-fill-color:#c4cfdf !important;
+}
+.auth-v7-page .auth-v7-card a[href="/terms"] {
+  color:#c6530c !important; -webkit-text-fill-color:#c6530c !important;
+}
+html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
+  color:#ffbd83 !important; -webkit-text-fill-color:#ffbd83 !important;
+}
+.auth-v7-page .auth-v7-card button[type="submit"] {
+  min-height:56px !important;
+  background:#f47721 !important;
+  background-image:linear-gradient(110deg,#f47721,#e96612) !important;
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  border:1px solid #e96612 !important;
+  box-shadow:0 8px 22px rgba(244,119,33,.24) !important;
+}
+.auth-v7-page .auth-v7-card button[type="submit"]:hover {
+  background:#df5e0d !important;
+  background-image:none !important;
+}
+.auth-v7-page .auth-v7-card input:not([type="checkbox"]),
+.auth-v7-page .auth-v7-card select {
+  background:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border-color:#cbd5e1 !important;
+}
+.auth-v7-page .auth-v7-card input::placeholder {
+  color:#64748b !important; -webkit-text-fill-color:#64748b !important; opacity:1 !important;
+}
+.auth-v7-page .auth-v7-card a.google-auth-button,
+.auth-v7-page .auth-v7-card button.google-auth-button {
+  background:#ffffff !important;
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+  border:1.5px solid #cbd5e1 !important;
+  min-height:58px !important;
+}
+.auth-v7-page .auth-v7-card a.google-auth-button span,
+.auth-v7-page .auth-v7-card button.google-auth-button span {
+  color:#17233d !important;
+  -webkit-text-fill-color:#17233d !important;
+}
+.auth-v7-page .auth-v7-card [role="alert"] {
+  background:#fff1f2 !important; color:#9f1239 !important; border-color:#fecdd3 !important;
+  -webkit-text-fill-color:#9f1239 !important;
+}
+.auth-v7-page .auth-v7-card [role="status"] {
+  background:#ecfdf5 !important; color:#166534 !important; border-color:#bbf7d0 !important;
+  -webkit-text-fill-color:#166534 !important;
+}
