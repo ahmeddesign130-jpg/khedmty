@@ -3,8 +3,12 @@ import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 export const dynamic = "force-dynamic";
+
+// Cached Google signing keys let us verify the ID token without a second userinfo round trip.
+const googleJwks = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
 function googleRedirectUri(req: NextRequest) {
   if (process.env.VERCEL_ENV === "preview") {
@@ -50,16 +54,27 @@ export async function GET(req: NextRequest) {
       cache: "no-store",
     });
     if (!tokenResponse.ok) { console.error("Google token exchange failed", tokenResponse.status, await tokenResponse.text().catch(() => "")); return fail(req, "google_token"); }
-    const tokenData = await tokenResponse.json() as { access_token?: string };
-    if (!tokenData.access_token) { console.error("Google token response did not include an access token"); return fail(req, "google_token"); }
+    const tokenData = await tokenResponse.json() as { id_token?: string };
+    if (!tokenData.id_token) { console.error("Google token response did not include an ID token"); return fail(req, "google_token"); }
 
-    const profileResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-      headers: { Authorization: "Bearer " + tokenData.access_token },
-      cache: "no-store",
+    // Validate Google's signed identity token locally (cached JWKS) instead of making
+    // a second sequential HTTPS request to the userinfo endpoint.
+    const verified = await jwtVerify(tokenData.id_token, googleJwks, {
+      issuer: ["https://accounts.google.com", "accounts.google.com"],
+      audience: clientId,
     });
-    if (!profileResponse.ok) { console.error("Google profile request failed", profileResponse.status); return fail(req, "google_profile"); }
-    const profile = await profileResponse.json() as { sub?: string; email?: string; email_verified?: boolean; name?: string };
-    if (!profile.sub || !profile.email || profile.email_verified !== true) { console.error("Google profile is missing verified identity fields"); return fail(req, "google_profile"); }
+    const claims = verified.payload;
+    const emailClaim = typeof claims.email === "string" ? claims.email : "";
+    const profile = {
+      sub: typeof claims.sub === "string" ? claims.sub : "",
+      email: emailClaim,
+      email_verified: claims.email_verified === true || claims.email_verified === "true",
+      name: typeof claims.name === "string" ? claims.name : undefined,
+    };
+    if (!profile.sub || !profile.email || profile.email_verified !== true) {
+      console.error("Google ID token is missing verified identity fields");
+      return fail(req, "google_profile");
+    }
 
     const email = profile.email.trim().toLowerCase();
     let user = await prisma.user.findUnique({ where: { email } });
