@@ -1,0 +1,8 @@
+"use client";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+export default function StoreSetupForm({ initialName="", initialDescription="" }: { initialName?: string; initialDescription?: string }) {
+ const router=useRouter();const [busy,setBusy]=useState(false);const [error,setError]=useState("");
+ async function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget);try{const r=await fetch("/api/store",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:f.get("name"),description:f.get("description")})});const d=await r.json();if(!r.ok)throw new Error(d.message||"تعذر حفظ المتجر.");router.refresh();}catch(x){setError(x instanceof Error?x.message:"حدث خطأ.");}finally{setBusy(false);}}
+ return <form onSubmit={submit} className="mt-6 space-y-4 rounded-2xl bg-white p-5 shadow-sm"><h2 className="text-xl font-black">بيانات متجرك الرقمي</h2><label className="block text-sm font-bold">اسم المتجر<input name="name" required minLength={2} maxLength={80} defaultValue={initialName} className="mt-2 w-full rounded-xl border p-3"/></label><label className="block text-sm font-bold">نبذة عن المتجر<textarea name="description" required minLength={10} maxLength={2000} rows={3} defaultValue={initialDescription} className="mt-2 w-full rounded-xl border p-3"/></label>{error&&<p role="alert" className="text-sm font-bold text-red-600">{error}</p>}<button disabled={busy} className="rounded-xl bg-orange-500 px-5 py-3 font-black text-white">{busy?"جارٍ الحفظ...":"حفظ بيانات المتجر"}</button></form>;
+}

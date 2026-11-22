@@ -33,6 +33,7 @@ enum OrderStatus {
   PAID
   IN_PROGRESS
   DELIVERED
+  DELIVERY_REVIEW
   REVISION_REQUESTED
   COMPLETED
   CANCELLED
@@ -42,6 +43,20 @@ enum OrderStatus {
 enum PaymentStatus {
   PENDING_REVIEW
   APPROVED
+  REJECTED
+}
+
+enum DigitalProductStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  PAUSED
+}
+
+enum DigitalPurchaseStatus {
+  PENDING_PAYMENT
+  PAYMENT_REVIEW
+  PAID
   REJECTED
 }
 
@@ -60,6 +75,10 @@ model User {
 
   profile          Profile?
   emailOtp         EmailOtp?
+  notifications    Notification[]
+  store            Store?
+  digitalBuyerPurchases DigitalPurchase[] @relation("DigitalBuyer")
+  digitalSellerPurchases DigitalPurchase[] @relation("DigitalSeller")
   services         Service[] @relation("ProviderServices")
   customerOrders   Order[]   @relation("CustomerOrders")
   providerOrders   Order[]   @relation("ProviderOrders")
@@ -125,8 +144,9 @@ model Order {
 
   customer  User      @relation("CustomerOrders", fields: [customerId], references: [id])
   provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
-  payments  Payment[]
-  createdAt DateTime  @default(now())
+  payments      Payment[]
+  deliveryFiles OrderDeliveryFile[]
+  createdAt     DateTime  @default(now())
 }
 
 model Payment {
@@ -138,6 +158,8 @@ model Payment {
   status      PaymentStatus @default(PENDING_REVIEW)
   reviewNote  String?
   reviewedAt  DateTime?
+  transferReference String?
+  transferDate DateTime?
 
   order     Order    @relation(fields: [orderId], references: [id])
   createdAt DateTime @default(now())
@@ -156,4 +178,91 @@ model AuditLog {
   targetId  String
   details   String?
   createdAt DateTime @default(now())
+}
+
+
+model OrderDeliveryFile {
+  id         String   @id @default(cuid())
+  orderId    String
+  uploaderId String
+  objectPath String   @unique
+  fileName   String
+  mimeType   String
+  sizeBytes  Int
+  createdAt  DateTime @default(now())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@index([orderId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String   @db.Text
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+}
+
+
+model Store {
+  id          String   @id @default(cuid())
+  ownerId     String   @unique
+  name        String
+  slug        String   @unique
+  description String   @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products    DigitalProduct[]
+}
+
+model DigitalProduct {
+  id          String               @id @default(cuid())
+  storeId     String
+  title       String
+  description String               @db.Text
+  price       Int
+  filePath    String
+  fileName    String
+  mimeType    String
+  sizeBytes   Int
+  coverUrl    String?
+  status      DigitalProductStatus @default(PENDING_REVIEW)
+  reviewNote  String?              @db.Text
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  store       Store                @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  purchases   DigitalPurchase[]
+  @@index([storeId, status, createdAt])
+}
+
+model DigitalPurchase {
+  id              String                @id @default(cuid())
+  purchaseNo      String                @unique
+  productId       String
+  buyerId         String
+  sellerId        String
+  productPrice    Int
+  commissionRate  Int                   @default(20)
+  commission      Int
+  sellerNet       Int
+  total           Int
+  status          DigitalPurchaseStatus @default(PENDING_PAYMENT)
+  paymentMethod   String?
+  receiptPath     String?
+  reviewNote      String?               @db.Text
+  transferReference String?
+  transferDate    DateTime?
+  reviewedAt      DateTime?
+  createdAt       DateTime              @default(now())
+  product         DigitalProduct        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  buyer           User                  @relation("DigitalBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
+  seller          User                  @relation("DigitalSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  @@index([buyerId, createdAt])
+  @@index([sellerId, createdAt])
+  @@index([status, createdAt])
 }

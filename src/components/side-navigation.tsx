@@ -9,22 +9,30 @@ type Locale = "ar" | "en";
 
 const items: Record<Role, { href: string; label: string; icon: "search" | "clipboard-list" | "settings" | "grid" | "briefcase" | "users" | "badge-check" | "wallet" | "user-cog" }[]> = {
   CUSTOMER: [
-    { href: "/services", label: "السوق", icon: "search" },
+    { href: "/services", label: "الخدمات", icon: "search" },
+    { href: "/stores", label: "المتاجر الرقمية", icon: "grid" },
+    { href: "/my-digital-purchases", label: "مشترياتي الرقمية", icon: "wallet" },
     { href: "/orders", label: "طلباتي", icon: "clipboard-list" },
+    { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
   PROVIDER: [
     { href: "/provider", label: "الرئيسية", icon: "grid" },
     { href: "/provider/services", label: "خدماتي", icon: "briefcase" },
+    { href: "/provider/store", label: "متجري الرقمي", icon: "wallet" },
     { href: "/provider/orders", label: "الطلبات", icon: "clipboard-list" },
+    { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
   SUPER_ADMIN: [
     { href: "/admin", label: "لوحة الإدارة", icon: "grid" },
     { href: "/admin/providers", label: "مقدمو الخدمات", icon: "users" },
     { href: "/admin/services", label: "مراجعة الخدمات", icon: "badge-check" },
+    { href: "/admin/digital-products", label: "مراجعة المنتجات الرقمية", icon: "grid" },
+    { href: "/admin/digital-payments", label: "مدفوعات المتاجر", icon: "wallet" },
     { href: "/admin/orders", label: "الطلبات", icon: "clipboard-list" },
     { href: "/admin/payments", label: "المدفوعات", icon: "wallet" },
+    { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/admin/administrators", label: "إدارة المسؤولين", icon: "user-cog" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
@@ -82,6 +90,8 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   const links = role ? items[role] : [
     { href: "/", label: "الرئيسية", icon: "grid" as const },
+    { href: "/services", label: "الخدمات", icon: "search" as const },
+    { href: "/stores", label: "المتاجر الرقمية", icon: "wallet" as const },
     { href: "/login", label: "تسجيل الدخول", icon: "users" as const },
     { href: "/register", label: "إنشاء حساب", icon: "badge-check" as const },
   ];

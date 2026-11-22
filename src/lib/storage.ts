@@ -44,3 +44,34 @@ export function serviceMediaPublicUrl(objectPath: string) {
   const { url } = config();
   return `${url}/storage/v1/object/public/service-media/${objectPath.split("/").map(encodeURIComponent).join("/")}`;
 }
+
+export async function ensurePrivateStorageBucket(bucket: string, fileSizeLimit: number) {
+  const { url, key } = config();
+  const headers = { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
+  const encoded = encodeURIComponent(bucket);
+  const current = await fetch(`${url}/storage/v1/bucket/${encoded}`, { headers, cache: "no-store" });
+  if (current.ok) {
+    const details = await current.json().catch(() => ({}));
+    if (details.public === true) {
+      const updated = await fetch(`${url}/storage/v1/bucket/${encoded}`, {
+        method: "PUT", headers, body: JSON.stringify({ public: false, file_size_limit: fileSizeLimit }), cache: "no-store",
+      });
+      if (!updated.ok) throw new Error("تعذر تأمين مساحة حفظ الملفات الرقمية.");
+    }
+    return;
+  }
+  if (current.status !== 404) throw new Error("تعذر التحقق من إعدادات مساحة الملفات الرقمية.");
+  const created = await fetch(`${url}/storage/v1/bucket`, {
+    method: "POST", headers, body: JSON.stringify({ id: bucket, name: bucket, public: false, file_size_limit: fileSizeLimit }), cache: "no-store",
+  });
+  if (!created.ok && created.status !== 409) {
+    const details = await created.text().catch(() => "");
+    console.error("SUPABASE_BUCKET_CREATE_ERROR", created.status, details.slice(0, 500));
+    throw new Error("تعذر تجهيز مساحة حفظ الملفات الرقمية.");
+  }
+  if (created.status === 409) {
+    const existing = await fetch(`${url}/storage/v1/bucket/${encoded}`, { headers, cache: "no-store" });
+    const details = await existing.json().catch(() => ({}));
+    if (!existing.ok || details.public === true) throw new Error("مساحة الملفات الرقمية موجودة لكنها ليست خاصة. يجب تأمينها قبل استقبال الملفات.");
+  }
+}
