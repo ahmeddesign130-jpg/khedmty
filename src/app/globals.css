@@ -2363,11 +2363,25 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
 }
 
 
-/* Subtle mobile type-size refinement: slightly smaller, still comfortable to read. */
+/* Subtle mobile type-size refinement: slightly smaller, still comfortable to read.
+   Uses !important because the existing global accessibility scale is !important. */
 @media (max-width: 640px) {
-  body { font-size: 13.5px; }
-  .khedmty-settings-page { font-size: 16px; }
+  body { font-size: 16px !important; }
+  main :where(.text-xs) { font-size: 13px !important; }
+  main :where(.text-sm) { font-size: 14.5px !important; }
+  main :where(.text-base) { font-size: 16px !important; }
+  main :where(.text-lg) { font-size: 18px !important; }
+  main :where(.text-xl) { font-size: 20px !important; }
+  main :where(.text-2xl) { font-size: 24px !important; }
+  main :where(.text-3xl) { font-size: 30px !important; }
+  main :where(.text-4xl) { font-size: 36px !important; }
+  main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    font-size: 16px !important;
+    min-height: 52px;
+  }
+  main :where(input, textarea)::placeholder { font-size: 14px !important; }
+  .khedmty-settings-page { font-size: 16px !important; }
   .khedmty-settings-page :where(input, textarea) { font-size: 16px !important; }
-  .khedmty-settings-page :where(h1) { font-size: clamp(1.9rem, 4.8vw, 2.3rem); }
-  .khedmty-settings-page :where(h2) { font-size: clamp(1.3rem, 3.8vw, 1.5rem); }
+  .khedmty-settings-page :where(h1) { font-size: clamp(1.85rem, 4.8vw, 2.2rem); }
+  .khedmty-settings-page :where(h2) { font-size: clamp(1.25rem, 3.8vw, 1.45rem); }
 }
