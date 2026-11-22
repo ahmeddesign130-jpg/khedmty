@@ -4,19 +4,21 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const PREVIEW_HOST = "khedmty-git-feature-wallet-checkout-refresh-ahmeddesign130-jpg.vercel.app";
+const PRODUCTION_HOST = "khedmty-swart.vercel.app";
 
 function googleRedirectUri(req: NextRequest) {
   if (process.env.VERCEL_ENV === "preview") {
     return `https://${PREVIEW_HOST}/api/auth/google/callback`;
   }
-  return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
+  // Production OAuth must always use the same host that stores the state cookies.
+  return `https://${PRODUCTION_HOST}/api/auth/google/callback`;
 }
 
 export async function GET(req: NextRequest) {
-  // Start OAuth on the same stable Preview host that receives Google's callback.
-  // This keeps the short-lived state/verifier cookies on the callback's host.
-  if (process.env.VERCEL_ENV === "preview" && req.nextUrl.hostname !== PREVIEW_HOST) {
-    const canonicalUrl = new URL("/api/auth/google", `https://${PREVIEW_HOST}`);
+  // Keep OAuth start, short-lived cookies, and Google's callback on one hostname.
+  const canonicalHost = process.env.VERCEL_ENV === "preview" ? PREVIEW_HOST : PRODUCTION_HOST;
+  if (req.nextUrl.hostname !== canonicalHost) {
+    const canonicalUrl = new URL("/api/auth/google", `https://${canonicalHost}`);
     canonicalUrl.search = req.nextUrl.search;
     return NextResponse.redirect(canonicalUrl);
   }
