@@ -44,17 +44,22 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const displayName = String(form.get("displayName") || "").trim();
     const email = String(form.get("email") || "").trim().toLowerCase();
+    const phone = String(form.get("phone") || "").trim();
     const password = String(form.get("password") || "");
     const requestedRole = String(form.get("role") || "CUSTOMER");
     const termsAccepted = form.get("termsAccepted") === "yes";
 
     if (!termsAccepted) return redirect303(req, "/register?error=terms_required");
-    if (
-      displayName.length < 2 || displayName.length > 70 ||
-      email.length < 5 || email.length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-      password.length < 10 || password.length > 72
-    ) return redirect303(req, "/register?error=invalid");
+    if (displayName.length < 2 || displayName.length > 70 ||
+        email.length < 5 || email.length > 254 ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return redirect303(req, "/register?error=invalid");
+    }
+    if (!/^01[0125]\d{8}$/.test(phone)) return redirect303(req, "/register?error=phone");
+    const passwordValid = password.length >= 10 && password.length <= 72 &&
+      /[A-Z]/.test(password) && /[a-z]/.test(password) &&
+      /\d/.test(password) && /[^A-Za-z0-9]/.test(password);
+    if (!passwordValid) return redirect303(req, "/register?error=password_policy");
     if (!["CUSTOMER", "PROVIDER"].includes(requestedRole)) {
       return redirect303(req, "/register?error=role");
     }
@@ -69,6 +74,7 @@ export async function POST(req: NextRequest) {
       data: {
         displayName, email, passwordHash, role, status: "PENDING",
         termsAcceptedAt: new Date(), termsVersion: "2026-11-22",
+        profile: { create: { phone } },
         emailOtp: {
           create: {
             codeHash: hashOtp("pending", code),
@@ -80,7 +86,6 @@ export async function POST(req: NextRequest) {
     });
     createdUserId = user.id;
 
-    // Bind the hash to the real user ID after creation.
     await prisma.emailOtp.update({
       where: { userId: user.id },
       data: { codeHash: hashOtp(user.id, code) },
