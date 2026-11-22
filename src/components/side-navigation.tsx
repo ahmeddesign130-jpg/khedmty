@@ -11,12 +11,14 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
   CUSTOMER: [
     { href: "/services", label: "السوق", icon: "search" },
     { href: "/orders", label: "طلباتي", icon: "clipboard-list" },
+    { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
   PROVIDER: [
     { href: "/provider", label: "الرئيسية", icon: "grid" },
     { href: "/provider/services", label: "خدماتي", icon: "briefcase" },
     { href: "/provider/orders", label: "الطلبات", icon: "clipboard-list" },
+    { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
   SUPER_ADMIN: [
@@ -25,6 +27,7 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
     { href: "/admin/services", label: "مراجعة الخدمات", icon: "badge-check" },
     { href: "/admin/orders", label: "الطلبات", icon: "clipboard-list" },
     { href: "/admin/payments", label: "المدفوعات", icon: "wallet" },
+    { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/admin/administrators", label: "إدارة المسؤولين", icon: "user-cog" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
   ],
