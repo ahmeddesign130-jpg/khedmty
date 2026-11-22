@@ -6,7 +6,7 @@ const errors: Record<string, string> = {
   role: "نوع الحساب غير صحيح.",
   exists: "هذا البريد مسجل بالفعل. جرّب تسجيل الدخول.",
   server: "تعذر إنشاء الحساب حاليًا. حاول مرة أخرى.",
-  google_account_required: "البريد ده مش مسجل في خِدمتي. أنشئ حسابًا بالبريد وكلمة المرور، ثم أكّد بريدك برمز OTP.",
+  google_account_required: "البريد ده مش مسجل في خِدمتي. أنشئ حسابك من هنا بالبريد الإلكتروني وكلمة المرور.",
 };
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
