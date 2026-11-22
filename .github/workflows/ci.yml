@@ -1,6 +1,5 @@
 name: Khedmty CI
-# CI validates the rebuild branch before any changes reach main.
-
+# CI validates changes against an isolated temporary database.
 on:
   push:
     branches:
@@ -19,6 +18,20 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: khedmty
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d khedmty"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/khedmty?schema=public
       AUTH_SECRET: ci-only-secret-value-with-at-least-thirty-two-characters
@@ -29,6 +42,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npx prisma generate
+      - run: npx prisma db push
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
