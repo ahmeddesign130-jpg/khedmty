@@ -30,6 +30,9 @@ async function main() {
   await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "EmailOtp_userId_key" ON "EmailOtp"("userId")');
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "EmailOtp_expiresAt_idx" ON "EmailOtp"("expiresAt")');
 
+  // Additive order workflow state; safe to run repeatedly on every build.
+  await prisma.$executeRawUnsafe('ALTER TYPE "OrderStatus" ADD VALUE IF NOT EXISTS \'DELIVERY_REVIEW\'');
+
   // Additive payment-review metadata; safe to run repeatedly on every build.
   await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "transferReference" TEXT, ADD COLUMN IF NOT EXISTS "transferDate" TIMESTAMP(3)');
 
