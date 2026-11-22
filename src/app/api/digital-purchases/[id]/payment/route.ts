@@ -18,7 +18,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!parsed.data.receiptPath.startsWith(`${user.id}/`) || parsed.data.receiptPath.includes("..")) return NextResponse.json({ message: "مسار الإيصال غير صالح." }, { status: 400 });
     const wallet = (process.env.PAYMENT_WALLET_NUMBER || process.env.ETISALAT_CASH_NUMBER || "").trim();
     if (!wallet) return NextResponse.json({ message: "محفظة الاستقبال غير مفعلة." }, { status: 503 });
-    const changed = await prisma.digitalPurchase.updateMany({ where: { id, buyerId: user.id, status: purchase.status }, data: { status: "PAYMENT_REVIEW", paymentMethod: parsed.data.method, receiptPath: parsed.data.receiptPath, reviewNote: null } });
+    const changed = await prisma.digitalPurchase.updateMany({ where: { id, buyerId: user.id, status: purchase.status }, data: { status: "PAYMENT_REVIEW", paymentMethod: parsed.data.method, receiptPath: parsed.data.receiptPath, reviewNote: null, reviewedAt: null, transferReference: null, transferDate: null } });
     if (changed.count !== 1) return NextResponse.json({ message: "تم تحديث العملية بالفعل." }, { status: 409 });
     await prisma.auditLog.create({ data: { actorId: user.id, action: "DIGITAL_PAYMENT_SUBMITTED", targetId: id, details: `تم إرسال إثبات الدفع للشراء ${purchase.purchaseNo}` } });
     return NextResponse.json({ message: "وصل إثبات الدفع إلى الإدارة للمراجعة." }, { status: 201 });
