@@ -6,6 +6,8 @@ import { UiIcon } from "@/components/ui-icon";
 const management = [
   { title: "مقدمو الخدمات", description: "راجع طلبات الانضمام واعتمد الحسابات أو ارفضها.", href: "/admin/providers", icon: "users" as const, action: "إدارة مقدمي الخدمات", tag: "الحسابات" },
   { title: "العملاء والحظر", description: "اعرض حسابات العملاء ومقدمي الخدمات وتحكم في الحظر وإعادة التفعيل.", href: "/admin/users", icon: "shield" as const, action: "إدارة الحسابات", tag: "الحسابات" },
+  { title: "المنتجات الرقمية", description: "راجع ملفات المتاجر الرقمية واعتمد المنتجات أو ارفضها مع توضيح السبب.", href: "/admin/digital-products", icon: "grid" as const, action: "مراجعة المنتجات الرقمية", tag: "المتاجر" },
+  { title: "مدفوعات المتاجر", description: "راجع إيصالات شراء الملفات الرقمية واعتمد فتح التحميل بعد التأكد من وصول المبلغ.", href: "/admin/digital-payments", icon: "wallet" as const, action: "مراجعة مدفوعات المتاجر", tag: "المعاملات" },
   { title: "الخدمات", description: "افحص تفاصيل الخدمات والصور والأسعار قبل نشرها.", href: "/admin/services", icon: "badge-check" as const, action: "مراجعة الخدمات", tag: "المحتوى" },
   { title: "الطلبات", description: "تابع حالة الطلبات ومراحل تنفيذها بين الطرفين.", href: "/admin/orders", icon: "clipboard-list" as const, action: "فتح الطلبات", tag: "التشغيل" },
   { title: "المدفوعات", description: "راجع إثباتات التحويل وتأكد من المبالغ قبل الاعتماد.", href: "/admin/payments", icon: "wallet" as const, action: "مراجعة المدفوعات", tag: "المعاملات" },
