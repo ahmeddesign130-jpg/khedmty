@@ -5,14 +5,16 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 
 export const dynamic = "force-dynamic";
 
+const PRODUCTION_HOST = "khedmty-swart.vercel.app";
+
 // Cached Google signing keys let us verify the ID token without a second userinfo round trip.
 const googleJwks = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
-function googleRedirectUri(req: NextRequest) {
+function googleRedirectUri() {
   if (process.env.VERCEL_ENV === "preview") {
     return "https://khedmty-git-feature-wallet-checkout-refresh-ahmeddesign130-jpg.vercel.app/api/auth/google/callback";
   }
-  return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
+  return `https://${PRODUCTION_HOST}/api/auth/google/callback`;
 }
 
 function fail(req: NextRequest, code: string, destination: "/login" | "/register" = "/login") {
@@ -25,6 +27,14 @@ function fail(req: NextRequest, code: string, destination: "/login" | "/register
 
 export async function GET(req: NextRequest) {
   try {
+    // If an old or manually entered alias receives the callback, move it to the
+    // canonical host. Normal sign-in starts on this host, so its cookies are present.
+    if (process.env.VERCEL_ENV !== "preview" && req.nextUrl.hostname !== PRODUCTION_HOST) {
+      const canonicalUrl = new URL("/api/auth/google/callback", `https://${PRODUCTION_HOST}`);
+      canonicalUrl.search = req.nextUrl.search;
+      return NextResponse.redirect(canonicalUrl);
+    }
+
     const params = req.nextUrl.searchParams;
     if (params.get("error")) return fail(req, "google_denied");
     const code = params.get("code");
@@ -34,9 +44,15 @@ export async function GET(req: NextRequest) {
     // OAuth callback is sign-in only. It must never create a Khedmty account.
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = googleRedirectUri(req);
+    const redirectUri = googleRedirectUri();
 
     if (!code || !state || !savedState || state !== savedState || !verifier || !clientId || !clientSecret) {
+      console.warn("Google OAuth callback validation failed", {
+        hasCode: Boolean(code), hasState: Boolean(state), hasSavedState: Boolean(savedState),
+        stateMatches: Boolean(state && savedState && state === savedState),
+        hasVerifier: Boolean(verifier), hasClientId: Boolean(clientId), hasClientSecret: Boolean(clientSecret),
+        host: req.nextUrl.hostname,
+      });
       return fail(req, "google_failed");
     }
 
@@ -66,7 +82,6 @@ export async function GET(req: NextRequest) {
       sub: typeof claims.sub === "string" ? claims.sub : "",
       email: emailClaim,
       email_verified: claims.email_verified === true || claims.email_verified === "true",
-      name: typeof claims.name === "string" ? claims.name : undefined,
     };
     if (!profile.sub || !profile.email || profile.email_verified !== true) {
       console.error("Google ID token is missing verified identity fields");
@@ -74,8 +89,17 @@ export async function GET(req: NextRequest) {
     }
 
     const email = profile.email.trim().toLowerCase();
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return fail(req, "google_account_required", "/register");
+    const exactUser = await prisma.user.findUnique({ where: { email } });
+    const user = exactUser ?? await prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
+    console.info("Google account lookup completed", {
+      matched: Boolean(user),
+      matchedBy: exactUser ? "exact" : user ? "case_insensitive" : "none",
+      emailDomain: email.split("@")[1] ?? "unknown",
+    });
+    // This is a sign-in flow: never send an existing user through account creation.
+    if (!user) return fail(req, "google_account_required", "/login");
 
     if (user.status === "SUSPENDED") return fail(req, "google_failed");
     // Google's signed email_verified claim is sufficient email verification.
