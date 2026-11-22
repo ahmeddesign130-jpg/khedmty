@@ -35,6 +35,10 @@ async function reviewDelivery(formData: FormData) {
       data: { status: decision === "APPROVED" ? "DELIVERED" : "IN_PROGRESS" },
     });
     if (changed.count !== 1) throw new Error("DELIVERY_REVIEW_CONFLICT");
+    if (decision === "REJECTED") {
+      // Remove rejected file records so they can never be exposed to the customer after a later approval.
+      await tx.orderDeliveryFile.deleteMany({ where: { orderId: id } });
+    }
     await tx.notification.create({
       data: {
         userId: decision === "APPROVED" ? order.customerId : order.providerId,
