@@ -12,7 +12,7 @@ async function applyAsProvider(formData: FormData) {
   if (!user || user.status !== "ACTIVE" || user.role !== "CUSTOMER") redirect("/login");
   const fullName = String(formData.get("fullName") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
-  const nationalId = String(formData.get("nationalId") || "").replace(/\\D/g, "");
+  const nationalId = String(formData.get("nationalId") || "").replace(/\D/g, "");
   const profession = String(formData.get("profession") || "").trim();
   const experience = String(formData.get("experience") || "").trim();
   const bio = String(formData.get("bio") || "").trim();

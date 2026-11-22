@@ -9,9 +9,7 @@ export const dynamic = "force-dynamic";
 const googleJwks = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
 function googleRedirectUri(req: NextRequest) {
-  if (process.env.VERCEL_ENV === "preview") {
-    return "https://khedmty-git-feature-wallet-checkout-refresh-ahmeddesign130-jpg.vercel.app/api/auth/google/callback";
-  }
+  // Use the same configured callback URL as the OAuth start route in this environment.
   return process.env.GOOGLE_REDIRECT_URI || new URL("/api/auth/google/callback", req.url).toString();
 }
 

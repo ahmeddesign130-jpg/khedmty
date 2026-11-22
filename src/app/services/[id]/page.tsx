@@ -88,9 +88,14 @@ export default async function ServiceDetailsPage({
           select: { commissionRate: true },
         });
 
-        const commissionRate = settings?.commissionRate ?? 100;
+        const commissionRate = settings?.commissionRate ?? 20;
+        if (!Number.isInteger(commissionRate) || commissionRate < 0 || commissionRate > 50) {
+          throw new Error("INVALID_COMMISSION_RATE");
+        }
+        // The stored service price is treated as the final customer-facing price.
         const servicePrice = currentService.price;
-        const commission = commissionRate;
+        const commission = Math.round((servicePrice * commissionRate) / 100);
+        const providerNet = servicePrice - commission;
 
         const order = await tx.order.create({
           data: {
@@ -104,7 +109,8 @@ export default async function ServiceDetailsPage({
             servicePrice,
             commissionRate,
             commission,
-            total: servicePrice + commission,
+            providerNet,
+            total: servicePrice,
             status: "PENDING_PAYMENT",
           },
           select: { id: true },
@@ -130,9 +136,11 @@ export default async function ServiceDetailsPage({
     select: { commissionRate: true },
   });
 
-  const commissionRate = commissionRateSetting?.commissionRate ?? 100;
-  const commission = commissionRate;
-  const total = service.price + commission;
+  const commissionRate = commissionRateSetting?.commissionRate ?? 20;
+  const total = service.price;
+  if (!Number.isInteger(commissionRate) || commissionRate < 0 || commissionRate > 50) {
+    throw new Error("Invalid platform commission setting.");
+  }
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f6f8]">
@@ -183,22 +191,6 @@ export default async function ServiceDetailsPage({
               </h2>
 
               <div className="mt-5 space-y-3 text-sm">
-                <div className="flex justify-between gap-3">
-                  <span className="text-slate-300">سعر الخدمة</span>
-                  <span className="font-bold">
-                    {service.price.toLocaleString("en-US")} EG
-                  </span>
-                </div>
-
-                <div className="flex justify-between gap-3">
-                  <span className="text-slate-300">
-                    عمولة المنصة الثابتة
-                  </span>
-                  <span className="font-bold">
-                    {commission.toLocaleString("en-US")} EG
-                  </span>
-                </div>
-
                 <div className="border-t border-white/20 pt-4">
                   <div className="flex justify-between gap-3">
                     <span className="font-bold">الإجمالي المطلوب</span>
