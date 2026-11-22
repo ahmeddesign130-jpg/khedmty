@@ -1,5 +1,3 @@
-import { randomBytes } from "node:crypto";
-import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
@@ -33,9 +31,7 @@ export async function GET(req: NextRequest) {
     const state = params.get("state");
     const savedState = req.cookies.get("khedmty_google_state")?.value;
     const verifier = req.cookies.get("khedmty_google_verifier")?.value;
-    const requestedRole = req.cookies.get("khedmty_google_role")?.value === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
-    const intent = req.cookies.get("khedmty_google_intent")?.value === "login" ? "login" : "register";
-    const acceptedTermsVersion = req.cookies.get("khedmty_google_terms")?.value;
+    // OAuth callback is sign-in only. It must never create a Khedmty account.
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = googleRedirectUri(req);
@@ -79,27 +75,7 @@ export async function GET(req: NextRequest) {
 
     const email = profile.email.trim().toLowerCase();
     let user = await prisma.user.findUnique({ where: { email } });
-    if (!user && intent === "login") return fail(req, "google_account_required", "/login");
-    if (!user && (!acceptedTermsVersion || intent !== "register")) return fail(req, "terms_required", "/register");
-    if (!user) {
-      const passwordHash = await bcrypt.hash(randomBytes(48).toString("hex"), 12);
-      try {
-        user = await prisma.user.create({
-          data: {
-            email,
-            displayName: (profile.name || email.split("@")[0]).slice(0, 70),
-            passwordHash,
-            role: requestedRole,
-            status: requestedRole === "PROVIDER" ? "PENDING" : "ACTIVE",
-            termsAcceptedAt: new Date(),
-            termsVersion: acceptedTermsVersion,
-          },
-        });
-      } catch {
-        user = await prisma.user.findUnique({ where: { email } });
-        if (!user) throw new Error("GOOGLE_ACCOUNT_CREATE_FAILED");
-      }
-    }
+    if (!user) return fail(req, "google_account_required", "/register");
 
     if (user.status === "SUSPENDED") return fail(req, "google_failed");
     try { await createSession({ id: user.id, role: user.role, status: user.status }); } catch (sessionError) { console.error("Google session creation failed:", sessionError); return fail(req, "google_session"); }
