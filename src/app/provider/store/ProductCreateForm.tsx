@@ -32,7 +32,7 @@ export default function ProductCreateForm() {
     <label className="block text-sm font-bold">وصف المنتج<textarea name="description" required minLength={20} maxLength={5000} rows={4} className="mt-2 w-full rounded-xl border p-3"/></label>
     <label className="block text-sm font-bold">سعر المنتج قبل عمولة المنصة (EG)<input name="price" type="number" min="1" max="10000000" step="1" required className="mt-2 w-full rounded-xl border p-3"/></label>
     <label className="block text-sm font-bold">الملف الرقمي الذي سيحصل عليه المشتري<input type="file" required onChange={e => setFile(e.target.files?.[0] || null)} className="mt-2 block w-full rounded-xl border p-3 text-sm"/></label>
-    <p className="text-xs leading-6 text-slate-500">حد أقصى 100 MB. الملفات محفوظة بشكل خاص ولا يحصل العميل على رابطها إلا بعد اعتماد الدفع. المنتجات الجديدة تخضع لمراجعة الإدارة.</p>
+    <p className="text-xs leading-6 text-slate-500">حد أقصى 50 MB. الملفات محفوظة بشكل خاص ولا يحصل العميل على رابطها إلا بعد اعتماد الدفع. المنتجات الجديدة تخضع لمراجعة الإدارة.</p>
     {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">{error}</p>}
     {message && <p role="status" className="rounded-xl bg-green-50 p-3 text-sm font-bold text-green-700">{message}</p>}
     <button disabled={busy} className="w-full rounded-xl bg-orange-500 p-4 font-black text-white disabled:opacity-50">{busy ? "جارٍ الرفع والإرسال..." : "إرسال المنتج للمراجعة"}</button>
