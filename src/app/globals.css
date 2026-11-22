@@ -2361,3 +2361,13 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   white-space: normal;
   text-wrap: balance;
 }
+
+
+/* Subtle mobile type-size refinement: slightly smaller, still comfortable to read. */
+@media (max-width: 640px) {
+  body { font-size: 13.5px; }
+  .khedmty-settings-page { font-size: 16px; }
+  .khedmty-settings-page :where(input, textarea) { font-size: 16px !important; }
+  .khedmty-settings-page :where(h1) { font-size: clamp(1.9rem, 4.8vw, 2.3rem); }
+  .khedmty-settings-page :where(h2) { font-size: clamp(1.3rem, 3.8vw, 1.5rem); }
+}
