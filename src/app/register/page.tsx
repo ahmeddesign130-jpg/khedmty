@@ -9,8 +9,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
         <h1 className="mt-2 text-center text-2xl font-semibold">إنشاء حساب جديد</h1>
         <p className="mt-2 text-center text-sm leading-7">حساب واحد يوصلك للخدمة اللي تحتاجها أو يفتح مهارتك لعملاء جدد.</p>
         <RegisterForm error={params.error}/>
-        <p className="mt-5 text-center text-sm text-slate-600">لديك حساب بالفعل؟ <Link href="/login" className="font-semibold text-orange-600">تسجيل الدخول</Link></p>
-        <Link href="/" className="mt-3 block text-center text-sm font-medium text-slate-600">العودة للرئيسية</Link>
+        <p className="mt-5 text-center text-sm text-slate-600">لديك حساب بالفعل؟ <Link href="/login" prefetch={false} className="font-semibold text-orange-600">تسجيل الدخول</Link></p>
+        <Link href="/" prefetch={false} className="mt-3 block text-center text-sm font-medium text-slate-600">العودة للرئيسية</Link>
       </section>
     </main>
   );
