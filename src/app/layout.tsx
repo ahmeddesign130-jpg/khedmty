@@ -7,12 +7,12 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "خِدمتي | مهارتك تستحق التميز",
-  description: "منصة خِدمتي للخدمات المستقلة، تجمع العملاء بمقدمي الخدمات المحترفين.",
+  description: "منصة خِدمتي للخدمات المستقلة والمتاجر الرقمية لبيع الملفات والصور والفيديوهات.",
   applicationName: "Khedmty",
   metadataBase: new URL("https://khedmty-swart.vercel.app"),
   openGraph: {
     title: "خِدمتي | مهارتك تستحق التميز",
-    description: "منصة موثوقة للخدمات المستقلة.",
+    description: "منصة للخدمات المستقلة والمتاجر الرقمية.",
     siteName: "خِدمتي",
     locale: "ar_EG",
     type: "website",
