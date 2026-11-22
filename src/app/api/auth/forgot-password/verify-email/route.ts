@@ -16,7 +16,9 @@ export async function POST(req:NextRequest){
   const expected=Buffer.from(otp.codeHash,"hex"), supplied=Buffer.from(hash(user.id,code),"hex");
   const valid=expected.length===supplied.length&&timingSafeEqual(expected,supplied);
   if(!valid){await prisma.emailOtp.updateMany({where:{id:otp.id,attempts:{lt:5},consumedAt:null},data:{attempts:{increment:1}}});return go(req,`/forgot-password?step=verify&email=${encodeURIComponent(email)}&error=wrong`);}
-  const consumed=await prisma.emailOtp.updateMany({where:{id:otp.id,codeHash:hash(user.id,code),consumedAt:null,expiresAt:{gt:new Date()},attempts:{lt:5}},data:{consumedAt:new Date()}});\n  if(consumed.count!==1)return go(req,`/forgot-password?step=verify&email=${encodeURIComponent(email)}&error=expired`);\n  const secret=process.env.AUTH_SECRET; if(!secret||secret.length<32) throw new Error("AUTH_SECRET is not configured securely");
+  const consumed=await prisma.emailOtp.updateMany({where:{id:otp.id,codeHash:hash(user.id,code),consumedAt:null,expiresAt:{gt:new Date()},attempts:{lt:5}},data:{consumedAt:new Date()}});
+  if(consumed.count!==1)return go(req,`/forgot-password?step=verify&email=${encodeURIComponent(email)}&error=expired`);
+  const secret=process.env.AUTH_SECRET; if(!secret||secret.length<32) throw new Error("AUTH_SECRET is not configured securely");
   const token=await new SignJWT({purpose:"password-reset-email-verified"}).setProtectedHeader({alg:"HS256"}).setSubject(user.id).setIssuedAt().setExpirationTime("10m").sign(new TextEncoder().encode(secret));
   const response=go(req,"/forgot-password?step=phone");
   response.cookies.set("khedmty_reset_email",token,{httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax",path:"/",maxAge:600});
