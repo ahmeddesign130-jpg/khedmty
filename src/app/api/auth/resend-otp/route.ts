@@ -1,6 +1,7 @@
 import { createHash, randomInt } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendKhedmtyCode } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -11,22 +12,6 @@ function hashOtp(userId: string, code: string) {
 }
 function redirect(req: NextRequest, path: string) {
   return NextResponse.redirect(new URL(path, req.url), 303);
-}
-async function sendOtp(email: string, code: string) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: process.env.RESEND_FROM_EMAIL || "خِدمتي <onboarding@resend.dev>",
-      to: [email],
-      subject: "كود تأكيد البريد الإلكتروني - خِدمتي",
-      text: `كود تأكيد بريدك في خِدمتي هو: ${code}. صالح لمدة دقيقتين.`,
-    }),
-    cache: "no-store",
-  });
-  if (!response.ok) throw new Error(`Resend failed: ${response.status}`);
 }
 
 export async function POST(req: NextRequest) {
@@ -51,7 +36,7 @@ export async function POST(req: NextRequest) {
         lastSentAt: new Date(),
       },
     });
-    await sendOtp(email, code);
+    await sendKhedmtyCode(email, code, "registration");
     return redirect(req, `/verify-email?email=${encodeURIComponent(email)}&sent=1`);
   } catch (error) {
     console.error("OTP resend error:", error);
