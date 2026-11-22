@@ -2385,3 +2385,27 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   .khedmty-settings-page :where(h1) { font-size: clamp(1.85rem, 4.8vw, 2.2rem); }
   .khedmty-settings-page :where(h2) { font-size: clamp(1.25rem, 3.8vw, 1.45rem); }
 }
+
+
+/* Registration and terms usability refinements */
+.terms-back-link { position:relative !important; z-index:5 !important; pointer-events:auto !important; touch-action:manipulation; cursor:pointer; }
+.terms-back-link:active { transform:translateY(1px); }
+.auth-v7-page .auth-v7-card { padding:clamp(20px,4vw,30px) !important; }
+.auth-v7-page .auth-v7-card h1 { font-size:clamp(23px,5vw,27px) !important; font-weight:650 !important; }
+.auth-v7-page .auth-v7-card :where(label,button,a) { font-weight:550 !important; }
+.auth-v7-page .auth-v7-card button[type="submit"] { font-size:15px !important; font-weight:600 !important; }
+.auth-v7-page .auth-v7-card p { font-size:14px !important; line-height:1.75 !important; }
+.auth-v7-page .auth-v7-card input:not([type="checkbox"]),.auth-v7-page .auth-v7-card select { min-height:46px !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance { padding:10px 12px !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance > span { font-size:13px !important; line-height:1.7 !important; }
+.auth-v7-page .auth-v7-card form > div > label { font-size:13px !important; }
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] { font-size:11px !important; }
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span { color:#64748b; }
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span.text-emerald-600 { color:#16834b !important; }
+html[data-theme="dark"] .auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span { color:#aab8ca; }
+html[data-theme="dark"] .auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span.text-emerald-600 { color:#72d6a0 !important; }
+.terms-page :where(h1,h2,h3) { font-weight:650 !important; }
+.terms-page :where(p,li) { font-weight:400 !important; }
+@media (max-width:640px) {
+  .auth-v7-page .auth-v7-card { padding:20px !important; }
+}
