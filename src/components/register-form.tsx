@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
 
 const messages: Record<string, string> = {
   terms_required: "لازم توافق على شروط الخدمة قبل إنشاء الحساب.",
