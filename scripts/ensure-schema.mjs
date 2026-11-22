@@ -70,7 +70,7 @@ async function main() {
 
 
   // Digital storefront schema: additive and safe to re-run during deployment.
-  const productStatusType = await prisma.$queryRawUnsafe("SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'DigitalProductStatus') AS exists");
+  const productStatusType = await prisma.$queryRawUnsafe("SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'DigitalProductStatus') AS "exists");
   if (!productStatusType[0].exists) await prisma.$executeRawUnsafe("CREATE TYPE \"DigitalProductStatus\" AS ENUM ('PENDING_REVIEW','APPROVED','REJECTED','PAUSED')");
   const purchaseStatusType = await prisma.$queryRawUnsafe("SELECT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'DigitalPurchaseStatus') AS exists");
   if (!purchaseStatusType[0].exists) await prisma.$executeRawUnsafe("CREATE TYPE \"DigitalPurchaseStatus\" AS ENUM ('PENDING_PAYMENT','PAYMENT_REVIEW','PAID','REJECTED')");
