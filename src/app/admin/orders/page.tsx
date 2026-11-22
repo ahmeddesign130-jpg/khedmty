@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 const statusLabels: Record<string, string> = {
+  DELIVERY_REVIEW: "مراجعة تسليم العمل",
   PENDING_PAYMENT: "في انتظار الدفع",
   PAYMENT_REVIEW: "مراجعة الدفع",
   PAID: "تم الدفع",
@@ -15,6 +17,43 @@ const statusLabels: Record<string, string> = {
   CANCELLED: "ملغي",
   REJECTED: "مرفوض",
 };
+
+
+async function reviewDelivery(formData: FormData) {
+  "use server";
+  const admin = await getCurrentUser();
+  if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
+  const id = String(formData.get("id") || "");
+  const decision = String(formData.get("decision") || "");
+  const note = String(formData.get("reviewNote") || "").trim();
+  if (!id || !["APPROVED", "REJECTED"].includes(decision) || note.length > 1000 || (decision === "REJECTED" && !note)) return;
+  const order = await prisma.order.findFirst({ where: { id, status: "DELIVERY_REVIEW" }, include: { deliveryFiles: { select: { id: true } } } });
+  if (!order || order.deliveryFiles.length === 0) return;
+  await prisma.$transaction(async (tx) => {
+    const changed = await tx.order.updateMany({
+      where: { id, status: "DELIVERY_REVIEW" },
+      data: { status: decision === "APPROVED" ? "DELIVERED" : "IN_PROGRESS" },
+    });
+    if (changed.count !== 1) throw new Error("DELIVERY_REVIEW_CONFLICT");
+    await tx.notification.create({
+      data: {
+        userId: decision === "APPROVED" ? order.customerId : order.providerId,
+        title: decision === "APPROVED" ? "تم اعتماد وتسليم العمل" : "مطلوب تعديل ملفات التسليم",
+        body: decision === "APPROVED"
+          ? `اعتمدت الإدارة ملفات الطلب ${order.orderNo}. يمكنك الآن مراجعة الملفات من تفاصيل الطلب.`
+          : `راجعت الإدارة ملفات الطلب ${order.orderNo} وطلبت تعديلها. السبب: ${note}`,
+        href: `/orders/${order.id}`,
+      },
+    });
+    await tx.auditLog.create({
+      data: { actorId: admin.id, action: decision === "APPROVED" ? "DELIVERY_APPROVED" : "DELIVERY_REJECTED", targetId: order.id, details: note || `اعتماد تسليم الطلب ${order.orderNo}` },
+    });
+  });
+  revalidatePath("/admin/orders");
+  revalidatePath("/provider/orders");
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${id}`);
+}
 
 export default async function AdminOrdersPage() {
   const user = await getCurrentUser();
@@ -38,6 +77,7 @@ export default async function AdminOrdersPage() {
         },
       },
       payments: true,
+      deliveryFiles: { orderBy: { createdAt: "asc" } },
     },
     orderBy: {
       createdAt: "desc",
@@ -199,6 +239,27 @@ export default async function AdminOrdersPage() {
                     </p>
                   </div>
                 </div>
+
+                {order.deliveryFiles.length > 0 && (
+                  <section className="mt-5 rounded-xl border border-slate-200 p-4">
+                    <h2 className="font-black text-slate-800">ملفات العمل المرفوعة</h2>
+                    <div className="mt-3 space-y-2">{order.deliveryFiles.map((file) => (
+                      <a key={file.id} href={`/api/orders/${order.id}/delivery/${file.id}`} className="block rounded-lg bg-slate-50 p-3 text-sm font-bold text-orange-700">{file.fileName} — تحميل ومراجعة</a>
+                    ))}</div>
+                    {order.status === "DELIVERY_REVIEW" && (
+                      <form action={reviewDelivery} className="mt-4 space-y-3">
+                        <input type="hidden" name="id" value={order.id} />
+                        <label className="block text-sm font-bold">سبب طلب التعديل (مطلوب عند الرفض)
+                          <textarea name="reviewNote" rows={2} maxLength={1000} className="mt-2 w-full rounded-xl border p-3" />
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <button name="decision" value="APPROVED" className="rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white">اعتماد التسليم وإرساله للعميل</button>
+                          <button name="decision" value="REJECTED" formNoValidate className="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white">طلب تعديل من مقدم الخدمة</button>
+                        </div>
+                      </form>
+                    )}
+                  </section>
+                )}
 
                 <div className="mt-4 text-xs text-slate-400">
                   تاريخ الطلب:{" "}
