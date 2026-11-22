@@ -12,10 +12,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const { id, fileId } = await params;
     const file = await prisma.orderDeliveryFile.findFirst({
       where: { id: fileId, orderId: id },
-      include: { order: { select: { customerId: true, providerId: true } } },
+      include: { order: { select: { customerId: true, providerId: true, status: true } } },
     });
     if (!file) return NextResponse.json({ message: "الملف غير موجود." }, { status: 404 });
-    const allowed = user.role === "SUPER_ADMIN" || file.order.customerId === user.id || file.order.providerId === user.id;
+    const allowed = user.role === "SUPER_ADMIN" || file.order.providerId === user.id || (file.order.customerId === user.id && file.order.status === "DELIVERED");
     if (!allowed) return NextResponse.json({ message: "غير مسموح لك بتحميل هذا الملف." }, { status: 403 });
     const url = await createStorageDownload("order-deliveries", file.objectPath);
     if (!url) return NextResponse.json({ message: "تعذر تجهيز رابط التحميل." }, { status: 503 });
