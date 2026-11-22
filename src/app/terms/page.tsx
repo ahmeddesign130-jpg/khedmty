@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export const metadata = {
   title: "شروط الخدمة | خِدمتي",
   description: "شروط استخدام منصة خِدمتي للعملاء ومقدمي الخدمات.",
