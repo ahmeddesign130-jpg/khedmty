@@ -50,23 +50,24 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
       const changed = await tx.order.updateMany({
         where: { id: order.id, providerId: user.id, status: order.status },
-        data: { status: "DELIVERED" },
+        data: { status: "DELIVERY_REVIEW" },
       });
       if (changed.count !== 1) throw new Error("DELIVERY_CONFLICT");
-      await tx.notification.create({
-        data: {
-          userId: order.customerId,
-          title: "تم تسليم ملفات طلبك",
-          body: `أرفق مقدم الخدمة ملفات التسليم للطلب ${order.orderNo}. يمكنك فتح الطلب ومراجعة الملفات.`,
-          href: `/orders/${order.id}`,
-        },
-      });
+      const admins = await tx.user.findMany({ where: { role: "SUPER_ADMIN", status: "ACTIVE" }, select: { id: true } });
+      if (admins.length) {
+        await tx.notification.createMany({ data: admins.map((admin) => ({
+          userId: admin.id,
+          title: "تسليم جديد يحتاج مراجعة",
+          body: `أرسل مقدم الخدمة ملفات العمل للطلب ${order.orderNo}. راجع الملفات من لوحة إدارة الطلبات.`,
+          href: "/admin/orders",
+        })) });
+      }
       await tx.auditLog.create({
-        data: { actorId: user.id, action: "ORDER_DELIVERY_UPLOADED", targetId: order.id, details: `تم رفع ${files.length} ملف/ملفات وتسليم الطلب ${order.orderNo}` },
+        data: { actorId: user.id, action: "ORDER_DELIVERY_SUBMITTED_FOR_REVIEW", targetId: order.id, details: `تم رفع ${files.length} ملف/ملفات وتسليم الطلب ${order.orderNo}` },
       });
     });
 
-    return NextResponse.json({ message: "تم رفع الملفات وربطها بالطلب وإشعار العميل." }, { status: 201 });
+    return NextResponse.json({ message: "تم إرسال الملفات للإدارة لمراجعتها. سيظهر التسليم للعميل بعد اعتماد الإدارة." }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "DELIVERY_CONFLICT") {
       return NextResponse.json({ message: "تغيرت حالة الطلب. حدّث الصفحة وحاول مرة أخرى." }, { status: 409 });
