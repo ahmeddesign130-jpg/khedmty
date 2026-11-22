@@ -25,8 +25,8 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 text-white md:grid-cols-[1.2fr_.8fr] md:py-28">
           <div>
             <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-orange-200">خدمات تناسب احتياجك. ومكان يبرز مهارتك.</span>
-            <h1 className="mt-7 text-4xl font-black leading-[1.5] md:text-6xl">أنجز شغلك مع الشخص المناسب — من غير دوشة البحث والتنسيق.</h1>
-            <p className="mt-6 max-w-xl text-base leading-9 text-slate-200 md:text-lg">بدل ما تضيع وقتك في البحث والسؤال، اكتشف خدمات واضحة وتابع طلبك من مكان واحد. ولو بتقدم خدمة، اعرض شغلك وخلي العملاء يلاقوك.</p>
+            <h1 className="mt-7 text-3xl font-black leading-[1.5] md:text-5xl">أنجز شغلك مع الشخص المناسب — من غير دوشة البحث والتنسيق.</h1>
+            <p className="mt-6 max-w-xl text-sm leading-8 text-slate-200 md:text-base">بدل ما تضيع وقتك في البحث والسؤال، اكتشف خدمات واضحة وتابع طلبك من مكان واحد. ولو بتقدم خدمة، اعرض شغلك وخلي العملاء يلاقوك.</p>
             <div className="mt-9">
               <Link href="/services" className="inline-flex min-h-14 items-center justify-center rounded-2xl bg-orange-500 px-8 py-4 font-black text-white shadow-xl shadow-orange-950/20 transition hover:-translate-y-0.5 hover:bg-orange-600">اكتشف الخدمات</Link>
               <p className="mt-4 text-sm text-slate-200">مقدم خدمة؟ <Link href="/register" className="font-bold text-orange-200 underline decoration-orange-200/50 underline-offset-4 hover:text-white">سجّل مجانًا واعرض مهارتك</Link></p>
@@ -57,14 +57,14 @@ export default function HomePage() {
       <section className="mx-auto max-w-6xl px-5 py-16 md:py-20">
         <div className="text-center">
           <span className="text-sm font-bold text-orange-600">خطوات واضحة. متابعة أسهل.</span>
-          <h2 className="mt-3 text-3xl font-black text-[#14213d]">من أول تسجيل لحد استلام الخدمة</h2>
+          <h2 className="mt-3 text-2xl font-black text-[#14213d]">من أول تسجيل لحد استلام الخدمة</h2>
           <p className="mt-4 text-sm leading-8 text-slate-500">سواء بتشتري خدمة أو بتقدمها، هتلاقي خطواتك الأساسية قدامك.</p>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {steps.map((step) => (
             <article key={step.number} className="rounded-3xl border border-slate-100 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
               <span className="ui-icon-tile"><UiIcon name={step.icon} size={27}/></span><span className="mr-3 text-xs font-black text-orange-500">{step.number}</span>
-              <h3 className="mt-5 text-xl font-black">{step.title}</h3>
+              <h3 className="mt-5 text-lg font-black">{step.title}</h3>
               <p className="mt-3 text-sm leading-8 text-slate-500">{step.description}</p>
             </article>
           ))}
