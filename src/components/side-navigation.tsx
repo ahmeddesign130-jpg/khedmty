@@ -90,6 +90,8 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   const links = role ? items[role] : [
     { href: "/", label: "الرئيسية", icon: "grid" as const },
+    { href: "/services", label: "الخدمات", icon: "search" as const },
+    { href: "/stores", label: "المتاجر الرقمية", icon: "wallet" as const },
     { href: "/login", label: "تسجيل الدخول", icon: "users" as const },
     { href: "/register", label: "إنشاء حساب", icon: "badge-check" as const },
   ];
