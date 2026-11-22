@@ -13,7 +13,7 @@ const errors: Record<string, string> = {
   google_profile: "لم نتمكن من قراءة بيانات حساب Google الموثّق.",
   google_session: "تم التحقق من Google لكن تعذر إنشاء جلسة الدخول.",
   google_denied: "تم إلغاء تسجيل الدخول باستخدام Google.",
-  google_account_required: "البريد ده مش مسجل في خِدمتي. هتنتقل لإنشاء حساب وتأكيد البريد برمز OTP.",
+  google_account_required: "البريد ده مش مسجل في خِدمتي. انتقل لإنشاء حساب جديد بالبريد الإلكتروني.",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; registered?: string }> }) {
