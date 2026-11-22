@@ -78,11 +78,20 @@ export async function GET(req: NextRequest) {
     if (!user) return fail(req, "google_account_required", "/register");
 
     if (user.status === "SUSPENDED") return fail(req, "google_failed");
-    try { await createSession({ id: user.id, role: user.role, status: user.status }); } catch (sessionError) { console.error("Google session creation failed:", sessionError); return fail(req, "google_session"); }
+    // Google's signed email_verified claim is sufficient email verification.
+    // Preserve provider approval state; only activate a customer waiting for email OTP.
+    const verifiedUser = user.emailVerifiedAt ? user : await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerifiedAt: new Date(),
+        status: user.role === "CUSTOMER" ? "ACTIVE" : user.status,
+      },
+    });
+    try { await createSession({ id: verifiedUser.id, role: verifiedUser.role, status: verifiedUser.status }); } catch (sessionError) { console.error("Google session creation failed:", sessionError); return fail(req, "google_session"); }
 
-    const destination = user.role === "SUPER_ADMIN" ? "/admin"
-      : user.role === "PROVIDER" && user.status === "PENDING" ? "/pending"
-      : user.role === "PROVIDER" ? "/provider" : "/services";
+    const destination = verifiedUser.role === "SUPER_ADMIN" ? "/admin"
+      : verifiedUser.role === "PROVIDER" && verifiedUser.status === "PENDING" ? "/pending"
+      : verifiedUser.role === "PROVIDER" ? "/provider" : "/services";
     const response = NextResponse.redirect(new URL(destination, req.url));
     for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent", "khedmty_google_terms"]) {
       response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
