@@ -8,11 +8,12 @@ export default function ProductCreateForm() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setError(""); setMessage("");
+    event.preventDefault();
+    const formElement = event.currentTarget; setError(""); setMessage("");
     if (!file) { setError("اختار الملف الرقمي المراد بيعه."); return; }
     setBusy(true);
     try {
-      const form = new FormData(event.currentTarget);
+      const form = new FormData(formElement);
       const signedResponse = await fetch("/api/uploads/sign", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "digital-product", name: file.name, mimeType: file.type, size: file.size }) });
       const signed = await signedResponse.json();
       if (!signedResponse.ok) throw new Error(signed.message || "تعذر تجهيز رفع الملف.");
@@ -21,7 +22,7 @@ export default function ProductCreateForm() {
       const response = await fetch("/api/store/products", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: String(form.get("title") || ""), description: String(form.get("description") || ""), price: Number(form.get("price")), filePath: signed.objectPath, fileName: file.name, mimeType: file.type, sizeBytes: file.size }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "تعذرت إضافة المنتج.");
-      setMessage(data.message); event.currentTarget.reset(); setFile(null); router.refresh();
+      setMessage(data.message); formElement.reset(); setFile(null); router.refresh();
     } catch (e) { setError(e instanceof Error ? e.message : "حدث خطأ غير متوقع."); }
     finally { setBusy(false); }
   }
