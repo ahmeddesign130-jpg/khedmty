@@ -2409,3 +2409,26 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card form > div > div[aria-live="
 @media (max-width:640px) {
   .auth-v7-page .auth-v7-card { padding:20px !important; }
 }
+
+
+/* Auth typography: calm, lighter weights and smaller headings. */
+.auth-v7-page .auth-v7-card h1,
+.auth-v7-page .auth-v7-card h2,
+.auth-v7-page .auth-v7-card h3 { font-weight:600 !important; }
+.auth-v7-page .auth-v7-card :where(label,button,a,strong) { font-weight:500 !important; }
+.auth-v7-page .auth-v7-card button[type="submit"] { font-weight:550 !important; }
+.auth-v7-page .auth-v7-card p { font-weight:400 !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance > span,
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] { font-weight:400 !important; }
+.auth-v7-page .auth-v7-card h1 { font-size:clamp(22px,4.8vw,25px) !important; }
+
+/* Avoid expensive blur and entrance effects on small touch devices. */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .auth-v7-page .auth-v7-card,
+  .auth-v7-page .glass-surface {
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+    animation:none !important;
+    transition:none !important;
+  }
+}
