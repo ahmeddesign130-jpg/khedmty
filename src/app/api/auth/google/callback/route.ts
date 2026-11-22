@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
     }
 
     const email = profile.email.trim().toLowerCase();
-    let user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return fail(req, "google_account_required", "/register");
 
     if (user.status === "SUSPENDED") return fail(req, "google_failed");
