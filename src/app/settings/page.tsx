@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { UiIcon } from "@/components/ui-icon";
 import { AppearanceLanguageControls } from "@/components/appearance-language-controls";
+import { PasswordChangeFields } from "@/components/password-change-fields";
 
 async function changePassword(formData: FormData) {
   "use server";
@@ -14,7 +15,10 @@ async function changePassword(formData: FormData) {
   const currentPassword = String(formData.get("currentPassword") || "");
   const newPassword = String(formData.get("newPassword") || "");
   const confirmPassword = String(formData.get("confirmPassword") || "");
-  if (newPassword.length < 10 || newPassword.length > 72 || newPassword !== confirmPassword) redirect("/settings?error=password_invalid");
+  const validPassword = newPassword.length >= 10 && newPassword.length <= 72 &&
+    /[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword) &&
+    /[0-9]/.test(newPassword) && /[^A-Za-z0-9]/.test(newPassword);
+  if (!validPassword || newPassword !== confirmPassword) redirect("/settings?error=password_invalid");
   const account = await prisma.user.findUnique({ where: { id: session.id }, select: { passwordHash: true } });
   if (!account || !(await bcrypt.compare(currentPassword, account.passwordHash))) redirect("/settings?error=password_current");
   const passwordHash = await bcrypt.hash(newPassword, 12);
@@ -139,18 +143,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <span className="ui-icon-tile"><UiIcon name="shield" size={26}/></span>
         <h2 className="settings-password-title mt-4 inline-flex rounded-xl bg-[#14213d] px-4 py-2 text-xl font-black text-white">تغيير كلمة المرور</h2>
         <p className="mt-2 text-base font-semibold leading-8 text-slate-700">استخدم كلمة مرور قوية لا تقل عن 10 أحرف.</p>
-        <form action={changePassword} className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm font-bold text-slate-700 sm:col-span-2">كلمة المرور الحالية
-            <input name="currentPassword" type="password" autoComplete="current-password" required maxLength={72} className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500" dir="ltr"/>
-          </label>
-          <label className="block text-sm font-bold text-slate-700">كلمة المرور الجديدة
-            <input name="newPassword" type="password" autoComplete="new-password" required minLength={10} maxLength={72} className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500" dir="ltr"/>
-          </label>
-          <label className="block text-sm font-bold text-slate-700">تأكيد كلمة المرور
-            <input name="confirmPassword" type="password" autoComplete="new-password" required minLength={10} maxLength={72} className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left outline-none focus:border-orange-500" dir="ltr"/>
-          </label>
-          <button type="submit" className="rounded-xl bg-[#14213d] px-5 py-3.5 font-black text-white transition hover:bg-orange-600 sm:col-span-2">تحديث كلمة المرور</button>
-        </form>
+        <PasswordChangeFields action={changePassword}/>
       </section>
 
       {user.role === "CUSTOMER" && <section className="mt-7 rounded-2xl border border-orange-200 bg-white p-6 shadow-sm">

@@ -2409,3 +2409,47 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card form > div > div[aria-live="
 @media (max-width:640px) {
   .auth-v7-page .auth-v7-card { padding:20px !important; }
 }
+
+
+/* Auth typography: calm, lighter weights and smaller headings. */
+.auth-v7-page .auth-v7-card h1,
+.auth-v7-page .auth-v7-card h2,
+.auth-v7-page .auth-v7-card h3 { font-weight:600 !important; }
+.auth-v7-page .auth-v7-card :where(label,button,a,strong) { font-weight:500 !important; }
+.auth-v7-page .auth-v7-card button[type="submit"] { font-weight:550 !important; }
+.auth-v7-page .auth-v7-card p { font-weight:400 !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance > span,
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] { font-weight:400 !important; }
+.auth-v7-page .auth-v7-card h1 { font-size:clamp(22px,4.8vw,25px) !important; }
+
+/* Avoid expensive blur and entrance effects on small touch devices. */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .auth-v7-page .auth-v7-card,
+  .auth-v7-page .glass-surface {
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+    animation:none !important;
+    transition:none !important;
+  }
+}
+
+
+/* Final global menu and sentence alignment refinements requested for Khedmty. */
+.khedmty-side-drawer,#khedmty-side-menu {
+  background-color:#ffffff !important;
+  background-image:none !important;
+  opacity:1 !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html[data-theme="dark"] .khedmty-side-drawer,
+html[data-theme="dark"] #khedmty-side-menu {
+  background-color:#121d30 !important;
+  background-image:none !important;
+  opacity:1 !important;
+}
+.khedmty-side-drawer :where(p,span,a,button,label,small,strong) { opacity:1 !important; }
+main p { text-align:center; }
+.auth-v7-page .auth-v7-card p { text-align:center !important; }
+.auth-v7-page .auth-v7-card a[href="/login"],
+.auth-v7-page .auth-v7-card a[href="/"] { position:relative; z-index:2; pointer-events:auto; touch-action:manipulation; }

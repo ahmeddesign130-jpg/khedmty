@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
     if (createdUserId) {
       await prisma.user.delete({ where: { id: createdUserId } }).catch(() => undefined);
     }
-    return redirect303(req, "/register?error=email_send");
+    const code = error && typeof error === "object" && "code" in error ? String((error as {code?:unknown}).code) : "";
+    return redirect303(req, code === "P2022" || code === "P2021" ? "/register?error=database" : "/register?error=email_send");
   }
 }
