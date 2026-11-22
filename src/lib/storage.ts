@@ -44,3 +44,17 @@ export function serviceMediaPublicUrl(objectPath: string) {
   const { url } = config();
   return `${url}/storage/v1/object/public/service-media/${objectPath.split("/").map(encodeURIComponent).join("/")}`;
 }
+
+export async function ensurePrivateStorageBucket(bucket: string, fileSizeLimit: number) {
+  const { url, key } = config();
+  const response = await fetch(`${url}/storage/v1/bucket`, {
+    method: "POST",
+    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ id: bucket, name: bucket, public: false, file_size_limit: fileSizeLimit }),
+    cache: "no-store",
+  });
+  if (response.ok || response.status === 409) return;
+  const details = await response.text().catch(() => "");
+  console.error("SUPABASE_BUCKET_CREATE_ERROR", response.status, details.slice(0, 500));
+  throw new Error("تعذر تجهيز مساحة حفظ الملفات الرقمية.");
+}
