@@ -34,7 +34,7 @@ export default function DeliveryUploadForm({ orderId }: { orderId: string }) {
         if (!uploadResponse.ok) throw new Error(`فشل رفع الملف: ${file.name}`);
         uploaded.push({ file, objectPath: signed.objectPath });
       }
-      setStatus("جاري ربط الملفات بالطلب وإشعار العميل...");
+      setStatus("جاري إرسال الملفات للإدارة للمراجعة...");
       const saveResponse = await fetch(`/api/orders/${orderId}/delivery`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ files: uploaded.map(({ file, objectPath }) => ({
@@ -43,7 +43,7 @@ export default function DeliveryUploadForm({ orderId }: { orderId: string }) {
       });
       const saved = await saveResponse.json();
       if (!saveResponse.ok) throw new Error(saved.message || "تعذر تسجيل ملفات التسليم.");
-      setStatus("تم تسليم الملفات وإشعار العميل.");
+      setStatus("تم إرسال الملفات للإدارة للمراجعة. سيصل إشعار للعميل بعد اعتماد التسليم.");
       setFiles([]);
       router.refresh();
     } catch (cause) {
@@ -58,6 +58,6 @@ export default function DeliveryUploadForm({ orderId }: { orderId: string }) {
     {files.length > 0 && <p className="text-sm font-bold text-slate-700">تم اختيار {files.length} ملف</p>}
     {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm font-bold text-red-700">{error}</p>}
     {status && <p role="status" aria-live="polite" className="rounded-lg bg-blue-50 p-3 text-sm font-bold text-blue-700">{status}</p>}
-    <button type="submit" disabled={busy || !files.length} className="w-full rounded-xl bg-green-600 px-4 py-3 font-black text-white disabled:opacity-50">{busy ? "جاري التسليم..." : "رفع الملفات وتسليم الطلب"}</button>
+    <button type="submit" disabled={busy || !files.length} className="w-full rounded-xl bg-green-600 px-4 py-3 font-black text-white disabled:opacity-50">{busy ? "جاري التسليم..." : "إرسال العمل للإدارة للمراجعة"}</button>
   </form>;
 }
