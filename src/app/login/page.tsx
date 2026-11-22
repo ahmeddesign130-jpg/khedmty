@@ -16,13 +16,14 @@ const errors: Record<string, string> = {
   google_account_required: "البريد ده مش مسجل في خِدمتي. انتقل لإنشاء حساب جديد بالبريد الإلكتروني.",
 };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; registered?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; registered?: string; verified?: string }> }) {
   const params = await searchParams;
   return (
     <main dir="rtl" className="auth-v7-page flex min-h-screen items-center justify-center px-5 py-10">
       <section className="auth-v7-card auth-readable glass-surface w-full max-w-md rounded-[30px] p-7 md:p-10">
         <h1 className="mt-3 text-center text-3xl font-black text-white">تسجيل الدخول</h1>
         <p className="mt-3 text-center text-base leading-8 text-slate-300">كمّل من حيث توقفت: تابع طلباتك ومدفوعاتك وخدماتك من حسابك.</p>
+        {params.verified === "1" && <p role="status" className="mt-5 rounded-xl bg-green-50 p-4 text-sm font-bold text-green-700">تم تأكيد بريدك الإلكتروني بنجاح. سجّل الدخول الآن.</p>}
         {params.registered === "1" && <p role="status" className="mt-5 rounded-xl bg-green-50 p-4 text-sm font-bold text-green-700">تم إنشاء حسابك بنجاح. سجّل الدخول الآن.</p>}
         {params.error && <div role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700"><p>{errors[params.error] || errors.server}</p>{params.error === "google_account_required" && <Link href="/register?error=google_account_required" className="mt-3 inline-block font-black text-orange-700 underline">إنشاء حساب جديد وتأكيد البريد</Link>}</div>}
         <a href="/api/auth/google?intent=login" className="google-auth-button group mt-7 flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400">
