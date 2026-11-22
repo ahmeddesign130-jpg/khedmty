@@ -9,7 +9,9 @@ type Locale = "ar" | "en";
 
 const items: Record<Role, { href: string; label: string; icon: "search" | "clipboard-list" | "settings" | "grid" | "briefcase" | "users" | "badge-check" | "wallet" | "user-cog" }[]> = {
   CUSTOMER: [
-    { href: "/services", label: "السوق", icon: "search" },
+    { href: "/services", label: "الخدمات", icon: "search" },
+    { href: "/stores", label: "المتاجر الرقمية", icon: "grid" },
+    { href: "/my-digital-purchases", label: "مشترياتي الرقمية", icon: "wallet" },
     { href: "/orders", label: "طلباتي", icon: "clipboard-list" },
     { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
@@ -17,6 +19,7 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
   PROVIDER: [
     { href: "/provider", label: "الرئيسية", icon: "grid" },
     { href: "/provider/services", label: "خدماتي", icon: "briefcase" },
+    { href: "/provider/store", label: "متجري الرقمي", icon: "wallet" },
     { href: "/provider/orders", label: "الطلبات", icon: "clipboard-list" },
     { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
     { href: "/settings", label: "الإعدادات", icon: "settings" },
@@ -25,6 +28,8 @@ const items: Record<Role, { href: string; label: string; icon: "search" | "clipb
     { href: "/admin", label: "لوحة الإدارة", icon: "grid" },
     { href: "/admin/providers", label: "مقدمو الخدمات", icon: "users" },
     { href: "/admin/services", label: "مراجعة الخدمات", icon: "badge-check" },
+    { href: "/admin/digital-products", label: "مراجعة المنتجات الرقمية", icon: "grid" },
+    { href: "/admin/digital-payments", label: "مدفوعات المتاجر", icon: "wallet" },
     { href: "/admin/orders", label: "الطلبات", icon: "clipboard-list" },
     { href: "/admin/payments", label: "المدفوعات", icon: "wallet" },
     { href: "/notifications", label: "الإشعارات", icon: "clipboard-list" },
