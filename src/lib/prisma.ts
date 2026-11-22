@@ -9,8 +9,6 @@ function prismaDatabaseUrl() {
   if (!raw) return undefined;
   try {
     const url = new URL(raw);
-    // Supabase transaction pooler (port 6543) runs in PgBouncer transaction mode.
-    // Disable Prisma's prepared-statement reuse to prevent "prepared statement s0 already exists".
     if (url.port === "6543" || url.hostname.includes(".pooler.supabase.com")) {
       url.searchParams.set("pgbouncer", "true");
       url.searchParams.set("statement_cache_size", "0");
@@ -30,8 +28,6 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = basePrisma;
 }
 
-// Additive compatibility migration for older production databases.
-// It only adds columns and indexes; it never drops or overwrites existing service data.
 let compatibilitySchemaPromise: Promise<void> | undefined;
 
 async function ensureCompatibilitySchema() {
@@ -42,6 +38,31 @@ async function ensureCompatibilitySchema() {
          ADD COLUMN IF NOT EXISTS "displayName" TEXT NOT NULL DEFAULT 'مستخدم'`
       );
       await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."User"
+         ADD COLUMN IF NOT EXISTS "emailVerifiedAt" TIMESTAMPTZ`
+      );
+      // Existing accounts predate email OTP and remain usable; new registrations
+      // explicitly keep this column NULL until the submitted code is verified.
+      await basePrisma.$executeRawUnsafe(
+        `UPDATE public."User" SET "emailVerifiedAt" = "createdAt"
+         WHERE "emailVerifiedAt" IS NULL AND "createdAt" < NOW() - INTERVAL '2 minutes'`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `CREATE TABLE IF NOT EXISTS public."EmailOtp" (
+          "id" TEXT PRIMARY KEY,
+          "userId" TEXT NOT NULL UNIQUE REFERENCES public."User"("id") ON DELETE CASCADE,
+          "codeHash" TEXT NOT NULL,
+          "expiresAt" TIMESTAMPTZ NOT NULL,
+          "attempts" INTEGER NOT NULL DEFAULT 0,
+          "consumedAt" TIMESTAMPTZ,
+          "lastSentAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "EmailOtp_expiresAt_idx" ON public."EmailOtp" ("expiresAt")`
+      );
+      await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "price" INTEGER NOT NULL DEFAULT 0`
       );
@@ -49,56 +70,46 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."Order"
          ADD COLUMN IF NOT EXISTS "orderNo" TEXT`
       );
-      // Backfill order numbers for legacy rows without changing existing values.
       await basePrisma.$executeRawUnsafe(
         `UPDATE public."Order"
          SET "orderNo" = 'KH-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 16))
          WHERE "orderNo" IS NULL`
       );
       await basePrisma.$executeRawUnsafe(
-        `CREATE UNIQUE INDEX IF NOT EXISTS "Order_orderNo_key"
-         ON public."Order" ("orderNo")`
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Order_orderNo_key" ON public."Order" ("orderNo")`
       );
       await basePrisma.$executeRawUnsafe(
-        `ALTER TABLE IF EXISTS public."Order"
-         ALTER COLUMN "orderNo" SET NOT NULL`
+        `ALTER TABLE IF EXISTS public."Order" ALTER COLUMN "orderNo" SET NOT NULL`
       );
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Service"
          ADD COLUMN IF NOT EXISTS "mediaUrls" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`
       );
       await basePrisma.$executeRawUnsafe(
-        `ALTER TABLE IF EXISTS public."Service"
-         ADD COLUMN IF NOT EXISTS "reviewNote" TEXT`
+        `ALTER TABLE IF EXISTS public."Service" ADD COLUMN IF NOT EXISTS "reviewNote" TEXT`
       );
       await basePrisma.$executeRawUnsafe(
-        `ALTER TABLE IF EXISTS public."Service"
-         ADD COLUMN IF NOT EXISTS "serviceNo" TEXT`
+        `ALTER TABLE IF EXISTS public."Service" ADD COLUMN IF NOT EXISTS "serviceNo" TEXT`
       );
       await basePrisma.$executeRawUnsafe(
-        `ALTER TABLE IF EXISTS public."Order"
-         ADD COLUMN IF NOT EXISTS "customerContact" TEXT`
+        `ALTER TABLE IF EXISTS public."Order" ADD COLUMN IF NOT EXISTS "customerContact" TEXT`
       );
-      // Backfill only missing numbers. Existing service numbers are preserved.
       await basePrisma.$executeRawUnsafe(
         `UPDATE public."Service"
          SET "serviceNo" = 'KH-SRV-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12))
          WHERE "serviceNo" IS NULL`
       );
       await basePrisma.$executeRawUnsafe(
-        `CREATE UNIQUE INDEX IF NOT EXISTS "Service_serviceNo_key"
-         ON public."Service" ("serviceNo")`
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Service_serviceNo_key" ON public."Service" ("serviceNo")`
       );
       await basePrisma.$executeRawUnsafe(
-        `ALTER TABLE IF EXISTS public."Service"
-         ALTER COLUMN "serviceNo" SET NOT NULL`
+        `ALTER TABLE IF EXISTS public."Service" ALTER COLUMN "serviceNo" SET NOT NULL`
       );
     })().catch((error) => {
       compatibilitySchemaPromise = undefined;
       throw error;
     });
   }
-
   await compatibilitySchemaPromise;
 }
 

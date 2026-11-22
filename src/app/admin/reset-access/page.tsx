@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PasswordInput } from "@/components/password-input";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,11 @@ export default async function AdminResetAccessPage({
         <form action="/api/auth/admin-reset" method="POST" className="mt-7 space-y-5">
           <div>
             <label htmlFor="resetToken" className="mb-2 block text-sm font-bold text-slate-700">مفتاح الأمان</label>
-            <input id="resetToken" name="resetToken" type="password" autoComplete="off" required minLength={32} className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-left" dir="ltr" />
+            <PasswordInput id="resetToken" name="resetToken" autoComplete="off" minLength={32} className="w-full rounded-xl border border-slate-200 px-4 py-3.5"/>
           </div>
           <div>
             <label htmlFor="newPassword" className="mb-2 block text-sm font-bold text-slate-700">كلمة المرور الجديدة</label>
-            <input id="newPassword" name="newPassword" type="password" autoComplete="new-password" required minLength={12} maxLength={72} className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-left" dir="ltr" />
+            <PasswordInput id="newPassword" name="newPassword" autoComplete="new-password" minLength={12} maxLength={72} className="w-full rounded-xl border border-slate-200 px-4 py-3.5"/>
             <p className="mt-2 text-xs text-slate-500">12 حرفًا على الأقل. استخدم كلمة مرور قوية وفريدة.</p>
           </div>
           <button type="submit" className="w-full rounded-xl bg-orange-500 px-5 py-4 font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600">تحديث كلمة المرور</button>

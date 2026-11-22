@@ -24,10 +24,8 @@ export async function GET(req: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) return NextResponse.redirect(new URL("/login?error=google_not_configured", req.url));
 
-  const requestedRole = req.nextUrl.searchParams.get("role") === "PROVIDER" ? "PROVIDER" : "CUSTOMER";
-  const intent = req.nextUrl.searchParams.get("intent") === "login" ? "login" : "register";
-  const termsAccepted = req.nextUrl.searchParams.get("termsAccepted") === "yes";
-  if (intent === "register" && !termsAccepted) return NextResponse.redirect(new URL("/register?error=terms_required", req.url));
+  // Google is supported for sign-in only. Account creation always uses the email + OTP flow.
+  const intent = "login";
   const state = randomBytes(32).toString("hex");
   const verifier = randomBytes(48).toString("base64url");
   const challenge = createHash("sha256").update(verifier).digest("base64url");
@@ -47,8 +45,6 @@ export async function GET(req: NextRequest) {
   const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/api/auth/google/callback", maxAge: 600 };
   response.cookies.set("khedmty_google_state", state, cookieOptions);
   response.cookies.set("khedmty_google_verifier", verifier, cookieOptions);
-  response.cookies.set("khedmty_google_role", requestedRole, cookieOptions);
   response.cookies.set("khedmty_google_intent", intent, cookieOptions);
-  if (intent === "register") response.cookies.set("khedmty_google_terms", "2026-11-21", cookieOptions);
   return response;
 }

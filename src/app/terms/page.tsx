@@ -24,9 +24,9 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <main dir="rtl" className="min-h-screen px-4 py-10 md:px-6">
+    <main dir="rtl" className="terms-page min-h-screen px-4 py-10 md:px-6">
       <article className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm md:p-10">
-        <Link href="/register" className="text-sm font-bold text-orange-700">العودة لإنشاء الحساب</Link>
+        <Link prefetch={false} href="/register" className="terms-back-link inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-orange-700">العودة لإنشاء الحساب</Link>
         <h1 className="mt-5 text-3xl font-black text-slate-900">شروط الخدمة</h1>
         <p className="mt-3 text-sm text-slate-600">منصة خِدمتي — آخر تحديث: 21 نوفمبر 2026</p>
         <p className="mt-6 rounded-2xl bg-orange-50 p-4 text-sm font-semibold leading-8 text-orange-950">يرجى قراءة الشروط قبل إنشاء الحساب. هذه صياغة تشغيلية أولية للمنصة، ويجب مراجعتها قانونيًا وفق القوانين المصرية قبل الإطلاق التجاري النهائي.</p>
@@ -37,7 +37,7 @@ export default function TermsPage() {
           </section>)}
         </div>
         <div className="mt-10 border-t border-slate-200 pt-6">
-          <Link href="/register" className="inline-flex rounded-xl bg-orange-500 px-6 py-3 font-black text-white">موافق، العودة لإنشاء الحساب</Link>
+          <Link prefetch={false} href="/register" className="terms-back-link inline-flex min-h-12 items-center rounded-xl bg-orange-500 px-6 py-3 text-base font-semibold text-white">موافق، العودة لإنشاء الحساب</Link>
         </div>
       </article>
     </main>

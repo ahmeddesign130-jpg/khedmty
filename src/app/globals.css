@@ -2361,3 +2361,95 @@ html[data-theme="dark"] .auth-v7-page .auth-v7-card a[href="/terms"] {
   white-space: normal;
   text-wrap: balance;
 }
+
+
+/* Subtle mobile type-size refinement: slightly smaller, still comfortable to read.
+   Uses !important because the existing global accessibility scale is !important. */
+@media (max-width: 640px) {
+  body { font-size: 16px !important; }
+  main :where(.text-xs) { font-size: 13px !important; }
+  main :where(.text-sm) { font-size: 14.5px !important; }
+  main :where(.text-base) { font-size: 16px !important; }
+  main :where(.text-lg) { font-size: 18px !important; }
+  main :where(.text-xl) { font-size: 20px !important; }
+  main :where(.text-2xl) { font-size: 24px !important; }
+  main :where(.text-3xl) { font-size: 30px !important; }
+  main :where(.text-4xl) { font-size: 36px !important; }
+  main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    font-size: 16px !important;
+    min-height: 52px;
+  }
+  main :where(input, textarea)::placeholder { font-size: 14px !important; }
+  .khedmty-settings-page { font-size: 16px !important; }
+  .khedmty-settings-page :where(input, textarea) { font-size: 16px !important; }
+  .khedmty-settings-page :where(h1) { font-size: clamp(1.85rem, 4.8vw, 2.2rem); }
+  .khedmty-settings-page :where(h2) { font-size: clamp(1.25rem, 3.8vw, 1.45rem); }
+}
+
+
+/* Registration and terms usability refinements */
+.terms-back-link { position:relative !important; z-index:5 !important; pointer-events:auto !important; touch-action:manipulation; cursor:pointer; }
+.terms-back-link:active { transform:translateY(1px); }
+.auth-v7-page .auth-v7-card { padding:clamp(20px,4vw,30px) !important; }
+.auth-v7-page .auth-v7-card h1 { font-size:clamp(23px,5vw,27px) !important; font-weight:650 !important; }
+.auth-v7-page .auth-v7-card :where(label,button,a) { font-weight:550 !important; }
+.auth-v7-page .auth-v7-card button[type="submit"] { font-size:15px !important; font-weight:600 !important; }
+.auth-v7-page .auth-v7-card p { font-size:14px !important; line-height:1.75 !important; }
+.auth-v7-page .auth-v7-card input:not([type="checkbox"]),.auth-v7-page .auth-v7-card select { min-height:46px !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance { padding:10px 12px !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance > span { font-size:13px !important; line-height:1.7 !important; }
+.auth-v7-page .auth-v7-card form > div > label { font-size:13px !important; }
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] { font-size:11px !important; }
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span { color:#64748b; }
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span.text-emerald-600 { color:#16834b !important; }
+html[data-theme="dark"] .auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span { color:#aab8ca; }
+html[data-theme="dark"] .auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] span.text-emerald-600 { color:#72d6a0 !important; }
+.terms-page :where(h1,h2,h3) { font-weight:650 !important; }
+.terms-page :where(p,li) { font-weight:400 !important; }
+@media (max-width:640px) {
+  .auth-v7-page .auth-v7-card { padding:20px !important; }
+}
+
+
+/* Auth typography: calm, lighter weights and smaller headings. */
+.auth-v7-page .auth-v7-card h1,
+.auth-v7-page .auth-v7-card h2,
+.auth-v7-page .auth-v7-card h3 { font-weight:600 !important; }
+.auth-v7-page .auth-v7-card :where(label,button,a,strong) { font-weight:500 !important; }
+.auth-v7-page .auth-v7-card button[type="submit"] { font-weight:550 !important; }
+.auth-v7-page .auth-v7-card p { font-weight:400 !important; }
+.auth-v7-page .auth-v7-card .terms-acceptance > span,
+.auth-v7-page .auth-v7-card form > div > div[aria-live="polite"] { font-weight:400 !important; }
+.auth-v7-page .auth-v7-card h1 { font-size:clamp(22px,4.8vw,25px) !important; }
+
+/* Avoid expensive blur and entrance effects on small touch devices. */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  .auth-v7-page .auth-v7-card,
+  .auth-v7-page .glass-surface {
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+    animation:none !important;
+    transition:none !important;
+  }
+}
+
+
+/* Final global menu and sentence alignment refinements requested for Khedmty. */
+.khedmty-side-drawer,#khedmty-side-menu {
+  background-color:#ffffff !important;
+  background-image:none !important;
+  opacity:1 !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html[data-theme="dark"] .khedmty-side-drawer,
+html[data-theme="dark"] #khedmty-side-menu {
+  background-color:#121d30 !important;
+  background-image:none !important;
+  opacity:1 !important;
+}
+.khedmty-side-drawer :where(p,span,a,button,label,small,strong) { opacity:1 !important; }
+main p { text-align:center; }
+.auth-v7-page .auth-v7-card p { text-align:center !important; }
+.auth-v7-page .auth-v7-card a[href="/login"],
+.auth-v7-page .auth-v7-card a[href="/"] { position:relative; z-index:2; pointer-events:auto; touch-action:manipulation; }
