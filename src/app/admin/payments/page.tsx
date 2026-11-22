@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createStorageDownload, storageReady } from "@/lib/storage";
+import PaymentReviewForm from "./PaymentReviewForm";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,16 @@ async function reviewPayment(formData: FormData) {
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   const reviewNote = String(formData.get("reviewNote") || "").trim();
+  const transferReference = String(formData.get("transferReference") || "").trim();
+  const rawTransferDate = String(formData.get("transferDate") || "").trim();
+  const transferDate = rawTransferDate ? new Date(rawTransferDate) : null;
 
   if (
     !id ||
     !["APPROVED", "REJECTED"].includes(status) ||
     reviewNote.length > 1000 ||
+    transferReference.length > 120 ||
+    (transferDate && Number.isNaN(transferDate.getTime())) ||
     (status === "REJECTED" && !reviewNote)
   ) return;
 
@@ -56,6 +62,8 @@ async function reviewPayment(formData: FormData) {
           status: status as "APPROVED" | "REJECTED",
           reviewNote: reviewNote || null,
           reviewedAt: new Date(),
+          transferReference: transferReference || null,
+          transferDate,
         },
       });
 
@@ -67,6 +75,17 @@ async function reviewPayment(formData: FormData) {
       });
 
       if (orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
+
+      await tx.notification.create({
+        data: {
+          userId: payment.order.customerId,
+          title: status === "APPROVED" ? "تم اعتماد الدفع" : "تم رفض إثبات الدفع",
+          body: status === "APPROVED"
+            ? `تم تأكيد استلام مبلغ الطلب ${payment.order.orderNo}. يمكنك متابعة حالة الطلب من حسابك.`
+            : `تم رفض إثبات الدفع للطلب ${payment.order.orderNo}. السبب: ${reviewNote}`,
+          href: `/orders/${payment.orderId}`,
+        },
+      });
 
       await tx.auditLog.create({
         data: {
@@ -202,6 +221,8 @@ export default async function AdminPaymentsPage() {
                   </p>
                 ) : null}
 
+                {payment.transferReference && <p className="mt-3 text-sm text-slate-600">الرقم المرجعي الذي راجعته الإدارة: <strong dir="ltr">{payment.transferReference}</strong></p>}
+                {payment.transferDate && <p className="mt-1 text-sm text-slate-600">تاريخ التحويل الذي راجعته الإدارة: {payment.transferDate.toLocaleString("en-GB")}</p>}
                 {payment.reviewNote && (
                   <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm">
                     ملاحظة الإدارة: {payment.reviewNote}
@@ -209,21 +230,7 @@ export default async function AdminPaymentsPage() {
                 )}
 
                 {payment.status === "PENDING_REVIEW" && (
-                  <form action={reviewPayment} className="mt-5 space-y-3">
-                    <input type="hidden" name="id" value={payment.id} />
-                    <label className="block text-sm font-bold">
-                      ملاحظة أو سبب الرفض
-                      <textarea name="reviewNote" rows={2} maxLength={1000} className="mt-2 w-full rounded-xl border p-3" />
-                    </label>
-                    <div className="flex flex-wrap gap-3">
-                      <button name="status" value="APPROVED" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">
-                        تأكيد استلام المبلغ
-                      </button>
-                      <button name="status" value="REJECTED" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">
-                        رفض الإيصال
-                      </button>
-                    </div>
-                  </form>
+                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} />
                 )}
 
                 <p className="mt-4 text-xs text-slate-400">

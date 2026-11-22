@@ -30,7 +30,45 @@ async function main() {
   await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "EmailOtp_userId_key" ON "EmailOtp"("userId")');
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "EmailOtp_expiresAt_idx" ON "EmailOtp"("expiresAt")');
 
-  console.log("Khedmty email-auth schema compatibility check completed.");
+  // Additive order workflow state; safe to run repeatedly on every build.
+  await prisma.$executeRawUnsafe('ALTER TYPE "OrderStatus" ADD VALUE IF NOT EXISTS \'DELIVERY_REVIEW\'');
+
+  // Additive payment-review metadata; safe to run repeatedly on every build.
+  await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "transferReference" TEXT, ADD COLUMN IF NOT EXISTS "transferDate" TIMESTAMP(3)');
+
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "OrderDeliveryFile" (
+      "id" TEXT NOT NULL,
+      "orderId" TEXT NOT NULL,
+      "uploaderId" TEXT NOT NULL,
+      "objectPath" TEXT NOT NULL,
+      "fileName" TEXT NOT NULL,
+      "mimeType" TEXT NOT NULL,
+      "sizeBytes" INTEGER NOT NULL,
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "OrderDeliveryFile_pkey" PRIMARY KEY ("id"),
+      CONSTRAINT "OrderDeliveryFile_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE
+    )
+  `);
+  await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "OrderDeliveryFile_objectPath_key" ON "OrderDeliveryFile"("objectPath")');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "OrderDeliveryFile_orderId_createdAt_idx" ON "OrderDeliveryFile"("orderId", "createdAt")');
+
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "Notification" (
+      "id" TEXT NOT NULL,
+      "userId" TEXT NOT NULL,
+      "title" TEXT NOT NULL,
+      "body" TEXT NOT NULL,
+      "href" TEXT,
+      "readAt" TIMESTAMP(3),
+      "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "Notification_pkey" PRIMARY KEY ("id"),
+      CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE
+    )
+  `);
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Notification_userId_createdAt_idx" ON "Notification"("userId", "createdAt")');
+
+  console.log("Khedmty email-auth, payment-review and delivery schema compatibility check completed.");
 }
 
 main()
