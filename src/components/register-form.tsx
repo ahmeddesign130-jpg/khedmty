@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { FormEvent } from "react";
 
 const messages: Record<string, string> = {
   terms_required: "لازم توافق على شروط الخدمة قبل إنشاء الحساب.",
@@ -16,8 +15,7 @@ const messages: Record<string, string> = {
 
 export function RegisterForm({ error }: { error?: string }) {
   const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const rules = useMemo(() => ({
     length: password.length >= 10 && password.length <= 72,
     cases: /[A-Z]/.test(password) && /[a-z]/.test(password),
@@ -26,39 +24,10 @@ export function RegisterForm({ error }: { error?: string }) {
   }), [password]);
   const validPassword = Object.values(rules).every(Boolean);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSubmitError("");
-    if (!validPassword) {
-      document.getElementById("password")?.focus();
-      return;
-    }
-    const form = event.currentTarget;
-    if (!form.reportValidity()) return;
-    setSubmitting(true);
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        body: new FormData(form),
-        redirect: "follow",
-        cache: "no-store",
-      });
-      if (response.redirected && response.url) {
-        window.location.assign(response.url);
-        return;
-      }
-      setSubmitError("تعذر إكمال التسجيل. حاول مرة أخرى.");
-      setSubmitting(false);
-    } catch {
-      setSubmitError("الاتصال ضعيف أو انقطع. تأكد من الإنترنت وحاول مرة أخرى.");
-      setSubmitting(false);
-    }
-  }
-
   const ruleClass = (passed: boolean) => passed ? "text-emerald-600" : "text-slate-500";
 
   return (
-    <form action="/api/auth/register" method="POST" onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <form action="/api/auth/register" method="POST" className="mt-6 space-y-4">
       <label className="terms-acceptance rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium leading-7 text-slate-700">
         <input type="checkbox" name="termsAccepted" value="yes" required className="mt-2 h-5 w-5 shrink-0 accent-orange-500"/>
         <span>قرأت وأوافق على <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-orange-700 underline">شروط الخدمة</a> وسياسة الاستخدام.</span>
@@ -77,7 +46,12 @@ export function RegisterForm({ error }: { error?: string }) {
       </div>
       <div>
         <label htmlFor="password" className="mb-1.5 block text-sm font-semibold text-slate-700">كلمة المرور</label>
-        <input id="password" name="password" type="password" autoComplete="new-password" maxLength={72} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="أنشئ كلمة مرور قوية" dir="ltr" className="w-full px-4 py-3 text-sm text-left"/>
+        <div className="relative">
+          <input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" maxLength={72} required value={password} onChange={(event) => setPassword(event.target.value)} placeholder="أنشئ كلمة مرور قوية" dir="ltr" className="w-full px-4 py-3 pe-12 text-sm text-left"/>
+          <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"} className="absolute inset-y-0 right-2 my-auto flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">
+            {showPassword ? <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.2-2.4 3.3M6.2 6.2C3.8 7.8 2.7 10 2.5 12c.5 1.2 3.8 7 9.5 7 1.4 0 2.7-.4 3.8-1"/></svg> : <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"/><circle cx="12" cy="12" r="2.7"/></svg>}
+          </button>
+        </div>
         <div className="mt-2 grid grid-cols-1 gap-1 text-xs leading-5 sm:grid-cols-2" aria-live="polite">
           <span className={ruleClass(rules.length)}>• 10 أحرف على الأقل</span>
           <span className={ruleClass(rules.cases)}>• حرف كبير وحرف صغير (A / a)</span>
@@ -92,9 +66,9 @@ export function RegisterForm({ error }: { error?: string }) {
           <option value="PROVIDER">مقدم خدمة - أريد عرض خدماتي</option>
         </select>
       </div>
-      {(error || submitError) && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{submitError || messages[error || ""] || messages.email_send}</p>}
-      <button type="submit" disabled={submitting} className="w-full rounded-xl bg-orange-500 px-5 py-3.5 text-base font-semibold text-white shadow-md shadow-orange-500/15 disabled:cursor-wait disabled:opacity-70">
-        {submitting ? "جارٍ إرسال الكود..." : "إرسال كود التأكيد"}
+      {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700">{messages[error] || messages.email_send}</p>}
+      <button type="submit" disabled={!validPassword} className="w-full rounded-xl bg-orange-500 px-5 py-3.5 text-base font-semibold text-white shadow-md shadow-orange-500/15 disabled:cursor-wait disabled:opacity-70">
+        إرسال كود التأكيد
       </button>
     </form>
   );
