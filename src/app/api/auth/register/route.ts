@@ -2,6 +2,7 @@ import { createHash, randomInt } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { sendKhedmtyCode } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -13,29 +14,6 @@ function hashOtp(userId: string, code: string) {
   return createHash("sha256")
     .update(`${process.env.AUTH_SECRET || "khedmty"}:${userId}:${code}`)
     .digest("hex");
-}
-
-async function sendOtp(email: string, code: string) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
-  const from = process.env.RESEND_FROM_EMAIL || "خِدمتي <onboarding@resend.dev>";
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from,
-      to: [email],
-      subject: "كود تأكيد البريد الإلكتروني - خِدمتي",
-      text: `كود تأكيد بريدك في خِدمتي هو: ${code}\nالكود صالح لمدة دقيقتين ولا تشاركه مع أي شخص.`,
-      html: `<div dir="rtl" style="font-family:Arial,sans-serif;line-height:2"><h2>أهلًا بك في خِدمتي</h2><p>استخدم الكود التالي لتأكيد بريدك الإلكتروني:</p><div style="font-size:32px;font-weight:bold;letter-spacing:8px;padding:16px;background:#fff4e8;border-radius:12px;text-align:center">${code}</div><p>الكود صالح لمدة دقيقتين، ولا تشاركه مع أي شخص.</p></div>`,
-    }),
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    const details = await response.text().catch(() => "");
-    console.error("Resend email error:", response.status, details);
-    throw new Error("Email delivery failed");
-  }
 }
 
 export async function POST(req: NextRequest) {
@@ -90,7 +68,7 @@ export async function POST(req: NextRequest) {
       where: { userId: user.id },
       data: { codeHash: hashOtp(user.id, code) },
     });
-    await sendOtp(email, code);
+    await sendKhedmtyCode(email, code, "registration");
 
     return redirect303(req, `/verify-email?email=${encodeURIComponent(email)}`);
   } catch (error) {
