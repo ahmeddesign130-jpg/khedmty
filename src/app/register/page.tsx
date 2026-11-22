@@ -6,25 +6,8 @@ const errors: Record<string, string> = {
   role: "نوع الحساب غير صحيح.",
   exists: "هذا البريد مسجل بالفعل. جرّب تسجيل الدخول.",
   server: "تعذر إنشاء الحساب حاليًا. حاول مرة أخرى.",
-  google_not_configured: "تسجيل Google يحتاج إكمال إعداداته أولًا.",
-  google_account_required: "الحساب ده مش مسجل في خِدمتي. أنشئ حسابك الأول بنفس بريد Google، وبعدها ارجع وسجّل الدخول.",
-  google_failed: "تعذر إنشاء الحساب باستخدام Google. حاول مرة أخرى.",
-  google_state: "انتهت جلسة Google أو لم تصل ملفات التحقق. جرّب مرة أخرى.",
-  google_config: "إعدادات Google غير مكتملة في نسخة التجربة.",
-  google_token: "تعذر تأكيد الدخول مع Google. راجع إعدادات رابط الرجوع.",
-  google_profile: "لم نتمكن من قراءة بيانات حساب Google الموثّق.",
-  google_session: "تم التحقق من Google لكن تعذر إنشاء جلسة الدخول.",
-  google_denied: "تم إلغاء التسجيل باستخدام Google.",
+  google_account_required: "البريد ده مش مسجل في خِدمتي. أنشئ حسابًا بالبريد وكلمة المرور، ثم أكّد بريدك برمز OTP.",
 };
-
-function GoogleMark() {
-  return <svg aria-hidden="true" viewBox="0 0 48 48" className="h-5 w-5 shrink-0">
-    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 3.08 13.22l7.98 6.19C12.95 13.72 18.02 9.5 24 9.5z"/>
-    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.64 5.93c4.46-4.12 7.12-10.2 7.12-17.58z"/>
-    <path fill="#FBBC05" d="M11.06 28.59A14.5 14.5 0 0 1 10.3 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 3.08 10.78l7.98-6.19z"/>
-    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.87l-7.64-5.93c-2.12 1.42-4.84 2.26-8.26 2.26-5.98 0-11.05-4.22-12.94-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-  </svg>;
-}
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const params = await searchParams;
@@ -39,9 +22,6 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
             <input type="checkbox" name="termsAccepted" value="yes" required className="mt-2 h-5 w-5 shrink-0 accent-orange-500"/>
             <span>قرأت وأوافق على <Link href="/terms" target="_blank" className="font-black text-orange-700 underline">شروط الخدمة</Link> وسياسة الاستخدام.</span>
           </label>
-          <button type="submit" formAction="/api/auth/google" formMethod="GET" name="role" value="CUSTOMER" className="google-auth-button group flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-100 bg-white shadow-sm"><GoogleMark/></span><span className="google-auth-label">التسجيل كعميل باستخدام Google</span></button>
-          <button type="submit" formAction="/api/auth/google" formMethod="GET" name="role" value="PROVIDER" className="google-auth-button group flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-base font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-100 bg-white shadow-sm"><GoogleMark/></span><span className="google-auth-label">التسجيل كمقدم خدمة باستخدام Google</span></button>
-        <div className="my-6 flex items-center gap-3 text-sm font-bold text-slate-600"><span className="h-px flex-1 bg-slate-100"/><span>أو بالبريد الإلكتروني</span><span className="h-px flex-1 bg-slate-100"/></div>
           <div><label htmlFor="displayName" className="mb-2 block text-base font-bold text-slate-700">الاسم</label><input id="displayName" name="displayName" type="text" autoComplete="name" minLength={2} maxLength={70} required placeholder="اكتب اسمك" className="w-full px-4 py-4 text-base"/></div>
           <div><label htmlFor="email" className="mb-2 block text-sm font-bold text-slate-700">البريد الإلكتروني</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="name@example.com" dir="ltr" className="w-full px-4 py-4 text-base text-left"/></div>
           <div><label htmlFor="password" className="mb-2 block text-sm font-bold text-slate-700">كلمة المرور</label><input id="password" name="password" type="password" autoComplete="new-password" minLength={10} maxLength={72} required placeholder="10 أحرف على الأقل" dir="ltr" className="w-full px-4 py-3.5 text-left"/></div>
