@@ -24,7 +24,7 @@ const sections = [
 
 export default function TermsPage() {
   return (
-    <main dir="rtl" className="min-h-screen px-4 py-10 md:px-6">
+    <main dir="rtl" className="terms-page min-h-screen px-4 py-10 md:px-6">
       <article className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 text-slate-800 shadow-sm md:p-10">
         <a href="/register" className="terms-back-link inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-orange-700">العودة لإنشاء الحساب</a>
         <h1 className="mt-5 text-3xl font-black text-slate-900">شروط الخدمة</h1>
