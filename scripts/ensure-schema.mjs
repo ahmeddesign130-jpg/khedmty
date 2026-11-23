@@ -30,6 +30,16 @@ async function main() {
   await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "EmailOtp_userId_key" ON "EmailOtp"("userId")');
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "EmailOtp_expiresAt_idx" ON "EmailOtp"("expiresAt")');
 
+  // Add the missing platform configuration table without altering existing records.
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "PlatformSettings" (
+      "id" TEXT NOT NULL DEFAULT 'main',
+      "commissionRate" INTEGER NOT NULL DEFAULT 20,
+      "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PlatformSettings_pkey" PRIMARY KEY ("id")
+    )
+  `);
+
   console.log("Khedmty email-auth schema compatibility check completed.");
 }
 
