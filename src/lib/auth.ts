@@ -50,26 +50,60 @@ export const SESSION_COOKIE_OPTIONS = {
 };
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
+  let token: string | undefined;
+
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
+    token = cookieStore.get(COOKIE_NAME)?.value;
 
-    if (!token) return null;
+    if (!token) {
+      console.info("[auth-session] missing_cookie");
+      return null;
+    }
+  } catch (error) {
+    console.error("[auth-session] cookie_read_failed", {
+      errorName: error instanceof Error ? error.name : "UnknownError",
+    });
+    return null;
+  }
 
+  let userId: string;
+  try {
     const { payload } = await jwtVerify(token, getSecret());
+    if (typeof payload.id !== "string") {
+      console.warn("[auth-session] invalid_payload");
+      return null;
+    }
+    userId = payload.id;
+  } catch (error) {
+    console.warn("[auth-session] jwt_verification_failed", {
+      errorName: error instanceof Error ? error.name : "UnknownError",
+    });
+    return null;
+  }
 
-    if (typeof payload.id !== "string") return null;
-
+  try {
     // Always read role/status from the database so admin changes take effect immediately.
     const user = await prisma.user.findUnique({
-      where: { id: payload.id },
+      where: { id: userId },
       select: { id: true, role: true, status: true },
     });
 
-    if (!user || user.status === "SUSPENDED") return null;
+    if (!user) {
+      console.warn("[auth-session] user_not_found");
+      return null;
+    }
+    if (user.status === "SUSPENDED") {
+      console.warn("[auth-session] user_suspended");
+      return null;
+    }
 
+    console.info("[auth-session] session_valid", { role: user.role, status: user.status });
     return user;
-  } catch {
+  } catch (error) {
+    console.error("[auth-session] database_lookup_failed", {
+      errorName: error instanceof Error ? error.name : "UnknownError",
+    });
     return null;
   }
 }
