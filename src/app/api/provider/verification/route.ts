@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "PROVIDER" || user.status !== "PENDING") {
+    if (!user || !((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) {
       return NextResponse.json({ message: "استكمال التحقق متاح لمقدم الخدمة صاحب الحساب المعلّق فقط." }, { status: 403 });
     }
     const body = await request.json();
