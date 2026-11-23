@@ -9,8 +9,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
   const query = await searchParams;
   const searchTerm = (query.q || "").trim().slice(0, 80);
   const viewer = await getCurrentUser();
-  if (!viewer) redirect("/login");
-  if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
+  if (viewer && (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE")) {
     redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");
   }
   const services = await prisma.service.findMany({
