@@ -25,10 +25,11 @@ export async function GET() {
         to_regclass('public."AuditLog"')::text AS "auditLogs"
     `;
 
-    const schemaReady = tables.length === 1 && Object.values(tables[0]).every(Boolean);
+    const missingTables = tables.length === 1 ? Object.entries(tables[0]).filter(([, value]) => !value).map(([name]) => name) : ["User", "Profile", "Service", "Order", "Payment", "PlatformSettings", "AuditLog"];
+    const schemaReady = missingTables.length === 0;
     if (!schemaReady) {
       return NextResponse.json(
-        { status: "degraded", database: "schema_incomplete" },
+        { status: "degraded", database: "schema_incomplete", missingTables },
         { status: 503 }
       );
     }
