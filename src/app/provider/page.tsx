@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { UiIcon } from "@/components/ui-icon";
 
-export default async function ProviderPage() {
+export default async function ProviderPage({ searchParams }: { searchParams: Promise<{ switch?: string }> }) {
+  const params = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role === "SUPER_ADMIN") redirect("/admin");
@@ -17,6 +18,7 @@ export default async function ProviderPage() {
       <div className="flex items-center gap-2"><Link href="/settings" aria-label="الإعدادات" title="الإعدادات" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 font-bold text-[#14213d] hover:bg-orange-50"><UiIcon name="settings" size={19}/><span className="hidden sm:inline">الإعدادات</span></Link><form action="/api/auth/logout" method="POST"><button className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-bold"><UiIcon name="log-out" size={18}/> تسجيل الخروج</button></form>
     </div></div></header>
     <section className="mx-auto max-w-6xl px-5 py-12">
+      {params.switch === "orders" && <p role="alert" className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 font-bold leading-7 text-amber-900">لا يمكن الرجوع لحساب العميل الآن؛ عندك طلبات قيد التنفيذ. أنهِ الطلبات الحالية أولًا حفاظًا على حقوق العملاء، وبعدها تقدر تبدّل لحساب العميل.</p>}
       <div className="rounded-3xl bg-[#14213d] p-8 text-white shadow-xl">
         <span className="ui-icon-tile ui-icon-tile-dark"><UiIcon name="briefcase" size={28}/></span>
         <p className="mt-4 text-orange-300">مساحة مقدم الخدمة</p><h1 className="mt-2 text-3xl font-black">أهلاً بك في خِدمتي</h1>
