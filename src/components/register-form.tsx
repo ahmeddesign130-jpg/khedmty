@@ -17,6 +17,7 @@ const messages: Record<string, string> = {
 export function RegisterForm({ error }: { error?: string }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState<"CUSTOMER" | "PROVIDER">("CUSTOMER");
   const rules = useMemo(() => ({
     length: password.length >= 10 && password.length <= 72,
     cases: /[A-Z]/.test(password) && /[a-z]/.test(password),
@@ -29,6 +30,10 @@ export function RegisterForm({ error }: { error?: string }) {
 
   return (
     <form action="/api/auth/register" method="POST" className="mt-6 space-y-4">
+      {role === "PROVIDER" && <div className="rounded-2xl bg-orange-50 p-4">
+        <p className="text-sm font-black text-orange-900">إنشاء حساب مقدم الخدمة — الخطوة 1 من 4</p>
+        <p className="mt-1 text-xs leading-6 text-orange-800">1) إنشاء الحساب، 2) تأكيد كود البريد، 3) إدخال بياناتك وصور البطاقة، 4) إرسال الطلب للأدمن ليقرر قبولك أو رفضك. كل الخطوات هتكملها وراء بعض من غير تسجيل دخول مرة ثانية.</p>
+      </div>}
       <label className="terms-acceptance rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-medium leading-7 text-slate-700">
         <input type="checkbox" name="termsAccepted" value="yes" required className="mt-2 h-5 w-5 shrink-0 accent-orange-500"/>
         <span>قرأت وأوافق على <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-orange-700 underline">شروط الخدمة</a> وسياسة الاستخدام.</span>
@@ -62,7 +67,7 @@ export function RegisterForm({ error }: { error?: string }) {
       </div>
       <div>
         <label htmlFor="role" className="mb-1.5 block text-sm font-semibold text-slate-700">نوع الحساب</label>
-        <select id="role" name="role" defaultValue="CUSTOMER" required className="w-full px-4 py-3 text-sm">
+        <select id="role" name="role" value={role} onChange={(event) => setRole(event.target.value as "CUSTOMER" | "PROVIDER")} required className="w-full px-4 py-3 text-sm">
           <option value="CUSTOMER">عميل - أريد شراء الخدمات</option>
           <option value="PROVIDER">مقدم خدمة - أريد عرض خدماتي</option>
         </select>
