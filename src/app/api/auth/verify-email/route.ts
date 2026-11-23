@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createSession } from "@/lib/auth";
+import { createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -54,9 +54,14 @@ export async function POST(req: NextRequest) {
       where: { id: user.id },
       data: { emailVerifiedAt: new Date(), status: user.role === "CUSTOMER" ? "ACTIVE" : "PENDING" },
     });
-    await createSession({ id: updated.id, role: updated.role, status: updated.status });
-    const destination = updated.role === "PROVIDER" ? "/pending?verified=1" : "/services?verified=1";
-    return redirect(req, destination);
+    // Keep the verified user inside the same registration journey.
+    // Set the session on the actual redirect response so the next page never
+    // falls back to /login before provider details are completed.
+    const token = await createSession({ id: updated.id, role: updated.role, status: updated.status });
+    const destination = updated.role === "PROVIDER" ? "/pending?step=provider-details&verified=1" : "/services?verified=1";
+    const response = NextResponse.redirect(new URL(destination, req.url), 303);
+    response.cookies.set(SESSION_COOKIE_NAME, token, SESSION_COOKIE_OPTIONS);
+    return response;
   } catch (error) {
     console.error("OTP verification error:", error);
     return redirect(req, "/verify-email?error=server");
