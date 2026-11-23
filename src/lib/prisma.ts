@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -20,9 +21,11 @@ function prismaDatabaseUrl() {
   }
 }
 
-const basePrisma = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: { db: { url: prismaDatabaseUrl() } },
-});
+const connectionString = prismaDatabaseUrl();
+const adapter = connectionString ? new PrismaPg({ connectionString }) : undefined;
+const basePrisma = globalForPrisma.prisma ?? new PrismaClient(
+  adapter ? { adapter } : {},
+);
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = basePrisma;
