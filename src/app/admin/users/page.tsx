@@ -31,6 +31,8 @@ async function deleteAccount(formData: FormData) {
   });
   revalidatePath("/admin/users");
   revalidatePath("/admin/providers");
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin/payments");
   revalidatePath("/services");
 }
 
@@ -74,7 +76,7 @@ export default async function AdminUsersPage() {
     <div className="mx-auto max-w-5xl">
       <Link href="/admin" className="font-bold text-orange-600">← العودة للوحة الإدارة</Link>
       <h1 className="mt-6 text-3xl font-black text-slate-900">إدارة العملاء ومقدمي الخدمات</h1>
-      <p className="mt-2 text-slate-600">يمكنك حظر الحساب أو إعادة تفعيله. الحسابات المعلقة تظهر في قسم مراجعة مقدمي الخدمات.</p>
+      <p className="mt-2 text-slate-600">يمكنك حظر الحساب أو إعادة تفعيله أو حذف بيانات الحساب الشخصية. تظل الطلبات والمدفوعات محفوظة في السجل المالي.</p>
       <div className="mt-6 space-y-3">
         {users.map((u) => <article key={u.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
