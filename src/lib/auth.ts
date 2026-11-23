@@ -21,7 +21,7 @@ function getSecret() {
   return new TextEncoder().encode(secret);
 }
 
-export async function createSession(user: SessionUser) {
+export async function createSession(user: SessionUser): Promise<string> {
   const token = await new SignJWT({ id: user.id })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -37,7 +37,17 @@ export async function createSession(user: SessionUser) {
     path: "/",
     maxAge: SESSION_DURATION,
   });
+  return token;
 }
+
+export const SESSION_COOKIE_NAME = COOKIE_NAME;
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: SESSION_DURATION,
+};
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
   try {
