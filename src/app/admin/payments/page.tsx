@@ -36,7 +36,6 @@ async function reviewPayment(formData: FormData) {
   });
 
   if (!payment || payment.status !== "PENDING_REVIEW") redirect("/admin/payments?review=not_found");
-  if (status === "APPROVED" && payment.order.amount !== undefined) { /* keep compatibility with generated Prisma types */ }
   if (status === "APPROVED" && (payment.order.status !== "PAYMENT_REVIEW" || payment.amount !== payment.order.total)) redirect("/admin/payments?review=amount_mismatch");
 
   try {
