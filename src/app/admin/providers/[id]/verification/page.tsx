@@ -38,13 +38,13 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     backPath ? createStorageDownload("provider-verification", backPath, 900) : null,
   ]);
 
-  async function review(formData: FormData) {
+  const documentsComplete = Boolean(frontUrl && backUrl && data.idFrontPath && data.idBackPath && data.dateOfBirth);\n\n  async function review(formData: FormData) {
     "use server";
     const currentAdmin = await getCurrentUser();
     if (!currentAdmin || currentAdmin.role !== "SUPER_ADMIN") redirect("/login");
     const action = String(formData.get("action") || "");
     const reason = String(formData.get("reason") || "").trim();
-    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers/" + id + "/verification?error=invalid");
+    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers/" + id + "/verification?error=invalid");\n    if (action === "APPROVE" && (!data.idFrontPath || !data.idBackPath || !data.dateOfBirth)) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     const latestRequest = await prisma.auditLog.findFirst({
       where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
       orderBy: { createdAt: "desc" }, select: { createdAt: true },
@@ -96,7 +96,7 @@ export default async function ProviderVerificationReviewPage({ params }: { param
         <article className="rounded-2xl bg-white p-4 shadow-sm"><h2 className="mb-3 font-black">البطاقة — الوجه الأمامي</h2>{frontUrl ? <a href={frontUrl} target="_blank" rel="noreferrer" className="font-bold text-orange-600 underline">فتح الصورة الخاصة</a> : <p className="text-sm text-red-700">الصورة غير متاحة</p>}</article>
         <article className="rounded-2xl bg-white p-4 shadow-sm"><h2 className="mb-3 font-black">البطاقة — الوجه الخلفي</h2>{backUrl ? <a href={backUrl} target="_blank" rel="noreferrer" className="font-bold text-orange-600 underline">فتح الصورة الخاصة</a> : <p className="text-sm text-red-700">الصورة غير متاحة</p>}</article>
       </div>
-      <form action={review} className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+      {documentsComplete ? <form action={review} className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
         <label className="block text-sm font-bold">سبب الرفض (مطلوب عند الرفض)
           <textarea name="reason" maxLength={1000} rows={3} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/>
         </label>
