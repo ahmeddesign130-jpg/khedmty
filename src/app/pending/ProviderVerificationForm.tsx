@@ -56,6 +56,10 @@ export default function ProviderVerificationForm() {
   }
 
   return <form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2">
+    <div className="rounded-2xl bg-orange-50 p-4 sm:col-span-2">
+      <p className="font-black text-orange-900">الخطوة 3 من 4: استكمال بيانات مقدم الخدمة</p>
+      <p className="mt-1 text-sm leading-7 text-orange-800">املأ بياناتك وارفع صور البطاقة. بعد الضغط على تأكيد، سيتم إرسال الطلب للأدمن مباشرة لمراجعته واتخاذ قرار القبول أو الرفض. لن تحتاج إلى تسجيل الدخول مرة أخرى.</p>
+    </div>
     <label className="text-sm font-bold text-slate-700">الاسم بالكامل كما في البطاقة
       <input name="fullName" required minLength={3} maxLength={100} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/>
     </label>
@@ -90,6 +94,6 @@ export default function ProviderVerificationForm() {
     </div>
     {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700 sm:col-span-2">{error}</p>}
     {progress && <p role="status" aria-live="polite" className="rounded-xl bg-blue-50 p-3 text-sm font-bold text-blue-700 sm:col-span-2">{progress}</p>}
-    <button type="submit" disabled={busy} className="rounded-xl bg-orange-500 px-5 py-4 font-black text-white disabled:opacity-50 sm:col-span-2">{busy ? "يرجى الانتظار..." : "إرسال بيانات التحقق للإدارة"}</button>
+    <button type="submit" disabled={busy} className="rounded-xl bg-orange-500 px-5 py-4 font-black text-white disabled:opacity-50 sm:col-span-2">{busy ? "يرجى الانتظار..." : "تأكيد البيانات وإرسال الطلب للأدمن"}</button>
   </form>;
 }
