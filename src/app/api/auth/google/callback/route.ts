@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createSession } from "@/lib/auth";
+import { createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/auth";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
 export const dynamic = "force-dynamic";
@@ -111,12 +111,21 @@ export async function GET(req: NextRequest) {
         status: user.role === "CUSTOMER" ? "ACTIVE" : user.status,
       },
     });
-    try { await createSession({ id: verifiedUser.id, role: verifiedUser.role, status: verifiedUser.status }); } catch (sessionError) { console.error("Google session creation failed:", sessionError); return fail(req, "google_session"); }
+    let sessionToken: string;
+    try {
+      sessionToken = await createSession({ id: verifiedUser.id, role: verifiedUser.role, status: verifiedUser.status });
+    } catch (sessionError) {
+      console.error("Google session creation failed:", sessionError);
+      return fail(req, "google_session");
+    }
 
     const destination = verifiedUser.role === "SUPER_ADMIN" ? "/admin"
       : verifiedUser.role === "PROVIDER" && verifiedUser.status === "PENDING" ? "/register/provider-details"
       : verifiedUser.role === "PROVIDER" ? "/provider" : "/services";
     const response = NextResponse.redirect(new URL(destination, req.url));
+    // Attach the session directly to the redirect response so the browser reliably stores it.
+    response.cookies.set(SESSION_COOKIE_NAME, sessionToken, SESSION_COOKIE_OPTIONS);
+    console.info("Google session cookie attached to redirect", { destination, role: verifiedUser.role });
     for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent", "khedmty_google_terms"]) {
       response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
     }
