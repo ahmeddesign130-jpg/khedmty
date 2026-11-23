@@ -15,8 +15,7 @@ export default async function ServiceDetailsPage({
   const { id } = await params;
   const query = await searchParams;
   const viewer = await getCurrentUser();
-  if (!viewer) redirect("/login");
-  if (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE") {
+  if (viewer && (viewer.role !== "CUSTOMER" || viewer.status !== "ACTIVE")) {
     redirect(viewer.role === "SUPER_ADMIN" ? "/admin" : viewer.role === "PROVIDER" ? "/provider" : "/login");
   }
 
@@ -26,12 +25,13 @@ export default async function ServiceDetailsPage({
       provider: {
         select: {
           displayName: true,
+          status: true,
         },
       },
     },
   });
 
-  if (!service || service.status !== "APPROVED") {
+  if (!service || service.status !== "APPROVED" || service.provider.status !== "ACTIVE") {
     notFound();
   }
 
@@ -211,17 +211,22 @@ export default async function ServiceDetailsPage({
 
               {query.error === "contact" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">اكتب وسيلة تواصل صحيحة قبل إنشاء الطلب.</p>}
               {query.error === "capacity" && <p role="alert" className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">اكتملت الأماكن المتاحة لطلباتك. أكمل طلبًا جاريًا أولًا حتى يتوفر مكان جديد.</p>}
-              <form action={createOrder}>
-                <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
-                  <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
-                </label>
-                <button
-                  type="submit"
-                  className="mt-7 w-full rounded-xl bg-orange-500 px-6 py-4 font-black text-white transition hover:bg-orange-600"
-                >
-                  اطلب الخدمة الآن
-                </button>
-              </form>
+              {viewer ? (
+                <form action={createOrder}>
+                  <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
+                    <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
+                  </label>
+                  <button type="submit" className="mt-7 w-full rounded-xl bg-orange-500 px-6 py-4 font-black text-white transition hover:bg-orange-600">
+                    اطلب الخدمة الآن
+                  </button>
+                </form>
+              ) : (
+                <div className="mt-6 rounded-xl border border-white/15 bg-white/10 p-4 text-center">
+                  <p className="text-sm leading-7 text-slate-200">تقدر تتصفح تفاصيل الخدمة بحرية. سجّل الدخول كعميل لإتمام الطلب.</p>
+                  <Link href="/login" className="mt-3 inline-flex w-full justify-center rounded-xl bg-orange-500 px-5 py-3 font-black text-white">تسجيل الدخول للشراء</Link>
+                  <Link href="/register" className="mt-3 inline-flex w-full justify-center rounded-xl border border-white/30 px-5 py-3 font-bold text-white">إنشاء حساب جديد</Link>
+                </div>
+              )}
 
               <p className="mt-4 text-center text-xs leading-6 text-slate-300">
                 لن يتم اعتماد الدفع إلا بعد مراجعة الإدارة والتحقق من وصول المبلغ. لا يبدأ التواصل مع مقدم الخدمة إلا بعد تأكيد الدفع.
