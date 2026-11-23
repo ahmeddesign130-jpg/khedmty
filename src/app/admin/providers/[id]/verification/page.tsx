@@ -38,13 +38,16 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     backPath ? createStorageDownload("provider-verification", backPath, 900) : null,
   ]);
 
-  const documentsComplete = Boolean(frontUrl && backUrl && data.idFrontPath && data.idBackPath && data.dateOfBirth);\n\n  async function review(formData: FormData) {
+  const documentsComplete = Boolean(frontUrl && backUrl && data.idFrontPath && data.idBackPath && data.dateOfBirth);
+
+  async function review(formData: FormData) {
     "use server";
     const currentAdmin = await getCurrentUser();
     if (!currentAdmin || currentAdmin.role !== "SUPER_ADMIN") redirect("/login");
     const action = String(formData.get("action") || "");
     const reason = String(formData.get("reason") || "").trim();
-    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers/" + id + "/verification?error=invalid");\n    if (action === "APPROVE" && (!data.idFrontPath || !data.idBackPath || !data.dateOfBirth)) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
+    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers/" + id + "/verification?error=invalid");
+    if (action === "APPROVE" && (!data.idFrontPath || !data.idBackPath || !data.dateOfBirth)) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     const latestRequest = await prisma.auditLog.findFirst({
       where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
       orderBy: { createdAt: "desc" }, select: { createdAt: true },
