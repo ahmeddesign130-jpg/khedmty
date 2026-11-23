@@ -58,6 +58,11 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     if (!latestRequest || (latestDecision && latestDecision.createdAt > latestRequest.createdAt)) redirect("/admin/providers?review=not_found");
     const reviewedData = latestRequest.details ? decryptProviderApplication(latestRequest.details) : null;
     if (!reviewedData?.dateOfBirth || !reviewedData.idFrontPath?.startsWith(id + "/verification/") || !reviewedData.idBackPath?.startsWith(id + "/verification/")) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
+    const [verifiedFront, verifiedBack] = await Promise.all([
+      reviewedData.idFrontPath ? createStorageDownload("provider-verification", reviewedData.idFrontPath, 300) : null,
+      reviewedData.idBackPath ? createStorageDownload("provider-verification", reviewedData.idBackPath, 300) : null,
+    ]);
+    if (!verifiedFront || !verifiedBack) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     await prisma.$transaction(async tx => {
       if (action === "APPROVE") {
         const changed = await tx.user.updateMany({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] }, data: { status: "ACTIVE", role: "PROVIDER" } });
