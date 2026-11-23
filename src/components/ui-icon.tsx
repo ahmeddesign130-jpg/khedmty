@@ -7,7 +7,7 @@ type IconName =
   | "message" | "shield" | "arrow-left" | "sparkles"
   | "clock" | "file-check" | "credit-card" | "help" | "languages"
   | "user-cog" | "bell" | "globe" | "menu" | "x"
-  | "chevron-left" | "sun" | "moon";
+  | "chevron-left" | "sun" | "moon" | "repeat";
 
 const paths: Record<IconName, ReactNode> = {
   grid: <><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></>,
@@ -40,6 +40,7 @@ const paths: Record<IconName, ReactNode> = {
   "chevron-left": <><path d="m15 18-6-6 6-6"/></>,
   sun: <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></>,
   moon: <><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></>,
+  repeat: <><path d="m17 2 4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></>,
 };
 
 type UiIconProps = SVGProps<SVGSVGElement> & {
