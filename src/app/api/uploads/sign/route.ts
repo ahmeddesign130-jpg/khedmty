@@ -24,7 +24,12 @@ export async function POST(request: Request) {
       if (!IMAGE_TYPES.has(mimeType) && !VIDEO_TYPES.has(mimeType)) return NextResponse.json({ message: "الصيغ المسموحة: JPG وPNG وWEBP وMP4 وWEBM وMOV." }, { status: 400 });
       maxSize = VIDEO_TYPES.has(mimeType) ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
       bucket = "service-media";
-    } else if (kind === "provider-verification") {\n      if (user.role !== "PROVIDER" || user.status !== "PENDING") return NextResponse.json({ message: "رفع مستندات التحقق متاح لمقدم الخدمة صاحب الطلب المعلّق فقط." }, { status: 403 });\n      if (!IMAGE_TYPES.has(mimeType)) return NextResponse.json({ message: "مستند التحقق يجب أن يكون صورة JPG أو PNG أو WEBP." }, { status: 400 });\n      maxSize = MAX_IMAGE_BYTES;\n      bucket = "provider-verification";\n    } else if (kind === "receipt") {
+    } else if (kind === "provider-verification") {
+      if (user.role !== "PROVIDER" || user.status !== "PENDING") return NextResponse.json({ message: "رفع مستندات التحقق متاح لمقدم الخدمة صاحب الطلب المعلّق فقط." }, { status: 403 });
+      if (!IMAGE_TYPES.has(mimeType)) return NextResponse.json({ message: "مستند التحقق يجب أن يكون صورة JPG أو PNG أو WEBP." }, { status: 400 });
+      maxSize = MAX_IMAGE_BYTES;
+      bucket = "provider-verification";
+    } else if (kind === "receipt") {
       if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") return NextResponse.json({ message: "رفع الإيصال متاح للعملاء فقط." }, { status: 403 });
       if (!IMAGE_TYPES.has(mimeType)) return NextResponse.json({ message: "إيصال الدفع يجب أن يكون صورة JPG أو PNG أو WEBP." }, { status: 400 });
       maxSize = MAX_IMAGE_BYTES;
@@ -32,7 +37,8 @@ export async function POST(request: Request) {
     } else return NextResponse.json({ message: "نوع الرفع غير صحيح." }, { status: 400 });
     if (size > maxSize) return NextResponse.json({ message: `حجم الملف أكبر من الحد المسموح (${Math.round(maxSize/1024/1024)} MB).` }, { status: 413 });
     const extension = mimeType === "image/jpeg" ? "jpg" : mimeType === "video/quicktime" ? "mov" : mimeType.split("/")[1];
-    const folder = kind === "provider-verification" ? "verification/" : "";\n    const objectPath = `${user.id}/${folder}${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    const folder = kind === "provider-verification" ? "verification/" : "";
+    const objectPath = `${user.id}/${folder}${Date.now()}-${crypto.randomUUID()}.${extension}`;
     const signed = await createStorageUpload(bucket, objectPath);
     return NextResponse.json({ ...signed, bucket, mimeType, maxSize, publicUrl: kind === "service" ? serviceMediaPublicUrl(objectPath) : null });
   } catch (error) {
