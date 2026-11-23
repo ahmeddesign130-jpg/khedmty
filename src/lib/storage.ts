@@ -24,13 +24,13 @@ export async function createStorageUpload(bucket: string, objectPath: string) {
   const uploadUrl = data.signedURL.startsWith("http") ? data.signedURL : `${url}${data.signedURL.startsWith("/") ? "" : "/"}${data.signedURL}`;
   return { uploadUrl, token: data.token, objectPath };
 }
-export async function createStorageDownload(bucket: string, objectPath: string) {
+export async function createStorageDownload(bucket: string, objectPath: string, expiresIn = 3600) {
   const { url, key } = config();
   const encoded = objectPath.split("/").map(encodeURIComponent).join("/");
   const response = await fetch(`${url}/storage/v1/object/sign/${bucket}/${encoded}`, {
     method: "POST",
     headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ expiresIn: 3600 }),
+    body: JSON.stringify({ expiresIn: Math.max(60, Math.min(expiresIn, 3600)) }),
     cache: "no-store",
   });
   const data = await response.json().catch(() => ({}));
