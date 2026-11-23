@@ -95,6 +95,31 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."Order" ADD COLUMN IF NOT EXISTS "customerContact" TEXT`
       );
       await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."User"
+         ADD COLUMN IF NOT EXISTS "termsAcceptedAt" TIMESTAMPTZ,
+         ADD COLUMN IF NOT EXISTS "termsVersion" TEXT`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."Order"
+         ALTER COLUMN "commissionRate" SET DEFAULT 20`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `CREATE TABLE IF NOT EXISTS public."PlatformSettings" (
+          "id" TEXT NOT NULL DEFAULT 'main',
+          "commissionRate" INTEGER NOT NULL DEFAULT 20,
+          "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          CONSTRAINT "PlatformSettings_pkey" PRIMARY KEY ("id")
+        )`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."PlatformSettings"
+         ALTER COLUMN "commissionRate" SET DEFAULT 20`
+      );
+      await basePrisma.$executeRawUnsafe(
         `UPDATE public."Service"
          SET "serviceNo" = 'KH-SRV-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12))
          WHERE "serviceNo" IS NULL`
