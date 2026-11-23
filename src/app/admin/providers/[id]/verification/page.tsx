@@ -60,13 +60,9 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     if (!reviewedData?.dateOfBirth || !reviewedData.idFrontPath?.startsWith(id + "/verification/") || !reviewedData.idBackPath?.startsWith(id + "/verification/")) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     await prisma.$transaction(async tx => {
       if (action === "APPROVE") {
-        const changed = await tx.user.updateMany({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] }, data: { status: "ACTIVE", role: "PROVIDER", displayName: reviewedData.fullName } });
+        const changed = await tx.user.updateMany({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] }, data: { status: "ACTIVE", role: "PROVIDER" } });
         if (changed.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
-        await tx.profile.upsert({
-          where: { userId: id },
-          update: { displayName: reviewedData.fullName, phone: reviewedData.phone, bio: reviewedData.bio, skills: [reviewedData.profession] },
-          create: { userId: id, displayName: reviewedData.fullName, phone: reviewedData.phone, bio: reviewedData.bio, skills: [reviewedData.profession] },
-        });
+
       }
       await tx.auditLog.create({
         data: { actorId: currentAdmin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? reason : "تمت الموافقة بعد مراجعة بيانات التحقق." },
