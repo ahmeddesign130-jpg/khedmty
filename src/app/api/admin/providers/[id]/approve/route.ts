@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { createStorageDownload } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -37,9 +38,9 @@ export async function POST(
       );
     }
 
-    const provider = await prisma.user.findUnique({ where: { id } });
+    const provider = await prisma.user.findFirst({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] } });
 
-    if (!provider || provider.role !== "PROVIDER") {
+    if (!provider) {
       return NextResponse.json(
         { error: "مقدم الخدمة غير موجود." },
         { status: 404 }
@@ -52,7 +53,7 @@ export async function POST(
       select: { details: true, createdAt: true },
     });
     const latestDecision = await prisma.auditLog.findFirst({
-      where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
+      where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED", "PROVIDER_REJECTED", "PROVIDER_APPROVED"] } },
       orderBy: { createdAt: "desc" },
       select: { createdAt: true },
     });
@@ -61,18 +62,16 @@ export async function POST(
     if (!verification?.dateOfBirth || !verification.idFrontPath?.startsWith(id + "/verification/") || !verification.idBackPath?.startsWith(id + "/verification/") || (latestDecision && latestSubmission && latestDecision.createdAt > latestSubmission.createdAt)) {
       return NextResponse.json({ error: "يجب استكمال ومراجعة بيانات الهوية قبل اعتماد الحساب." }, { status: 409 });
     }
-
-    if (provider.status !== "PENDING") {
-      return NextResponse.json(
-        { error: "تمت مراجعة هذا الحساب من قبل." },
-        { status: 409 }
-      );
-    }
+    const [front, back] = await Promise.all([
+      createStorageDownload("provider-verification", verification.idFrontPath, 300),
+      createStorageDownload("provider-verification", verification.idBackPath, 300),
+    ]);
+    if (!front || !back) return NextResponse.json({ error: "صور البطاقة غير موجودة أو غير متاحة للمراجعة." }, { status: 409 });
 
     await prisma.$transaction(async (tx) => {
       const update = await tx.user.updateMany({
-        where: { id, role: "PROVIDER", status: "PENDING" },
-        data: { status: action === "APPROVE" ? "ACTIVE" : "SUSPENDED" },
+        where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] },
+        data: action === "APPROVE" ? { status: "ACTIVE", role: "PROVIDER" } : { status: provider.status },
       });
 
       if (update.count !== 1) {
