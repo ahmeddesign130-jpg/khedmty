@@ -31,7 +31,13 @@ async function main() {
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "EmailOtp_expiresAt_idx" ON "EmailOtp"("expiresAt")');
 
   // Add the missing platform configuration table without altering existing records.
-  await prisma.$executeRawUnsafe('ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0');
+  await prisma.$executeRawUnsafe(`
+    ALTER TABLE "Order"
+      ADD COLUMN IF NOT EXISTS "servicePrice" INTEGER NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "commissionRate" INTEGER NOT NULL DEFAULT 20,
+      ADD COLUMN IF NOT EXISTS "commission" INTEGER NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0
+  `);
   await prisma.$executeRawUnsafe('ALTER TABLE "Order" ALTER COLUMN "commissionRate" SET DEFAULT 20');
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "PlatformSettings" (
@@ -40,6 +46,11 @@ async function main() {
       "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT "PlatformSettings_pkey" PRIMARY KEY ("id")
     )
+  `);
+  await prisma.$executeRawUnsafe(`
+    ALTER TABLE "PlatformSettings"
+      ADD COLUMN IF NOT EXISTS "commissionRate" INTEGER NOT NULL DEFAULT 20,
+      ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
   `);
   await prisma.$executeRawUnsafe('ALTER TABLE "PlatformSettings" ALTER COLUMN "commissionRate" SET DEFAULT 20');
 
