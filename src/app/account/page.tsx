@@ -1,22 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { UiIcon } from "@/components/ui-icon";
 
-export default async function AccountPage({ searchParams }: { searchParams: Promise<{ providerStatus?: string; providerError?: string }> }) {
+export default async function AccountPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role === "SUPER_ADMIN") redirect("/admin");
   if (user.role === "PROVIDER") { if (user.status === "PENDING") redirect("/pending"); redirect("/provider"); }
-  const params = await searchParams;
-  const events = await prisma.auditLog.findMany({
-    where: { targetId: user.id, action: { in: ["PROVIDER_APPLICATION_SUBMITTED", "PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
-    orderBy: { createdAt: "desc" }, take: 2, select: { action: true, details: true, createdAt: true },
-  });
-  const latest = events[0];
-  const rejection = latest?.action === "PROVIDER_APPLICATION_REJECTED" ? latest.details : null;
-  const applicationPending = latest?.action === "PROVIDER_APPLICATION_SUBMITTED";
   return <main dir="rtl" className="min-h-screen bg-[#f7f8fa]">
     <header className="bg-white shadow-sm"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
       <Link href="/" className="text-2xl font-black text-orange-500">خِدمتي</Link>
