@@ -3,8 +3,47 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { decryptProviderApplication } from "@/lib/provider-application";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
+
+async function reviewProvider(formData: FormData) {
+  "use server";
+  const admin = await getCurrentUser();
+  if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
+  const id = String(formData.get("id") || "");
+  const action = String(formData.get("action") || "");
+  if (!id || !["APPROVE", "REJECT"].includes(action)) return;
+  const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true, status: true } });
+  if (!target) return;
+  if (target.role === "CUSTOMER") {
+    const application = await prisma.auditLog.findFirst({ where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" }, orderBy: { createdAt: "desc" }, select: { id: true } });
+    if (!application || target.status !== "ACTIVE") return;
+  } else if (target.role !== "PROVIDER" || target.status !== "PENDING") {
+    return;
+  }
+  await prisma.$transaction(async (tx) => {
+    if (action === "APPROVE") {
+      const changed = await tx.user.updateMany({
+        where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] },
+        data: { role: "PROVIDER", status: "ACTIVE" },
+      });
+      if (changed.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
+    }
+    await tx.auditLog.create({
+      data: {
+        actorId: admin.id,
+        targetId: id,
+        action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED",
+        details: action === "APPROVE" ? "تم الاعتماد مباشرة من لوحة الإدارة." : "تم رفض الطلب بواسطة الإدارة دون إضافة سبب.",
+      },
+    });
+  });
+  revalidatePath("/admin/providers");
+  revalidatePath("/admin");
+  revalidatePath("/provider");
+  redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
+}
 
 export default async function AdminProvidersPage({ searchParams }: { searchParams: Promise<{ review?: string }> }) {
   const params = await searchParams;
@@ -74,6 +113,11 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
               <p className="text-xs text-slate-500 sm:col-span-2">تاريخ التقديم: {item.createdAt.toLocaleDateString("en-GB")}</p>
             </div>
             <Link href={`/admin/providers/${item.targetId}/verification`} className="mt-4 inline-flex rounded-xl bg-orange-500 px-5 py-3 font-bold text-white">فتح ملف التحقق ومراجعة البطاقة</Link>
+            <form action={reviewProvider} className="mt-4 flex flex-wrap gap-3">
+              <input type="hidden" name="id" value={item.targetId} />
+              <button name="action" value="APPROVE" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">قبول مقدم الخدمة</button>
+              <button name="action" value="REJECT" className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">رفض الطلب</button>
+            </form>
           </article>;
         })}</div>
       }
@@ -86,6 +130,11 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
           {p.profile?.bio && <p className="mt-3 leading-7 text-slate-600">{p.profile.bio}</p>}
           <p className="mt-2 text-xs text-slate-500">تاريخ التسجيل: {p.createdAt.toLocaleDateString("en-GB")}</p>
           <Link href={`/admin/providers/${p.id}/verification`} className="mt-5 inline-flex rounded-xl bg-orange-500 px-5 py-3 font-bold text-white">فتح ملف التحقق ومراجعة البطاقة</Link>
+          <form action={reviewProvider} className="mt-4 flex flex-wrap gap-3">
+            <input type="hidden" name="id" value={p.id} />
+            <button name="action" value="APPROVE" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">قبول مقدم الخدمة</button>
+            <button name="action" value="REJECT" className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">رفض الطلب</button>
+          </form>
         </article>)}</div>
       }
     </section>
