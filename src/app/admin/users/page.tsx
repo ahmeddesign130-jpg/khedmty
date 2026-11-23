@@ -90,7 +90,7 @@ export default async function AdminUsersPage() {
                 ? <button name="action" value="SUSPEND" className="rounded-xl bg-red-600 px-4 py-2.5 font-bold text-white">حظر الحساب</button>
                 : <button name="action" value="ACTIVATE" className="rounded-xl bg-green-600 px-4 py-2.5 font-bold text-white">إلغاء الحظر</button>}
             </form>}
-            <form action={deleteAccount} onSubmit={undefined}>
+            <form action={deleteAccount}>
               <input type="hidden" name="id" value={u.id}/>
               <button className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 font-bold text-red-700" type="submit">حذف الحساب</button>
             </form>
