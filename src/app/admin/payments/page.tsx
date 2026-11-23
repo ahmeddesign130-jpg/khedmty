@@ -31,8 +31,7 @@ async function reviewPayment(formData: FormData) {
   if (
     !id ||
     !["APPROVED", "REJECTED"].includes(status) ||
-    reviewNote.length > 1000 ||
-    (status === "REJECTED" && !reviewNote)
+    reviewNote.length > 1000
   ) return;
 
   const payment = await prisma.payment.findUnique({
@@ -43,8 +42,7 @@ async function reviewPayment(formData: FormData) {
   if (
     !payment ||
     payment.status !== "PENDING_REVIEW" ||
-    payment.order.status !== "PAYMENT_REVIEW" ||
-    payment.amount !== payment.order.total
+    (status === "APPROVED" && (payment.order.status !== "PAYMENT_REVIEW" || payment.amount !== payment.order.total))
   ) return;
 
   try {
@@ -65,8 +63,7 @@ async function reviewPayment(formData: FormData) {
         where: { id: payment.orderId, status: "PAYMENT_REVIEW" },
         data: { status: status === "APPROVED" ? "PAID" : "PENDING_PAYMENT" },
       });
-
-      if (orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
+      if (status === "APPROVED" && orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
 
       await tx.auditLog.create({
         data: {
