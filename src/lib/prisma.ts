@@ -101,6 +101,9 @@ async function ensureCompatibilitySchema() {
       );
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Order"
+         ADD COLUMN IF NOT EXISTS "servicePrice" INTEGER NOT NULL DEFAULT 0,
+         ADD COLUMN IF NOT EXISTS "commissionRate" INTEGER NOT NULL DEFAULT 20,
+         ADD COLUMN IF NOT EXISTS "commission" INTEGER NOT NULL DEFAULT 0,
          ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0`
       );
       await basePrisma.$executeRawUnsafe(
@@ -114,6 +117,11 @@ async function ensureCompatibilitySchema() {
           "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
           CONSTRAINT "PlatformSettings_pkey" PRIMARY KEY ("id")
         )`
+      );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."PlatformSettings"
+         ADD COLUMN IF NOT EXISTS "commissionRate" INTEGER NOT NULL DEFAULT 20,
+         ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()`
       );
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."PlatformSettings"
