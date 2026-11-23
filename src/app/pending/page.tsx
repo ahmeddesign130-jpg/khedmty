@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { decryptProviderApplication } from "@/lib/provider-application";
 import ProviderVerificationForm from "./ProviderVerificationForm";
 
 export const dynamic = "force-dynamic";
