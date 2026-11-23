@@ -46,7 +46,7 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     if (!currentAdmin || currentAdmin.role !== "SUPER_ADMIN") redirect("/login");
     const action = String(formData.get("action") || "");
     const reason = String(formData.get("reason") || "").trim();
-    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers/" + id + "/verification?error=invalid");
+    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && reason.length > 1000)) redirect("/admin/providers/" + id + "/verification?error=invalid");
     const latestRequest = await prisma.auditLog.findFirst({
       where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
       orderBy: { createdAt: "desc" }, select: { details: true, createdAt: true },
@@ -70,7 +70,7 @@ export default async function ProviderVerificationReviewPage({ params }: { param
 
       }
       await tx.auditLog.create({
-        data: { actorId: currentAdmin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? reason : "تمت الموافقة بعد مراجعة بيانات التحقق." },
+        data: { actorId: currentAdmin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? (reason || "تم رفض الطلب بواسطة الإدارة دون إضافة سبب.") : "تمت الموافقة بعد مراجعة بيانات التحقق." },
       });
     });
     revalidatePath("/admin/providers");
@@ -102,7 +102,7 @@ export default async function ProviderVerificationReviewPage({ params }: { param
         <article className="rounded-2xl bg-white p-4 shadow-sm"><h2 className="mb-3 font-black">البطاقة — الوجه الخلفي</h2>{backUrl ? <a href={backUrl} target="_blank" rel="noreferrer" className="font-bold text-orange-600 underline">فتح الصورة الخاصة</a> : <p className="text-sm text-red-700">الصورة غير متاحة</p>}</article>
       </div>
       {documentsComplete ? <form action={review} className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-        <label className="block text-sm font-bold">سبب الرفض (مطلوب عند الرفض)
+        <label className="block text-sm font-bold">سبب الرفض (اختياري)
           <textarea name="reason" maxLength={1000} rows={3} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/>
         </label>
         <div className="mt-4 flex flex-wrap gap-3">
