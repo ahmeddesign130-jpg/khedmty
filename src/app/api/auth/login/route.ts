@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createSession } from "@/lib/auth";
+import { createSession, ensurePrimaryAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,15 +16,16 @@ export async function POST(req: NextRequest) {
     const password = String(form.get("password") || "");
     if (!email || !password) return redirect303(req, "/login?error=missing");
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return redirect303(req, "/login?error=invalid");
-    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+    const account = await prisma.user.findUnique({ where: { email } });
+    if (!account) return redirect303(req, "/login?error=invalid");
+    const passwordMatches = await bcrypt.compare(password, account.passwordHash);
     if (!passwordMatches) return redirect303(req, "/login?error=invalid");
-    if (user.status === "SUSPENDED") return redirect303(req, "/login?error=suspended");
-    if (!user.emailVerifiedAt) {
+    if (account.status === "SUSPENDED") return redirect303(req, "/login?error=suspended");
+    if (!account.emailVerifiedAt) {
       return redirect303(req, `/verify-email?email=${encodeURIComponent(email)}&error=required`);
     }
 
+    const user = await ensurePrimaryAdmin(account);
     await createSession({ id: user.id, role: user.role, status: user.status });
     if (user.role === "SUPER_ADMIN") return redirect303(req, "/admin");
     if (user.role === "PROVIDER" && user.status === "PENDING") return redirect303(req, "/register/provider-details");
