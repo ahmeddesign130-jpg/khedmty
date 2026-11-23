@@ -1,71 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { decryptProviderApplication } from "@/lib/provider-application";
 
 export const dynamic = "force-dynamic";
-
-async function reviewExistingProvider(formData: FormData) {
-  "use server";
-  const admin = await getCurrentUser();
-  if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
-  const id = String(formData.get("id") || "");
-  const action = String(formData.get("action") || "");
-  const reason = String(formData.get("reason") || "").trim();
-  if (!id || !["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && reason.length < 3)) redirect("/admin/providers?review=invalid");
-  const provider = await prisma.user.findFirst({ where: { id, role: "PROVIDER", status: "PENDING" } });
-  if (!provider) redirect("/admin/providers?review=not_found");
-  try { await prisma.$transaction(async (tx) => {
-    const updated = await tx.user.updateMany({ where: { id, role: "PROVIDER", status: "PENDING" }, data: { status: action === "APPROVE" ? "ACTIVE" : "SUSPENDED" } });
-    if (updated.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
-    await tx.auditLog.create({ data: { actorId: admin.id, action: action === "APPROVE" ? "PROVIDER_APPROVED" : "PROVIDER_REJECTED", targetId: id, details: action === "REJECT" ? reason : "تمت الموافقة" } });
-  }); } catch (error) { console.error("Provider account review failed:", error); redirect("/admin/providers?review=failed"); }
-  revalidatePath("/admin/providers");
-  revalidatePath("/admin");
-  redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
-}
-
-async function reviewCustomerApplication(formData: FormData) {
-  "use server";
-  const admin = await getCurrentUser();
-  if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
-  const id = String(formData.get("id") || "");
-  const action = String(formData.get("action") || "");
-  const reason = String(formData.get("reason") || "").trim();
-  if (!id || !["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers?review=invalid");
-  const latest = await prisma.auditLog.findFirst({
-    where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_SUBMITTED", "PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
-    orderBy: { createdAt: "desc" }, select: { action: true },
-  });
-  if (latest?.action !== "PROVIDER_APPLICATION_SUBMITTED") redirect("/admin/providers?review=not_found");
-  try { await prisma.$transaction(async (tx) => {
-    if (action === "APPROVE") {
-      const application = await tx.auditLog.findFirst({
-        where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
-        orderBy: { createdAt: "desc" },
-        select: { details: true },
-      });
-      const details = application?.details ? decryptProviderApplication(application.details) : null;
-      if (!details || !details.dateOfBirth || !details.idFrontPath || !details.idBackPath) throw new Error("APPLICATION_VERIFICATION_INCOMPLETE");
-      const changed = await tx.user.updateMany({ where: { id, role: "CUSTOMER", status: "ACTIVE" }, data: { role: "PROVIDER", displayName: details.fullName } });
-      if (changed.count !== 1) throw new Error("APPLICATION_REVIEW_CONFLICT");
-      await tx.profile.upsert({
-        where: { userId: id },
-        update: { displayName: details.fullName, phone: details.phone, bio: details.bio, skills: [details.profession] },
-        create: { userId: id, displayName: details.fullName, phone: details.phone, bio: details.bio, skills: [details.profession] },
-      });
-    }
-    await tx.auditLog.create({
-      data: { actorId: admin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? reason : "تمت الموافقة على طلب التحويل إلى مقدم خدمة." },
-    });
-  }); } catch (error) { console.error("Customer-to-provider review failed:", error); redirect("/admin/providers?review=failed"); }
-  revalidatePath("/admin/providers");
-  revalidatePath("/account");
-  revalidatePath("/admin");
-  redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
-}
 
 export default async function AdminProvidersPage({ searchParams }: { searchParams: Promise<{ review?: string }> }) {
   const params = await searchParams;
