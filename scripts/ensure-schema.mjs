@@ -36,7 +36,8 @@ async function main() {
       ADD COLUMN IF NOT EXISTS "servicePrice" INTEGER NOT NULL DEFAULT 0,
       ADD COLUMN IF NOT EXISTS "commissionRate" INTEGER NOT NULL DEFAULT 20,
       ADD COLUMN IF NOT EXISTS "commission" INTEGER NOT NULL DEFAULT 0,
-      ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0
+      ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS "total" INTEGER NOT NULL DEFAULT 0
   `);
   await prisma.$executeRawUnsafe('ALTER TABLE "Order" ALTER COLUMN "commissionRate" SET DEFAULT 20');
   await prisma.$executeRawUnsafe(`
