@@ -35,13 +35,6 @@ export async function PATCH(
 
     const { status, reviewNote } = parsed.data;
 
-    if (status === "REJECTED" && !reviewNote?.trim()) {
-      return NextResponse.json(
-        { message: "يرجى كتابة سبب رفض الدفع." },
-        { status: 400 }
-      );
-    }
-
     const payment = await prisma.payment.findUnique({
       where: { id },
       include: { order: true },
@@ -54,7 +47,7 @@ export async function PATCH(
       );
     }
 
-    if (payment.status !== "PENDING_REVIEW" || payment.order.status !== "PAYMENT_REVIEW") {
+    if (payment.status !== "PENDING_REVIEW" || (status === "APPROVED" && payment.order.status !== "PAYMENT_REVIEW")) {
       return NextResponse.json(
         { message: "تمت مراجعة عملية الدفع من قبل." },
         { status: 409 }
@@ -89,7 +82,7 @@ export async function PATCH(
         },
       });
 
-      if (orderUpdate.count !== 1) {
+      if (status === "APPROVED" && orderUpdate.count !== 1) {
         throw new Error("REVIEW_CONFLICT");
       }
 
