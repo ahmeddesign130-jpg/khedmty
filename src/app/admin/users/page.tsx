@@ -1,10 +1,38 @@
 import Link from "next/link";
+import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+async function deleteAccount(formData: FormData) {
+  "use server";
+  const admin = await getCurrentUser();
+  if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
+  const id = String(formData.get("id") || "");
+  if (!id) return;
+  const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true, email: true } });
+  if (!target || target.role === "SUPER_ADMIN" || target.email.endsWith("@deleted.khedmty.invalid")) return;
+  const deletedEmail = `deleted-${target.id}@deleted.khedmty.invalid`;
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id },
+      data: { email: deletedEmail, displayName: "حساب محذوف", passwordHash: randomBytes(48).toString("hex"), status: "SUSPENDED" },
+    });
+    await tx.profile.updateMany({
+      where: { userId: id },
+      data: { displayName: null, bio: null, avatarUrl: null, phone: null, skills: [] },
+    });
+    await tx.emailOtp.deleteMany({ where: { userId: id } });
+    await tx.service.updateMany({ where: { providerId: id }, data: { status: "PAUSED" } });
+    await tx.auditLog.deleteMany({ where: { targetId: id } });
+  });
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/providers");
+  revalidatePath("/services");
+}
 
 async function changeAccess(formData: FormData) {
   "use server";
@@ -38,7 +66,7 @@ export default async function AdminUsersPage() {
   if (!admin) redirect("/login");
   if (admin.role !== "SUPER_ADMIN") redirect("/account");
   const users = await prisma.user.findMany({
-    where: { role: { in: ["CUSTOMER", "PROVIDER"] } },
+    where: { role: { in: ["CUSTOMER", "PROVIDER"] }, NOT: { email: { endsWith: "@deleted.khedmty.invalid" } } },
     select: { id: true, displayName: true, email: true, role: true, status: true, createdAt: true },
     orderBy: { createdAt: "desc" },
   });
@@ -55,12 +83,18 @@ export default async function AdminUsersPage() {
               <p dir="ltr" className="mt-1 text-left text-sm text-slate-600">{u.email}</p>
               <p className="mt-2 text-xs text-slate-500">{u.role === "PROVIDER" ? "مقدم خدمة" : "عميل"} · {u.status === "ACTIVE" ? "نشط" : u.status === "SUSPENDED" ? "محظور" : "قيد المراجعة"} · {u.createdAt.toLocaleDateString("en-GB")}</p>
             </div>
+            <div className="flex flex-wrap gap-2">
             {u.status !== "PENDING" && <form action={changeAccess}>
               <input type="hidden" name="id" value={u.id}/>
               {u.status === "ACTIVE"
                 ? <button name="action" value="SUSPEND" className="rounded-xl bg-red-600 px-4 py-2.5 font-bold text-white">حظر الحساب</button>
                 : <button name="action" value="ACTIVATE" className="rounded-xl bg-green-600 px-4 py-2.5 font-bold text-white">إلغاء الحظر</button>}
             </form>}
+            <form action={deleteAccount} onSubmit={undefined}>
+              <input type="hidden" name="id" value={u.id}/>
+              <button className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 font-bold text-red-700" type="submit">حذف الحساب</button>
+            </form>
+            </div>
           </div>
         </article>)}
         {users.length === 0 && <div className="rounded-2xl bg-white p-8 text-center text-slate-600">لا توجد حسابات حتى الآن.</div>}
