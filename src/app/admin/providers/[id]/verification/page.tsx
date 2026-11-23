@@ -107,7 +107,7 @@ export default async function ProviderVerificationReviewPage({ params }: { param
           <button name="action" value="APPROVE" className="rounded-xl bg-green-600 px-6 py-3 font-bold text-white">اعتماد مقدم الخدمة</button>
           <button name="action" value="REJECT" formNoValidate className="rounded-xl bg-red-600 px-6 py-3 font-bold text-white">رفض الطلب</button>
         </div>
-      </form>
+      </form> : <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 leading-7 text-amber-900">لا يمكن اعتماد هذا الطلب؛ يجب إعادة إرسال تاريخ الميلاد وصور البطاقة الأمامية والخلفية بشكل صحيح.</div>}
     </section>
   </main>;
 }
