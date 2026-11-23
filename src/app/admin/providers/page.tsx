@@ -30,6 +30,9 @@ async function reviewProvider(formData: FormData) {
       });
       if (changed.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
     }
+    else if (target.role === "PROVIDER" && target.status === "PENDING") {
+      await tx.user.updateMany({ where: { id, role: "PROVIDER", status: "PENDING" }, data: { status: "SUSPENDED" } });
+    }
     await tx.auditLog.create({
       data: {
         actorId: admin.id,
