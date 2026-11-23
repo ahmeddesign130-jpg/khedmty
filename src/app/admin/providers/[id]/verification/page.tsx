@@ -47,7 +47,6 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     const action = String(formData.get("action") || "");
     const reason = String(formData.get("reason") || "").trim();
     if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && (reason.length < 3 || reason.length > 1000))) redirect("/admin/providers/" + id + "/verification?error=invalid");
-    if (action === "APPROVE" && (!data.idFrontPath || !data.idBackPath || !data.dateOfBirth)) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     const latestRequest = await prisma.auditLog.findFirst({
       where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
       orderBy: { createdAt: "desc" }, select: { details: true, createdAt: true },
