@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await ensurePrimaryAdmin(account);
-    if (user.role === "CUSTOMER" && user.status === "PENDING" && user.emailVerifiedAt) {
+    if (user.role === "CUSTOMER" && user.status === "PENDING" && account.emailVerifiedAt) {
       const activated = await prisma.user.updateMany({
         where: { id: user.id, role: "CUSTOMER", status: "PENDING", emailVerifiedAt: { not: null } },
         data: { status: "ACTIVE" },
