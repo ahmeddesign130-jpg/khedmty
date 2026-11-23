@@ -104,7 +104,8 @@ async function ensureCompatibilitySchema() {
          ADD COLUMN IF NOT EXISTS "servicePrice" INTEGER NOT NULL DEFAULT 0,
          ADD COLUMN IF NOT EXISTS "commissionRate" INTEGER NOT NULL DEFAULT 20,
          ADD COLUMN IF NOT EXISTS "commission" INTEGER NOT NULL DEFAULT 0,
-         ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0`
+         ADD COLUMN IF NOT EXISTS "providerNet" INTEGER NOT NULL DEFAULT 0,
+         ADD COLUMN IF NOT EXISTS "total" INTEGER NOT NULL DEFAULT 0`
       );
       await basePrisma.$executeRawUnsafe(
         `ALTER TABLE IF EXISTS public."Order"
