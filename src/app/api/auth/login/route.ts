@@ -26,6 +26,13 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await ensurePrimaryAdmin(account);
+    if (user.role === "CUSTOMER" && user.status === "PENDING" && user.emailVerifiedAt) {
+      const activated = await prisma.user.updateMany({
+        where: { id: user.id, role: "CUSTOMER", status: "PENDING", emailVerifiedAt: { not: null } },
+        data: { status: "ACTIVE" },
+      });
+      if (activated.count === 1) user.status = "ACTIVE";
+    }
     await createSession({ id: user.id, role: user.role, status: user.status });
     if (user.role === "SUPER_ADMIN") return redirect303(req, "/admin");
     if (user.role === "PROVIDER" && user.status === "PENDING") return redirect303(req, "/register/provider-details");
