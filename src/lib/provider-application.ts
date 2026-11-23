@@ -13,6 +13,9 @@ export type ProviderApplicationData = {
   profession: string;
   experience: string;
   bio: string;
+  dateOfBirth?: string;
+  idFrontPath?: string;
+  idBackPath?: string;
 };
 
 export function encryptProviderApplication(data: ProviderApplicationData) {
