@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       maxSize = VIDEO_TYPES.has(mimeType) ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
       bucket = "service-media";
     } else if (kind === "provider-verification") {
-      if (user.role !== "PROVIDER" || user.status !== "PENDING") return NextResponse.json({ message: "رفع مستندات التحقق متاح لمقدم الخدمة صاحب الطلب المعلّق فقط." }, { status: 403 });
+      if (!((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) return NextResponse.json({ message: "رفع مستندات التحقق متاح للمتقدمين المؤهلين فقط." }, { status: 403 });
       if (!IMAGE_TYPES.has(mimeType)) return NextResponse.json({ message: "مستند التحقق يجب أن يكون صورة JPG أو PNG أو WEBP." }, { status: 400 });
       maxSize = MAX_IMAGE_BYTES;
       bucket = "provider-verification";
