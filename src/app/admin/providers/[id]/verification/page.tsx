@@ -50,21 +50,23 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     if (action === "APPROVE" && (!data.idFrontPath || !data.idBackPath || !data.dateOfBirth)) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     const latestRequest = await prisma.auditLog.findFirst({
       where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
-      orderBy: { createdAt: "desc" }, select: { createdAt: true },
+      orderBy: { createdAt: "desc" }, select: { details: true, createdAt: true },
     });
     const latestDecision = await prisma.auditLog.findFirst({
       where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
       orderBy: { createdAt: "desc" }, select: { createdAt: true },
     });
     if (!latestRequest || (latestDecision && latestDecision.createdAt > latestRequest.createdAt)) redirect("/admin/providers?review=not_found");
+    const reviewedData = latestRequest.details ? decryptProviderApplication(latestRequest.details) : null;
+    if (!reviewedData?.dateOfBirth || !reviewedData.idFrontPath?.startsWith(id + "/verification/") || !reviewedData.idBackPath?.startsWith(id + "/verification/")) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
     await prisma.$transaction(async tx => {
       if (action === "APPROVE") {
-        const changed = await tx.user.updateMany({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] }, data: { status: "ACTIVE", role: "PROVIDER", displayName: data.fullName } });
+        const changed = await tx.user.updateMany({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] }, data: { status: "ACTIVE", role: "PROVIDER", displayName: reviewedData.fullName } });
         if (changed.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
         await tx.profile.upsert({
           where: { userId: id },
-          update: { displayName: data.fullName, phone: data.phone, bio: data.bio, skills: [data.profession] },
-          create: { userId: id, displayName: data.fullName, phone: data.phone, bio: data.bio, skills: [data.profession] },
+          update: { displayName: reviewedData.fullName, phone: reviewedData.phone, bio: reviewedData.bio, skills: [reviewedData.profession] },
+          create: { userId: id, displayName: reviewedData.fullName, phone: reviewedData.phone, bio: reviewedData.bio, skills: [reviewedData.profession] },
         });
       }
       await tx.auditLog.create({
