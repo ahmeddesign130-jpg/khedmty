@@ -134,11 +134,7 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
               <p className="sm:col-span-2"><b>النبذة:</b> {item.data.bio}</p>
               <p className="text-xs text-slate-500 sm:col-span-2">تاريخ التقديم: {item.createdAt.toLocaleDateString("en-GB")}</p>
             </div>
-            <form action={reviewCustomerApplication} className="mt-4 space-y-3">
-              <input type="hidden" name="id" value={item.targetId}/>
-              <label className="block text-sm font-bold text-slate-700">سبب الرفض (مطلوب عند الرفض)<textarea name="reason" maxLength={1000} rows={2} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
-              <div className="flex flex-wrap gap-3"><button type="submit" name="action" value="APPROVE" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">الموافقة وتحويله لمقدم خدمة</button><button type="submit" name="action" value="REJECT" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">رفض الطلب</button></div>
-            </form>
+            <Link href={`/admin/providers/${item.targetId}/verification`} className="mt-4 inline-flex rounded-xl bg-orange-500 px-5 py-3 font-bold text-white">فتح ملف التحقق ومراجعة البطاقة</Link>
           </article>;
         })}</div>
       }
