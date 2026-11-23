@@ -16,6 +16,7 @@ export async function GET() {
       auditLogs: string | null;
       emailOtps: string | null;
       providerNet: string | null;
+      orderCommissionRate: string | null;
     }>>`
       SELECT
         to_regclass('public."User"')::text AS users,
@@ -26,7 +27,8 @@ export async function GET() {
         to_regclass('public."PlatformSettings"')::text AS settings,
         to_regclass('public."AuditLog"')::text AS "auditLogs",
         to_regclass('public."EmailOtp"')::text AS "emailOtps",
-        (SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'Order' AND column_name = 'providerNet') AS "providerNet"
+        (SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'Order' AND column_name = 'providerNet') AS "providerNet",
+        (SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'Order' AND column_name = 'commissionRate') AS "orderCommissionRate"
     `;
 
     const missingTables = tables.length === 1 ? Object.entries(tables[0]).filter(([, value]) => !value).map(([name]) => name) : ["User", "Profile", "Service", "Order", "Payment", "PlatformSettings", "AuditLog"];
