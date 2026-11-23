@@ -48,7 +48,7 @@ async function reviewCustomerApplication(formData: FormData) {
         select: { details: true },
       });
       const details = application?.details ? decryptProviderApplication(application.details) : null;
-      if (!details) throw new Error("APPLICATION_DATA_UNAVAILABLE");
+      if (!details || !details.dateOfBirth || !details.idFrontPath || !details.idBackPath) throw new Error("APPLICATION_VERIFICATION_INCOMPLETE");
       const changed = await tx.user.updateMany({ where: { id, role: "CUSTOMER", status: "ACTIVE" }, data: { role: "PROVIDER", displayName: details.fullName } });
       if (changed.count !== 1) throw new Error("APPLICATION_REVIEW_CONFLICT");
       await tx.profile.upsert({
