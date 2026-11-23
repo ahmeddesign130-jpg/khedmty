@@ -102,15 +102,19 @@ export async function GET(req: NextRequest) {
     if (!user) return fail(req, "google_account_required", "/login");
 
     if (user.status === "SUSPENDED") return fail(req, "google_failed");
-    // Google's signed email_verified claim is sufficient email verification.
-    // Preserve provider approval state; only activate a customer waiting for email OTP.
-    const verifiedUser = user.emailVerifiedAt ? user : await prisma.user.update({
+    // Google's signed email_verified claim proves the email. Activate customers even
+    // when their email was already verified but their account status was left PENDING.
+    // Provider approval state remains unchanged until an admin approves the application.
+    const needsActivation = !user.emailVerifiedAt ||
+      (user.role === "CUSTOMER" && user.status !== "ACTIVE");
+    const verifiedUser = needsActivation ? await prisma.user.update({
       where: { id: user.id },
       data: {
-        emailVerifiedAt: new Date(),
+        emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
         status: user.role === "CUSTOMER" ? "ACTIVE" : user.status,
       },
-    });
+    }) : user;
+
     let sessionToken: string;
     try {
       sessionToken = await createSession({ id: verifiedUser.id, role: verifiedUser.role, status: verifiedUser.status });
