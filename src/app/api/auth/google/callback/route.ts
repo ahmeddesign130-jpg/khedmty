@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/auth";
+import { createSession, ensurePrimaryAdmin, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/auth";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 
 export const dynamic = "force-dynamic";
-
 const PRODUCTION_HOST = "khedmty-swart.vercel.app";
-
-// Cached Google signing keys let us verify the ID token without a second userinfo round trip.
 const googleJwks = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
 function googleRedirectUri() {
@@ -27,21 +24,17 @@ function fail(req: NextRequest, code: string, destination: "/login" | "/register
 
 export async function GET(req: NextRequest) {
   try {
-    // If an old or manually entered alias receives the callback, move it to the
-    // canonical host. Normal sign-in starts on this host, so its cookies are present.
     if (process.env.VERCEL_ENV !== "preview" && req.nextUrl.hostname !== PRODUCTION_HOST) {
       const canonicalUrl = new URL("/api/auth/google/callback", `https://${PRODUCTION_HOST}`);
       canonicalUrl.search = req.nextUrl.search;
       return NextResponse.redirect(canonicalUrl);
     }
-
     const params = req.nextUrl.searchParams;
     if (params.get("error")) return fail(req, "google_denied");
     const code = params.get("code");
     const state = params.get("state");
     const savedState = req.cookies.get("khedmty_google_state")?.value;
     const verifier = req.cookies.get("khedmty_google_verifier")?.value;
-    // OAuth callback is sign-in only. It must never create a Khedmty account.
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = googleRedirectUri();
@@ -61,17 +54,17 @@ export async function GET(req: NextRequest) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         code, client_id: clientId, client_secret: clientSecret,
-        redirect_uri: redirectUri, grant_type: "authorization_code",
-        code_verifier: verifier,
+        redirect_uri: redirectUri, grant_type: "authorization_code", code_verifier: verifier,
       }),
       cache: "no-store",
     });
-    if (!tokenResponse.ok) { console.error("Google token exchange failed", tokenResponse.status, await tokenResponse.text().catch(() => "")); return fail(req, "google_token"); }
+    if (!tokenResponse.ok) {
+      console.error("Google token exchange failed", tokenResponse.status, await tokenResponse.text().catch(() => ""));
+      return fail(req, "google_token");
+    }
     const tokenData = await tokenResponse.json() as { id_token?: string };
-    if (!tokenData.id_token) { console.error("Google token response did not include an ID token"); return fail(req, "google_token"); }
+    if (!tokenData.id_token) return fail(req, "google_token");
 
-    // Validate Google's signed identity token locally (cached JWKS) instead of making
-    // a second sequential HTTPS request to the userinfo endpoint.
     const verified = await jwtVerify(tokenData.id_token, googleJwks, {
       issuer: ["https://accounts.google.com", "accounts.google.com"],
       audience: clientId,
@@ -83,53 +76,39 @@ export async function GET(req: NextRequest) {
       email: emailClaim,
       email_verified: claims.email_verified === true || claims.email_verified === "true",
     };
-    if (!profile.sub || !profile.email || profile.email_verified !== true) {
-      console.error("Google ID token is missing verified identity fields");
-      return fail(req, "google_profile");
-    }
+    if (!profile.sub || !profile.email || profile.email_verified !== true) return fail(req, "google_profile");
 
     const email = profile.email.trim().toLowerCase();
     const exactUser = await prisma.user.findUnique({ where: { email } });
-    const user = exactUser ?? await prisma.user.findFirst({
+    const account = exactUser ?? await prisma.user.findFirst({
       where: { email: { equals: email, mode: "insensitive" } },
     });
     console.info("Google account lookup completed", {
-      matched: Boolean(user),
-      matchedBy: exactUser ? "exact" : user ? "case_insensitive" : "none",
+      matched: Boolean(account),
+      matchedBy: exactUser ? "exact" : account ? "case_insensitive" : "none",
       emailDomain: email.split("@")[1] ?? "unknown",
     });
-    // This is a sign-in flow: never send an existing user through account creation.
-    if (!user) return fail(req, "google_account_required", "/login");
+    if (!account) return fail(req, "google_account_required", "/login");
+    if (account.status === "SUSPENDED") return fail(req, "google_failed");
 
-    if (user.status === "SUSPENDED") return fail(req, "google_failed");
-    // Google's signed email_verified claim proves the email. Activate customers even
-    // when their email was already verified but their account status was left PENDING.
-    // Provider approval state remains unchanged until an admin approves the application.
-    const needsActivation = !user.emailVerifiedAt ||
-      (user.role === "CUSTOMER" && user.status !== "ACTIVE");
-    const verifiedUser = needsActivation ? await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
-        status: user.role === "CUSTOMER" ? "ACTIVE" : user.status,
-      },
-    }) : user;
+    const verifiedAccount = !account.emailVerifiedAt || (account.role === "CUSTOMER" && account.status !== "ACTIVE")
+      ? await prisma.user.update({
+          where: { id: account.id },
+          data: {
+            emailVerifiedAt: account.emailVerifiedAt ?? new Date(),
+            status: account.role === "CUSTOMER" ? "ACTIVE" : account.status,
+          },
+        })
+      : account;
+    const user = await ensurePrimaryAdmin(verifiedAccount);
 
-    let sessionToken: string;
-    try {
-      sessionToken = await createSession({ id: verifiedUser.id, role: verifiedUser.role, status: verifiedUser.status });
-    } catch (sessionError) {
-      console.error("Google session creation failed:", sessionError);
-      return fail(req, "google_session");
-    }
-
-    const destination = verifiedUser.role === "SUPER_ADMIN" ? "/admin"
-      : verifiedUser.role === "PROVIDER" && verifiedUser.status === "PENDING" ? "/register/provider-details"
-      : verifiedUser.role === "PROVIDER" ? "/provider" : "/services";
+    const sessionToken = await createSession({ id: user.id, role: user.role, status: user.status });
+    const destination = user.role === "SUPER_ADMIN" ? "/admin"
+      : user.role === "PROVIDER" && user.status === "PENDING" ? "/register/provider-details"
+      : user.role === "PROVIDER" ? "/provider" : "/services";
     const response = NextResponse.redirect(new URL(destination, req.url));
-    // Attach the session directly to the redirect response so the browser reliably stores it.
     response.cookies.set(SESSION_COOKIE_NAME, sessionToken, SESSION_COOKIE_OPTIONS);
-    console.info("Google session cookie attached to redirect", { destination, role: verifiedUser.role });
+    console.info("Google session cookie attached to redirect", { destination, role: user.role });
     for (const name of ["khedmty_google_state", "khedmty_google_verifier", "khedmty_google_role", "khedmty_google_intent", "khedmty_google_terms"]) {
       response.cookies.set(name, "", { path: "/api/auth/google/callback", maxAge: 0 });
     }
