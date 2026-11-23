@@ -46,7 +46,23 @@ export async function POST(
       );
     }
 
-    const latestSubmission = await prisma.auditLog.findFirst({\n      where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },\n      orderBy: { createdAt: "desc" },\n      select: { details: true, createdAt: true },\n    });\n    const latestDecision = await prisma.auditLog.findFirst({\n      where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },\n      orderBy: { createdAt: "desc" },\n      select: { createdAt: true },\n    });\n    const { decryptProviderApplication } = await import("@/lib/provider-application");\n    const verification = latestSubmission?.details ? decryptProviderApplication(latestSubmission.details) : null;\n    if (!verification?.dateOfBirth || !verification.idFrontPath || !verification.idBackPath || (latestDecision && latestSubmission && latestDecision.createdAt > latestSubmission.createdAt)) {\n      return NextResponse.json({ error: "يجب استكمال ومراجعة بيانات الهوية قبل اعتماد الحساب." }, { status: 409 });\n    }\n\n    if (provider.status !== "PENDING") {
+    const latestSubmission = await prisma.auditLog.findFirst({
+      where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
+      orderBy: { createdAt: "desc" },
+      select: { details: true, createdAt: true },
+    });
+    const latestDecision = await prisma.auditLog.findFirst({
+      where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    const { decryptProviderApplication } = await import("@/lib/provider-application");
+    const verification = latestSubmission?.details ? decryptProviderApplication(latestSubmission.details) : null;
+    if (!verification?.dateOfBirth || !verification.idFrontPath || !verification.idBackPath || (latestDecision && latestSubmission && latestDecision.createdAt > latestSubmission.createdAt)) {
+      return NextResponse.json({ error: "يجب استكمال ومراجعة بيانات الهوية قبل اعتماد الحساب." }, { status: 409 });
+    }
+
+    if (provider.status !== "PENDING") {
       return NextResponse.json(
         { error: "تمت مراجعة هذا الحساب من قبل." },
         { status: 409 }
