@@ -40,13 +40,13 @@ export default async function AdminPage() {
           <div className="pointer-events-none absolute -left-12 -top-20 h-64 w-64 rounded-full bg-orange-400/10 blur-3xl"/>
           <div className="relative flex flex-col justify-between gap-7 md:flex-row md:items-end">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-orange-300/30 bg-orange-400/10 px-3 py-1.5 text-xs font-bold text-orange-200"><UiIcon name="grid" size={15}/> ADMIN DASHBOARD V2</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-orange-300/30 bg-orange-400/10 px-3 py-1.5 text-xs font-bold text-orange-200"><UiIcon name="grid" size={15}/> مساحة الإدارة</span>
               <h1 className="mt-5 text-3xl font-black leading-tight sm:text-4xl">مركز إدارة خِدمتي</h1>
               <p className="mt-3 max-w-xl text-sm leading-8 text-slate-200 sm:text-base">كل أدوات تشغيل المنصة في مكان واحد. راجع الحسابات والخدمات، وتابع الطلبات والمدفوعات، وتحكم في إعدادات السوق.</p>
             </div>
-            <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+            <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-white/30 bg-[#ffffff]/15 p-4 shadow-lg backdrop-blur-md">
               <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-400 text-[#14213d]"><UiIcon name="shield" size={23}/></span>
-              <div><p className="text-sm font-extrabold">وضع المسؤول</p><p className="mt-1 text-xs text-slate-300">صلاحيات إدارة المنصة</p></div>
+              <div><p className="text-sm font-extrabold text-white">وضع المسؤول</p><p className="mt-1 text-xs font-semibold text-white">صلاحيات إدارة المنصة</p></div>
             </div>
           </div>
         </section>
