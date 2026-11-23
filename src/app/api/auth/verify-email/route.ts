@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     // Set the session on the actual redirect response so the next page never
     // falls back to /login before provider details are completed.
     const token = await createSession({ id: updated.id, role: updated.role, status: updated.status });
-    const destination = updated.role === "PROVIDER" ? "/pending?step=provider-details&verified=1" : "/services?verified=1";
+    const destination = updated.role === "PROVIDER" ? "/register/provider-details?step=3&verified=1" : "/services?verified=1";
     const response = NextResponse.redirect(new URL(destination, req.url), 303);
     response.cookies.set(SESSION_COOKIE_NAME, token, SESSION_COOKIE_OPTIONS);
     return response;
