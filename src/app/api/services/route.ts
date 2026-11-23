@@ -18,15 +18,13 @@ function generateServiceNo() {
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
-    if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
-      return NextResponse.json({ success: false, message: "تصفح الخدمات متاح للعملاء النشطين فقط." }, { status: 403 });
-    }
-
     const serviceNo = request.nextUrl.searchParams.get("serviceNo")?.trim().toUpperCase();
     const services = await prisma.service.findMany({
-      where: { status: "APPROVED", ...(serviceNo ? { serviceNo: { equals: serviceNo } } : {}) },
+      where: {
+        status: "APPROVED",
+        provider: { status: "ACTIVE" },
+        ...(serviceNo ? { serviceNo: { equals: serviceNo } } : {}),
+      },
       select: {
         id: true,
         title: true,
@@ -43,7 +41,7 @@ export async function GET(request: NextRequest) {
       take: 100,
     });
     return NextResponse.json({ success: true, services }, {
-      headers: { "Cache-Control": "private, no-store, max-age=0" },
+      headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
     });
   } catch (error) {
     console.error("GET_SERVICES_ERROR:", error);
