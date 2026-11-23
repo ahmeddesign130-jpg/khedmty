@@ -28,22 +28,16 @@ async function reviewPayment(formData: FormData) {
   const status = String(formData.get("status") || "");
   const reviewNote = String(formData.get("reviewNote") || "").trim();
 
-  if (
-    !id ||
-    !["APPROVED", "REJECTED"].includes(status) ||
-    reviewNote.length > 1000
-  ) return;
+  if (!id || !["APPROVED", "REJECTED"].includes(status) || reviewNote.length > 1000) redirect("/admin/payments?review=invalid");
 
   const payment = await prisma.payment.findUnique({
     where: { id },
     include: { order: true },
   });
 
-  if (
-    !payment ||
-    payment.status !== "PENDING_REVIEW" ||
-    (status === "APPROVED" && (payment.order.status !== "PAYMENT_REVIEW" || payment.amount !== payment.order.total))
-  ) return;
+  if (!payment || payment.status !== "PENDING_REVIEW") redirect("/admin/payments?review=not_found");
+  if (status === "APPROVED" && payment.order.amount !== undefined) { /* keep compatibility with generated Prisma types */ }
+  if (status === "APPROVED" && (payment.order.status !== "PAYMENT_REVIEW" || payment.amount !== payment.order.total)) redirect("/admin/payments?review=amount_mismatch");
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -75,16 +69,18 @@ async function reviewPayment(formData: FormData) {
       });
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "PAYMENT_REVIEW_CONFLICT") return;
+    if (error instanceof Error && error.message === "PAYMENT_REVIEW_CONFLICT") redirect("/admin/payments?review=conflict");
     throw error;
   }
 
   revalidatePath("/admin/payments");
   revalidatePath("/admin/orders");
   revalidatePath(`/orders/${payment.orderId}`);
+  redirect(status === "APPROVED" ? "/admin/payments?review=approved" : "/admin/payments?review=rejected");
 }
 
-export default async function AdminPaymentsPage() {
+export default async function AdminPaymentsPage({ searchParams }: { searchParams: Promise<{ review?: string }> }) {
+  const params = await searchParams;
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") redirect("/login");
 
@@ -118,6 +114,12 @@ export default async function AdminPaymentsPage() {
         </a>
         <h1 className="text-3xl font-black text-slate-900">إدارة المدفوعات</h1>
         <p className="mb-8 mt-2 text-slate-500">راجع الإيصال والمبلغ قبل اعتماد الدفع.</p>
+        {params.review === "approved" && <p role="status" className="mb-5 rounded-xl bg-green-50 p-4 font-bold text-green-800">تم تأكيد استلام التحويل وتحديث حالة الطلب.</p>}
+        {params.review === "rejected" && <p role="status" className="mb-5 rounded-xl bg-amber-50 p-4 font-bold text-amber-900">تم رفض الإيصال وإعادة الطلب لانتظار الدفع.</p>}
+        {params.review === "amount_mismatch" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">لم يتم قبول التحويل: المبلغ لا يطابق إجمالي الطلب أو أن الطلب لم يعد في انتظار مراجعة الدفع.</p>}
+        {params.review === "not_found" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">عملية الدفع غير موجودة أو تمت مراجعتها بالفعل.</p>}
+        {params.review === "conflict" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">تم تحديث عملية الدفع من مسؤول آخر. حدّث الصفحة.</p>}
+        {params.review === "invalid" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">بيانات المراجعة غير صحيحة.</p>}
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
           <div className="rounded-2xl bg-white p-5 shadow-sm">
