@@ -150,10 +150,7 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
           {p.profile?.phone && <p className="mt-2 text-sm">الهاتف: {p.profile.phone}</p>}
           {p.profile?.bio && <p className="mt-3 leading-7 text-slate-600">{p.profile.bio}</p>}
           <p className="mt-2 text-xs text-slate-500">تاريخ التسجيل: {p.createdAt.toLocaleDateString("en-GB")}</p>
-          <form action={reviewExistingProvider} className="mt-5 space-y-3"><input type="hidden" name="id" value={p.id}/>
-            <label className="block text-sm font-bold text-slate-700">سبب الرفض (مطلوب عند الرفض)<textarea name="reason" maxLength={1000} rows={2} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/></label>
-            <div className="flex flex-wrap gap-3"><button name="action" value="APPROVE" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">الموافقة على الحساب</button><button name="action" value="REJECT" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">رفض الحساب</button></div>
-          </form>
+          <Link href={`/admin/providers/${p.id}/verification`} className="mt-5 inline-flex rounded-xl bg-orange-500 px-5 py-3 font-bold text-white">فتح ملف التحقق ومراجعة البطاقة</Link>
         </article>)}</div>
       }
     </section>
