@@ -58,7 +58,7 @@ export async function POST(
     });
     const { decryptProviderApplication } = await import("@/lib/provider-application");
     const verification = latestSubmission?.details ? decryptProviderApplication(latestSubmission.details) : null;
-    if (!verification?.dateOfBirth || !verification.idFrontPath || !verification.idBackPath || (latestDecision && latestSubmission && latestDecision.createdAt > latestSubmission.createdAt)) {
+    if (!verification?.dateOfBirth || !verification.idFrontPath?.startsWith(id + "/verification/") || !verification.idBackPath?.startsWith(id + "/verification/") || (latestDecision && latestSubmission && latestDecision.createdAt > latestSubmission.createdAt)) {
       return NextResponse.json({ error: "يجب استكمال ومراجعة بيانات الهوية قبل اعتماد الحساب." }, { status: 409 });
     }
 
