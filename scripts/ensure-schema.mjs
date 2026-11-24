@@ -3,6 +3,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
+  // Preview builds must not mutate the production database or depend on its availability.
+  // The additive compatibility repair runs in production and in the isolated CI database.
+  if (process.env.VERCEL_ENV === "preview") {
+    console.log("Skipping database schema compatibility repair in Vercel Preview.");
+    return;
+  }
+
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to apply the additive schema compatibility check.");
   }
