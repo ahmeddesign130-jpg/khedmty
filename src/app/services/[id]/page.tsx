@@ -36,6 +36,8 @@ export default async function ServiceDetailsPage({
     notFound();
   }
 
+  const serviceRequirements = service.requirements;
+
   async function createOrder(formData: FormData) {
     "use server";
 
@@ -52,7 +54,7 @@ export default async function ServiceDetailsPage({
       redirect(`/services/${id}?error=contact`);
     }
 
-    const requirementAnswers = service.requirements.map((question, index) => ({ question, answer: String(formData.get(`requirement_${index}`) || "").trim() }));
+    const requirementAnswers = serviceRequirements.map((question, index) => ({ question, answer: String(formData.get(`requirement_${index}`) || "").trim() }));
     if (requirementAnswers.some((item) => item.answer.length < 2 || item.answer.length > 1500)) redirect(`/services/${id}?error=requirements`);
 
     let orderId: string;
