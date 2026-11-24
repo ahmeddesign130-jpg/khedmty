@@ -43,6 +43,7 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   useEffect(() => {
     if (!open) return;
+    const trigger = triggerRef.current;
     closeRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }
@@ -54,7 +55,7 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => { window.removeEventListener("keydown", onKeyDown); triggerRef.current?.focus(); };
+    return () => { window.removeEventListener("keydown", onKeyDown); trigger?.focus(); };
   }, [open]);
 
   useEffect(() => {
