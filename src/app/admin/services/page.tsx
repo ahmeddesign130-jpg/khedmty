@@ -22,9 +22,11 @@ export default async function AdminServicesPage() {
     const id = String(formData.get("id") || "");
     const action = String(formData.get("action") || "");
     const reason = String(formData.get("reason") || "").trim();
+    const finalPrice = Number(formData.get("finalPrice"));
 
     if (!id || !["APPROVE", "REJECT"].includes(action)) return;
     if (action === "REJECT" && !reason) return;
+    if (action === "APPROVE" && (!Number.isSafeInteger(finalPrice) || finalPrice <= 0 || finalPrice > 100000000)) return;
 
     const service = await prisma.service.findUnique({
       where: { id },
@@ -39,6 +41,7 @@ export default async function AdminServicesPage() {
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
           reviewNote: action === "REJECT" ? reason : null,
+          ...(action === "APPROVE" ? { price: finalPrice } : {}),
         },
       });
       if (updated.count !== 1) throw new Error("SERVICE_REVIEW_CONFLICT");
@@ -50,7 +53,7 @@ export default async function AdminServicesPage() {
           targetId: id,
           details: action === "REJECT"
             ? `سبب رفض الخدمة: ${reason}`
-            : "تمت الموافقة على الخدمة.",
+            : `تم اعتماد السعر النهائي للعميل: ${finalPrice} EG.` ,
         },
       });
     }).catch((error) => {
@@ -137,7 +140,7 @@ export default async function AdminServicesPage() {
                 <div className="mt-4 grid gap-2 rounded-xl bg-gray-50 p-4 text-sm">
                   <p>مقدم الخدمة: {service.provider.displayName}</p>
                   <p>البريد: {service.provider.email}</p>
-                  <p>السعر: {service.price} EG</p>
+                  <p>السعر المقترح من مقدم الخدمة: {service.price.toLocaleString("en-US")} EG</p>
                   <p>
                     تاريخ الإضافة: {service.createdAt.toLocaleDateString("en-GB")}
                   </p>
@@ -147,6 +150,19 @@ export default async function AdminServicesPage() {
                   <input type="hidden" name="id" value={service.id} />
 
                   <div>
+                    <label className="mb-2 block font-bold">
+                      السعر النهائي الذي سيدفعه العميل (EG)
+                    </label>
+                    <input
+                      type="number"
+                      name="finalPrice"
+                      min="1"
+                      max="100000000"
+                      step="1"
+                      required
+                      defaultValue={service.price}
+                      className="mb-4 w-full rounded-xl border border-gray-300 p-3 outline-none focus:border-orange-500"
+                    />
                     <label className="mb-2 block font-bold">
                       سبب الرفض (مطلوب عند الرفض)
                     </label>
