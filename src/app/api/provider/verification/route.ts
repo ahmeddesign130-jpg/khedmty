@@ -18,10 +18,16 @@ export async function POST(request: NextRequest) {
     const profession = String(body.profession || "").trim();
     const experience = String(body.experience || "").trim();
     const bio = String(body.bio || "").trim();
+    const nationalId = String(body.nationalId || "").replace(/\\D/g, "");
     const dateOfBirth = String(body.dateOfBirth || "").trim();
     const birthMatch = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(dateOfBirth);
     const birthDate = birthMatch ? new Date(Number(birthMatch[1]), Number(birthMatch[2]) - 1, Number(birthMatch[3])) : null;
-    const validBirthDate = !!birthMatch && !!birthDate && birthDate.getFullYear() === Number(birthMatch[1]) && birthDate.getMonth() === Number(birthMatch[2]) - 1 && birthDate.getDate() === Number(birthMatch[3]) && birthDate.getTime() < Date.now();
+    const idYear = nationalId.length === 14 && /^[23]/.test(nationalId) ? (nationalId[0] === "2" ? 1900 : 2000) + Number(nationalId.slice(1, 3)) : 0;
+    const idMonth = Number(nationalId.slice(3, 5));
+    const idDay = Number(nationalId.slice(5, 7));
+    const idDate = idYear ? new Date(idYear, idMonth - 1, idDay) : null;
+    const idDateIsValid = !!idDate && idDate.getFullYear() === idYear && idDate.getMonth() === idMonth - 1 && idDate.getDate() === idDay;
+    const validBirthDate = nationalId.length === 14 && idDateIsValid && dateOfBirth === `${idYear}-${String(idMonth).padStart(2, "0")}-${String(idDay).padStart(2, "0")}` && !!birthMatch && !!birthDate && birthDate.getFullYear() === Number(birthMatch[1]) && birthDate.getMonth() === Number(birthMatch[2]) - 1 && birthDate.getDate() === Number(birthMatch[3]) && birthDate.getTime() < Date.now();
     const portfolioPaths = Array.isArray(body.portfolioPaths) ? body.portfolioPaths.map((p: unknown) => String(p)) : [];
     const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..");
     if (fullName.length < 3 || fullName.length > 100 || !/^01[0125][0-9]{8}$/.test(phone) ||
