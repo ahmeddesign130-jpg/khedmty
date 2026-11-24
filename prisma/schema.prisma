@@ -33,6 +33,7 @@ enum OrderStatus {
   PAID
   IN_PROGRESS
   DELIVERED
+  DELIVERY_REVIEW
   REVISION_REQUESTED
   COMPLETED
   CANCELLED
@@ -60,6 +61,7 @@ model User {
 
   profile          Profile?
   emailOtp         EmailOtp?
+  notifications    Notification[]
   services         Service[] @relation("ProviderServices")
   customerOrders   Order[]   @relation("CustomerOrders")
   providerOrders   Order[]   @relation("ProviderOrders")
@@ -125,8 +127,9 @@ model Order {
 
   customer  User      @relation("CustomerOrders", fields: [customerId], references: [id])
   provider  User      @relation("ProviderOrders", fields: [providerId], references: [id])
-  payments  Payment[]
-  createdAt DateTime  @default(now())
+  payments      Payment[]
+  deliveryFiles OrderDeliveryFile[]
+  createdAt     DateTime  @default(now())
 }
 
 model Payment {
@@ -138,6 +141,8 @@ model Payment {
   status      PaymentStatus @default(PENDING_REVIEW)
   reviewNote  String?
   reviewedAt  DateTime?
+  transferReference String?
+  transferDate DateTime?
 
   order     Order    @relation(fields: [orderId], references: [id])
   createdAt DateTime @default(now())
@@ -156,4 +161,30 @@ model AuditLog {
   targetId  String
   details   String?
   createdAt DateTime @default(now())
+}
+
+
+model OrderDeliveryFile {
+  id         String   @id @default(cuid())
+  orderId    String
+  uploaderId String
+  objectPath String   @unique
+  fileName   String
+  mimeType   String
+  sizeBytes  Int
+  createdAt  DateTime @default(now())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@index([orderId, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String   @db.Text
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
 }
