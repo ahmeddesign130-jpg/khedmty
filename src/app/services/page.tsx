@@ -18,11 +18,13 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
       status: "APPROVED",
       ...(searchTerm ? { OR: [
         { title: { contains: searchTerm, mode: "insensitive" as const } },
+        { serviceNo: { contains: searchTerm, mode: "insensitive" as const } },
         { description: { contains: searchTerm, mode: "insensitive" as const } },
       ] } : {}),
     },
     select: {
       id: true,
+      serviceNo: true,
       title: true,
       description: true,
       price: true,
@@ -83,7 +85,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
           <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
             <div className="text-4xl">✦</div>
             <h2 className="mt-4 text-xl font-black text-[#14213d]">
-              {searchTerm ? `لم نعثر على خدمة باسم أو وصف يحتوي على «${searchTerm}».` : "لا توجد خدمات متاحة حاليًا"}
+              {searchTerm ? `لم نعثر على خدمة برقمها أو باسمها أو وصفها يحتوي على «${searchTerm}».` : "لا توجد خدمات متاحة حاليًا"}
             </h2>
             <p className="mt-3 text-gray-500">
               {searchTerm ? "جرّب كلمات بحث أخرى مثل صنع فيديو أو تصميم شعار." : "نعمل على إضافة خدمات جديدة قريبًا."}
@@ -108,9 +110,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
 
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-lg font-black text-[#14213d]">
-                      {service.title}
-                    </h2>
+                    <div className="min-w-0"><h2 className="text-lg font-black text-[#14213d]">{service.title}</h2><p className="mt-1 text-xs font-semibold text-slate-400">رقم الخدمة: {service.serviceNo}</p></div>
 
                   </div>
 
