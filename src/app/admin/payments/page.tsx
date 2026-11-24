@@ -19,9 +19,9 @@ const aiReceiptLabels: Record<string, string> = {
   UNCLEAR: "النتيجة غير واضحة — مراجعة يدوية",
 };
 const paymentMethods: Record<string, string> = {
-  INSTAPAY: "InstaPay",
+  INSTAPAY: "إنستاباي",
   E_AND_MONEY: "e& money",
-  ETISALAT_CASH: "Etisalat Cash",
+  ETISALAT_CASH: "اتصالات كاش",
   OTHER: "وسيلة أخرى",
 };
 
