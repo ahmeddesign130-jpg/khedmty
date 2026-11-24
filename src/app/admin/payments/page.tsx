@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createStorageDownload, storageReady } from "@/lib/storage";
+import PaymentReviewForm from "./PaymentReviewForm";
 
 export const dynamic = "force-dynamic";
 
@@ -27,16 +28,30 @@ async function reviewPayment(formData: FormData) {
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   const reviewNote = String(formData.get("reviewNote") || "").trim();
+  const transferReference = String(formData.get("transferReference") || "").trim();
+  const rawTransferDate = String(formData.get("transferDate") || "").trim();
+  const transferDate = rawTransferDate ? new Date(rawTransferDate) : null;
 
-  if (!id || !["APPROVED", "REJECTED"].includes(status) || reviewNote.length > 1000) redirect("/admin/payments?review=invalid");
+  if (
+    !id ||
+    !["APPROVED", "REJECTED"].includes(status) ||
+    reviewNote.length > 1000 ||
+    transferReference.length > 120 ||
+    (transferDate && Number.isNaN(transferDate.getTime())) ||
+    (status === "REJECTED" && !reviewNote)
+  ) return;
 
   const payment = await prisma.payment.findUnique({
     where: { id },
     include: { order: true },
   });
 
-  if (!payment || payment.status !== "PENDING_REVIEW") redirect("/admin/payments?review=not_found");
-  if (status === "APPROVED" && (payment.order.status !== "PAYMENT_REVIEW" || payment.amount !== payment.order.total)) redirect("/admin/payments?review=amount_mismatch");
+  if (
+    !payment ||
+    payment.status !== "PENDING_REVIEW" ||
+    payment.order.status !== "PAYMENT_REVIEW" ||
+    payment.amount !== payment.order.total
+  ) return;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -47,6 +62,8 @@ async function reviewPayment(formData: FormData) {
           status: status as "APPROVED" | "REJECTED",
           reviewNote: reviewNote || null,
           reviewedAt: new Date(),
+          transferReference: transferReference || null,
+          transferDate,
         },
       });
 
@@ -56,7 +73,19 @@ async function reviewPayment(formData: FormData) {
         where: { id: payment.orderId, status: "PAYMENT_REVIEW" },
         data: { status: status === "APPROVED" ? "PAID" : "PENDING_PAYMENT" },
       });
-      if (status === "APPROVED" && orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
+
+      if (orderUpdate.count !== 1) throw new Error("PAYMENT_REVIEW_CONFLICT");
+
+      await tx.notification.create({
+        data: {
+          userId: payment.order.customerId,
+          title: status === "APPROVED" ? "تم اعتماد الدفع" : "تم رفض إثبات الدفع",
+          body: status === "APPROVED"
+            ? `تم تأكيد استلام مبلغ الطلب ${payment.order.orderNo}. يمكنك متابعة حالة الطلب من حسابك.`
+            : `تم رفض إثبات الدفع للطلب ${payment.order.orderNo}. السبب: ${reviewNote}`,
+          href: `/orders/${payment.orderId}`,
+        },
+      });
 
       await tx.auditLog.create({
         data: {
@@ -68,18 +97,16 @@ async function reviewPayment(formData: FormData) {
       });
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "PAYMENT_REVIEW_CONFLICT") redirect("/admin/payments?review=conflict");
+    if (error instanceof Error && error.message === "PAYMENT_REVIEW_CONFLICT") return;
     throw error;
   }
 
   revalidatePath("/admin/payments");
   revalidatePath("/admin/orders");
   revalidatePath(`/orders/${payment.orderId}`);
-  redirect(status === "APPROVED" ? "/admin/payments?review=approved" : "/admin/payments?review=rejected");
 }
 
-export default async function AdminPaymentsPage({ searchParams }: { searchParams: Promise<{ review?: string }> }) {
-  const params = await searchParams;
+export default async function AdminPaymentsPage() {
   const user = await getCurrentUser();
   if (!user || user.role !== "SUPER_ADMIN") redirect("/login");
 
@@ -113,12 +140,6 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
         </a>
         <h1 className="text-3xl font-black text-slate-900">إدارة المدفوعات</h1>
         <p className="mb-8 mt-2 text-slate-500">راجع الإيصال والمبلغ قبل اعتماد الدفع.</p>
-        {params.review === "approved" && <p role="status" className="mb-5 rounded-xl bg-green-50 p-4 font-bold text-green-800">تم تأكيد استلام التحويل وتحديث حالة الطلب.</p>}
-        {params.review === "rejected" && <p role="status" className="mb-5 rounded-xl bg-amber-50 p-4 font-bold text-amber-900">تم رفض الإيصال وإعادة الطلب لانتظار الدفع.</p>}
-        {params.review === "amount_mismatch" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">لم يتم قبول التحويل: المبلغ لا يطابق إجمالي الطلب أو أن الطلب لم يعد في انتظار مراجعة الدفع.</p>}
-        {params.review === "not_found" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">عملية الدفع غير موجودة أو تمت مراجعتها بالفعل.</p>}
-        {params.review === "conflict" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">تم تحديث عملية الدفع من مسؤول آخر. حدّث الصفحة.</p>}
-        {params.review === "invalid" && <p role="alert" className="mb-5 rounded-xl bg-red-50 p-4 font-bold text-red-800">بيانات المراجعة غير صحيحة.</p>}
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
           <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -200,6 +221,8 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                   </p>
                 ) : null}
 
+                {payment.transferReference && <p className="mt-3 text-sm text-slate-600">الرقم المرجعي الذي راجعته الإدارة: <strong dir="ltr">{payment.transferReference}</strong></p>}
+                {payment.transferDate && <p className="mt-1 text-sm text-slate-600">تاريخ التحويل الذي راجعته الإدارة: {payment.transferDate.toLocaleString("en-GB")}</p>}
                 {payment.reviewNote && (
                   <p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm">
                     ملاحظة الإدارة: {payment.reviewNote}
@@ -207,21 +230,7 @@ export default async function AdminPaymentsPage({ searchParams }: { searchParams
                 )}
 
                 {payment.status === "PENDING_REVIEW" && (
-                  <form action={reviewPayment} className="mt-5 space-y-3">
-                    <input type="hidden" name="id" value={payment.id} />
-                    <label className="block text-sm font-bold">
-                      ملاحظة أو سبب الرفض
-                      <textarea name="reviewNote" rows={2} maxLength={1000} className="mt-2 w-full rounded-xl border p-3" />
-                    </label>
-                    <div className="flex flex-wrap gap-3">
-                      <button name="status" value="APPROVED" className="rounded-xl bg-green-600 px-5 py-3 font-bold text-white">
-                        تأكيد استلام المبلغ
-                      </button>
-                      <button name="status" value="REJECTED" formNoValidate className="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">
-                        رفض الإيصال
-                      </button>
-                    </div>
-                  </form>
+                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} />
                 )}
 
                 <p className="mt-4 text-xs text-slate-400">
