@@ -190,6 +190,7 @@ export default async function ServiceDetailsPage({
               {query.error === "contact" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">اكتب وسيلة تواصل صحيحة قبل إنشاء الطلب.</p>}
               {query.error === "capacity" && <p role="alert" className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">اكتملت الأماكن المتاحة لطلباتك. أكمل طلبًا جاريًا أولًا حتى يتوفر مكان جديد.</p>}
               <form action={createOrder}>
+                {service.requirements.map((item, index) => <label key={item} className="mb-4 block text-sm font-bold text-slate-700">{item}<textarea name={`requirement_${index}`} required minLength={2} maxLength={1500} rows={3} placeholder="اكتب التفاصيل المطلوبة هنا" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" /></label>)}
                 <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
                   <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
                 </label>
