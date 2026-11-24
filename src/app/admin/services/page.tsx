@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateOrderPricing } from "@/lib/pricing.mjs";
 
 export default async function AdminServicesPage() {
   const admin = await getCurrentUser();
@@ -66,7 +67,7 @@ export default async function AdminServicesPage() {
     revalidatePath("/services");
   }
 
-  const services = await prisma.service.findMany({
+  const [services, settings] = await Promise.all([prisma.service.findMany({
     where: { status: "PENDING_REVIEW" },
     select: {
       id: true,
@@ -84,7 +85,8 @@ export default async function AdminServicesPage() {
       },
     },
     orderBy: { createdAt: "asc" },
-  });
+  }), prisma.platformSettings.findUnique({ where: { id: "main" }, select: { commissionRate: true } })]);
+  const commissionRate = Number.isInteger(settings?.commissionRate) && (settings?.commissionRate ?? -1) >= 0 && (settings?.commissionRate ?? 101) <= 50 ? settings!.commissionRate : 20;
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f6f8]">
@@ -121,8 +123,10 @@ export default async function AdminServicesPage() {
           </div>
         ) : (
           <div className="mt-6 grid gap-5">
-            {services.map((service) => (
-              <article key={service.id} className="rounded-2xl bg-white p-6 shadow-sm">
+            {services.map((service) => {
+              const suggestedFinalPrice = Math.ceil((service.price * 100) / (100 - commissionRate));
+              const suggestedSplit = calculateOrderPricing(suggestedFinalPrice, commissionRate);
+              return <article key={service.id} className="rounded-2xl bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-xl font-black text-[#14213d]">
                     {service.title}
@@ -141,6 +145,10 @@ export default async function AdminServicesPage() {
                   <p>مقدم الخدمة: {service.provider.displayName}</p>
                   <p>البريد: {service.provider.email}</p>
                   <p>السعر المقترح من مقدم الخدمة: {service.price.toLocaleString("en-US")} EG</p>
+                  <p>العمولة الحالية: {commissionRate}%</p>
+                  <p>السعر النهائي المقترح: {suggestedFinalPrice.toLocaleString("en-US")} EG</p>
+                  <p>صافي مقدم الخدمة المتوقع: {suggestedSplit.providerNet.toLocaleString("en-US")} EG</p>
+                  <p>حصة خِدمتي المتوقعة: {suggestedSplit.commission.toLocaleString("en-US")} EG</p>
                   <p>
                     تاريخ الإضافة: {service.createdAt.toLocaleDateString("en-GB")}
                   </p>
@@ -160,7 +168,7 @@ export default async function AdminServicesPage() {
                       max="100000000"
                       step="1"
                       required
-                      defaultValue={service.price}
+                      defaultValue={suggestedFinalPrice}
                       className="mb-4 w-full rounded-xl border border-gray-300 p-3 outline-none focus:border-orange-500"
                     />
                     <label className="mb-2 block font-bold">
@@ -194,8 +202,8 @@ export default async function AdminServicesPage() {
                     </button>
                   </div>
                 </form>
-              </article>
-            ))}
+              </article>;
+            })}
           </div>
         )}
       </section>
