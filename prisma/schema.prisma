@@ -81,6 +81,7 @@ model Order {
   serviceId String
   customerId String
   customerContact String? @db.Text
+  requirementsAnswers String? @db.Text
   providerId String
   servicePrice Int
   commissionRate Int @default(20)
