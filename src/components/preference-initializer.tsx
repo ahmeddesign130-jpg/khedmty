@@ -431,7 +431,6 @@ const translations: Record<string, string> = {
   "اعثر على الخدمة": "Find a service",
   "كل طلباتك في مكان واحد: تابع التنفيذ، راجع الدفع، واعرف الخطوة الجاية.": "All your orders in one place: track progress, review payment, and see what's next.",
   "لسه ما طلبتش خدمة؟ ابدأ باكتشاف الخدمات المناسبة ليك.": "Haven't ordered a service yet? Explore options that fit your needs.",
-,
   "لغة الموقع": "Website language",
   "غيّر اللغة وسيتم تطبيقها على واجهة الموقع وحفظ اختيارك.": "Change the language across the website interface and save your choice.",
   "الخط العربي": "Arabic font",
