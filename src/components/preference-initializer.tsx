@@ -9,6 +9,7 @@ const translations: Record<string, string> = {
   "منصة خِدمتي للخدمات المستقلة": "Khedmty Freelance Services Marketplace",
   "إنشاء حساب جديد": "Create a new account",
   "تسجيل الدخول": "Log in",
+  "تسجيل": "Log in",
   "سجّل دخولك للوصول إلى حسابك ومتابعة طلباتك.": "Log in to access your account and track your orders.",
   "المتابعة باستخدام Google": "Continue with Google",
   "أو بالبريد الإلكتروني": "Or continue with email",
@@ -28,11 +29,11 @@ const translations: Record<string, string> = {
   "حسابك حاليًا في انتظار مراجعة وموافقة إدارة المنصة.": "Your account is awaiting review and approval by the platform team.",
   "سنتمكن من إتاحة لوحة مقدم الخدمة بعد الموافقة.": "Your provider dashboard will be available after approval.",
   "لا تحتاج إلى إنشاء حساب جديد. انتظر حتى تنتهي الإدارة من مراجعة حسابك.": "You do not need to create another account. Please wait for the team to review your account.",
-  "لوحة التحكم": "Dashboard",
+  "لوحة التحكم": "Control center",
   "الرئيسية": "Home",
   "الإعدادات": "Settings",
   "خدماتي": "My services",
-  "لوحة الإدارة": "Admin dashboard",
+  "لوحة الإدارة": "Admin center",
   "المدفوعات": "Payments",
   "القائمة الرئيسية": "Main menu",
   "فتح قائمة خِدمتي": "Open Khedmty menu",
@@ -68,6 +69,7 @@ const translations: Record<string, string> = {
   "من 5": "of 5",
   "لسه مفيش طلبات": "No orders yet",
   "تصفح الخدمات": "Browse services",
+  "اكتشف الخدمات": "Explore services",
   "الإجمالي": "Total",
   "تابع حالة مشترياتك والمدفوعات وتفاصيل كل طلب.": "Track your purchases, payments, and order details.",
   "مرحبًا بك في خِدمتي": "Welcome to Khedmty",
@@ -137,7 +139,7 @@ const translations: Record<string, string> = {
   "استكشف الخدمات": "Explore services",
   "عرض الطلبات": "View orders",
   "أهلاً بك في خِدمتي": "Welcome to Khedmty",
-  "أدر خدماتك وتابع طلبات العملاء ومراحل تنفيذها من لوحة واحدة.": "Manage your services and track customer orders and delivery from one dashboard.",
+  "أدر خدماتك وتابع طلبات العملاء ومراحل تنفيذها من لوحة واحدة.": "Manage your services and track customer orders and delivery from one management center.",
   "إضافة خدمة جديدة وتعديل خدماتك ومتابعة مراجعة الإدارة.": "Add new services, edit your listings, and track admin reviews.",
   "متابعة الطلبات الجديدة وحالة التنفيذ والتسليم.": "Track new orders, progress, and delivery.",
   "إدارة الخدمات": "Manage services",
@@ -422,7 +424,7 @@ const translations: Record<string, string> = {
   "تابع مشترياتك ومدفوعاتك، واوصل للخدمة اللي تناسب احتياجك من حساب واحد.": "Track purchases and payments, and find the service that fits your needs — all from one account.",
   "دوّر على الخدمة باسمها أو نوعها، وقارن التفاصيل قبل ما تختار.": "Search by service name or category, then compare the details before choosing.",
   "اعرف كل طلب وصل لفين، وراجع تفاصيله ومدفوعاته في أي وقت.": "See where every order stands and review its details and payments anytime.",
-  "راجع الحسابات والخدمات، وتابع الطلبات والمدفوعات، وخلي تشغيل المنصة واضح من لوحة واحدة.": "Review accounts and services, track orders and payments, and keep platform operations clear from one dashboard.",
+  "راجع الحسابات والخدمات، وتابع الطلبات والمدفوعات، وخلي تشغيل المنصة واضح من لوحة واحدة.": "Review accounts and services, track orders and payments, and keep platform operations clear from one management center.",
   "حوّل مهارتك لخدمة واضحة، وتابع طلبات العملاء والتنفيذ والتسليم من مكان واحد.": "Turn your skills into a clear service offering, then manage customer orders, progress, and delivery in one place.",
   "جهّز عرضك، حدّث تفاصيله، وتابع قرار المراجعة أولًا بأول.": "Build your listing, update its details, and keep track of its review status.",
   "اعرف الطلبات الجديدة، ونظّم شغلك، وتابع كل مرحلة لحد التسليم.": "See new orders, organize your work, and track every stage through delivery.",
@@ -431,7 +433,35 @@ const translations: Record<string, string> = {
   "اعثر على الخدمة": "Find a service",
   "كل طلباتك في مكان واحد: تابع التنفيذ، راجع الدفع، واعرف الخطوة الجاية.": "All your orders in one place: track progress, review payment, and see what's next.",
   "لسه ما طلبتش خدمة؟ ابدأ باكتشاف الخدمات المناسبة ليك.": "Haven't ordered a service yet? Explore options that fit your needs.",
-
+  "غيّر اللغة وسيتم تطبيقها على واجهة الموقع وحفظ اختيارك.": "Change the language across the website interface and save your choice.",
+  "الخط العربي": "Arabic font",
+  "اختر من 15 خطًا، ويتغير الخط على صفحات الموقع كلها.": "Choose from 15 fonts applied throughout the website.",
+  "معاينة: خِدمتي — مهارتك تستحق التميز": "Preview: Khedmty — Your skills deserve excellence",
+  "ألوان الموقع": "Website colors",
+  "7 لوحات ألوان متناسقة، ويمكنك تغيير اللون الأساسي في أي وقت.": "7 coordinated color palettes. Change the accent color at any time.",
+  "برتقالي": "Orange",
+  "أزرق": "Blue",
+  "أخضر": "Green",
+  "بنفسجي": "Purple",
+  "وردي": "Rose",
+  "فيروزي": "Teal",
+  "ذهبي": "Gold",
+  "المظهر": "Appearance",
+  "Alexandria": "Alexandria",
+  "Cairo": "Cairo",
+  "Tajawal": "Tajawal",
+  "IBM Plex Sans Arabic": "IBM Plex Sans Arabic",
+  "Noto Sans Arabic": "Noto Sans Arabic",
+  "Noto Kufi Arabic": "Noto Kufi Arabic",
+  "Almarai": "Almarai",
+  "Readex Pro": "Readex Pro",
+  "Changa": "Changa",
+  "El Messiri": "El Messiri",
+  "Amiri": "Amiri",
+  "Mada": "Mada",
+  "Harmattan": "Harmattan",
+  "Reem Kufi": "Reem Kufi",
+  "Baloo Bhaijaan 2": "Baloo Bhaijaan 2",
 };
 
 function translateText(value: string) {
@@ -498,22 +528,27 @@ function translateDocument(locale: "ar" | "en") {
 export function PreferenceInitializer({ userId }: { userId: string }) {
   useEffect(() => {
     let locale: "ar" | "en" = "ar";
-    try {
-      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string };
-      locale = saved.locale === "en" ? "en" : "ar";
-    } catch {}
     const root = document.documentElement;
+    try {
+      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string; palette?: string; font?: string };
+      locale = saved.locale === "en" ? "en" : "ar";
+      root.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+      root.dataset.palette = saved.palette || "orange";
+      root.dataset.font = saved.font || "alexandria";
+    } catch {}
     const apply = () => {
       root.lang = locale;
       root.dir = locale === "en" ? "ltr" : "rtl";
       root.dataset.locale = locale;
-      root.dataset.theme = "light";
       translateDocument(locale);
     };
     const refresh = () => {
       try {
-        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string };
+        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string; palette?: string; font?: string };
         locale = saved.locale === "en" ? "en" : "ar";
+        root.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+        root.dataset.palette = saved.palette || "orange";
+        root.dataset.font = saved.font || "alexandria";
       } catch {}
       apply();
     };

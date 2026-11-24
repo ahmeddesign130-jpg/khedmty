@@ -105,7 +105,13 @@ async function main() {
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Notification_userId_createdAt_idx" ON "Notification"("userId", "createdAt")');
 
 
-  console.log("Khedmty email-auth, payment-review and delivery schema compatibility check completed.");
+  // Additive marketplace taxonomy and order requirement answers.
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "category" TEXT NOT NULL DEFAULT 'أخرى', ADD COLUMN IF NOT EXISTS "subcategory" TEXT NOT NULL DEFAULT 'عام', ADD COLUMN IF NOT EXISTS "requirements" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`);
+  await prisma.$executeRawUnsafe('ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "requirementsAnswers" TEXT');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Service_status_category_subcategory_idx" ON "Service"("status", "category", "subcategory")');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Service_status_price_idx" ON "Service"("status", "price")');
+
+  console.log("Khedmty marketplace taxonomy and requirements schema compatibility check completed.");
 }
 
 main()

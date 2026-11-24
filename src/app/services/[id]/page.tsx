@@ -36,6 +36,8 @@ export default async function ServiceDetailsPage({
     notFound();
   }
 
+  const serviceRequirements = service.requirements;
+
   async function createOrder(formData: FormData) {
     "use server";
 
@@ -51,6 +53,9 @@ export default async function ServiceDetailsPage({
     if (customerContact.length < 5 || customerContact.length > 160) {
       redirect(`/services/${id}?error=contact`);
     }
+
+    const requirementAnswers = serviceRequirements.map((question, index) => ({ question, answer: String(formData.get(`requirement_${index}`) || "").trim() }));
+    if (requirementAnswers.some((item) => item.answer.length < 2 || item.answer.length > 1500)) redirect(`/services/${id}?error=requirements`);
 
     let orderId: string;
 
@@ -98,6 +103,7 @@ export default async function ServiceDetailsPage({
             serviceId: currentService.id,
             customerId: user.id,
             customerContact,
+            requirementsAnswers: requirementAnswers.length ? JSON.stringify(requirementAnswers) : null,
             providerId: currentService.providerId,
             ...pricing,
             status: "PENDING_PAYMENT",
@@ -163,6 +169,7 @@ export default async function ServiceDetailsPage({
               </p>
             </div>
 
+            {service.requirements.length > 0 && <div className="mt-6 rounded-2xl border border-orange-100 bg-orange-50/50 p-5"><h2 className="font-black text-[#14213d]">المعلومات المطلوبة لتنفيذ الخدمة</h2><ul className="mt-3 list-inside list-disc space-y-2 text-sm leading-7 text-slate-600">{service.requirements.map((item) => <li key={item}>{item}</li>)}</ul></div>}
             <div className="mt-6 rounded-2xl border border-slate-100 p-5"><p className="text-sm text-slate-500">مقدم الخدمة</p><p className="mt-2 text-lg font-black text-[#14213d]">{service.provider.displayName}</p></div>
 
             <div className="mt-6 rounded-2xl bg-[#14213d] p-6 text-white">
@@ -181,9 +188,11 @@ export default async function ServiceDetailsPage({
                 </div>
               </div>
 
+              {query.error === "requirements" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">جاوب عن كل المتطلبات المطلوبة قبل إنشاء الطلب.</p>}
               {query.error === "contact" && <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">اكتب وسيلة تواصل صحيحة قبل إنشاء الطلب.</p>}
               {query.error === "capacity" && <p role="alert" className="mb-4 rounded-xl bg-orange-50 p-3 text-sm font-bold text-orange-800">اكتملت الأماكن المتاحة لطلباتك. أكمل طلبًا جاريًا أولًا حتى يتوفر مكان جديد.</p>}
               <form action={createOrder}>
+                {service.requirements.map((item, index) => <label key={item} className="mb-4 block text-sm font-bold text-slate-700">{item}<textarea name={`requirement_${index}`} required minLength={2} maxLength={1500} rows={3} placeholder="اكتب التفاصيل المطلوبة هنا" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" /></label>)}
                 <label className="mb-5 block text-sm font-bold text-slate-700">طريقة التواصل معك (هاتف أو واتساب أو بريد إلكتروني)
                   <input name="customerContact" required minLength={5} maxLength={160} placeholder="اكتب رقمك أو بريدك للتواصل" className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3" dir="auto" />
                 </label>

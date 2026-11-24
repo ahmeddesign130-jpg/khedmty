@@ -101,6 +101,9 @@ model Service {
   serviceNo   String        @unique
   title       String
   description String
+  category    String        @default("أخرى")
+  subcategory String        @default("عام")
+  requirements String[]     @default([])
   price       Int
   mediaUrls   String[]      @default([])
   reviewNote  String?       @db.Text
@@ -109,6 +112,9 @@ model Service {
   provider    User          @relation("ProviderServices", fields: [providerId], references: [id])
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@index([status, category, subcategory])
+  @@index([status, price])
 }
 
 model Order {
@@ -117,6 +123,7 @@ model Order {
   serviceId       String
   customerId      String
   customerContact String?     @db.Text
+  requirementsAnswers String? @db.Text
   providerId      String
   servicePrice    Int
   commissionRate  Int         @default(20)

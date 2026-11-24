@@ -34,7 +34,7 @@ export default async function PendingPage() {
       <h1 className="mt-6 text-center text-2xl font-black text-[#14213d]">{isPending ? "تم تأكيد بياناتك وإرسال الطلب" : "الخطوة 3: بيانات مقدم الخدمة"}</h1>
       <p className="mt-3 text-center leading-8 text-slate-600">{isPending ? "وصل طلبك بنجاح. لا تحتاج إلى تسجيل الدخول مرة أخرى أو إنشاء حساب جديد. الأدمن سيراجع بياناتك ويقرر قبولك أو رفضك، وسيظل حساب مقدم الخدمة غير مفعّل حتى صدور القرار." : "أكمل بياناتك هنا مباشرة بعد تأكيد كود البريد، دون تسجيل دخول مرة ثانية. بعد تأكيد البيانات تُرسل للأدمن للمراجعة، ولن يتم تفعيل حساب مقدم الخدمة إلا بعد موافقته."}</p>
       {rejection && <div role="alert" className="mt-5 rounded-xl bg-red-50 p-4 text-sm leading-7 text-red-800"><b>تم رفض الطلب السابق.</b><p>سبب الرفض: {rejection}</p></div>}
-      {isPending ? <div className="mt-6 rounded-xl bg-amber-50 p-4 text-center font-bold text-amber-900">تم استلام طلبك. انتظر قرار الأدمن؛ لن تظهر بياناتك الشخصية أو صور بطاقتك للعملاء.</div> : <ProviderVerificationForm/>}
+      {isPending ? <div className="mt-6 rounded-xl bg-amber-50 p-4 text-center font-bold text-amber-900">تم استلام طلبك. انتظر قرار الأدمن؛ نماذج أعمالك لا تظهر للعملاء أثناء المراجعة.</div> : <ProviderVerificationForm/>}
       <div className="mt-7 text-center"><Link href="/" className="font-bold text-orange-600">العودة إلى الرئيسية</Link></div>
     </section>
   </main>;

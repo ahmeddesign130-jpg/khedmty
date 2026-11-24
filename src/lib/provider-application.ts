@@ -1,15 +1,11 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 
-function deriveKey(secret: string) {
-  return createHash("sha256").update(secret).digest();
-}
-
+function deriveKey(secret: string) { return createHash("sha256").update(secret).digest(); }
 function activeKey() {
   const secret = process.env.PII_ENCRYPTION_KEY || process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) throw new Error("PII_ENCRYPTION_KEY or AUTH_SECRET must be configured.");
   return deriveKey(secret);
 }
-
 function legacyKey() {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) throw new Error("AUTH_SECRET must be configured.");
@@ -23,6 +19,7 @@ export type ProviderApplicationData = {
   profession: string;
   experience: string;
   bio: string;
+  portfolioPaths?: string[];
   dateOfBirth?: string;
   idFrontPath?: string;
   idBackPath?: string;
@@ -46,20 +43,16 @@ function decryptWithKey(value: string, encryptionKey: Buffer): ProviderApplicati
     decipher.setAuthTag(tag);
     const plain = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString("utf8");
     const data = JSON.parse(plain) as ProviderApplicationData;
-    return data && typeof data.nationalId === "string" ? data : null;
-  } catch {
-    return null;
-  }
+    return data && typeof data.fullName === "string" && typeof data.phone === "string" &&
+      typeof data.profession === "string" && typeof data.bio === "string" ? data : null;
+  } catch { return null; }
 }
 
 export function decryptProviderApplication(value: string): ProviderApplicationData | null {
   try {
     const current = decryptWithKey(value, activeKey());
     if (current) return current;
-    // Keep existing applications readable after introducing the dedicated PII key.
     if (process.env.PII_ENCRYPTION_KEY) return decryptWithKey(value, legacyKey());
     return null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }

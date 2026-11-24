@@ -60,19 +60,22 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}");
+      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}");
       const nextLocale: Locale = saved.locale === "en" ? "en" : "ar";
       setLocale(nextLocale);
       document.documentElement.lang = nextLocale;
       document.documentElement.dir = nextLocale === "ar" ? "rtl" : "ltr";
       document.documentElement.dataset.locale = nextLocale;
-      document.documentElement.dataset.theme = "light";
+      document.documentElement.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+      document.documentElement.dataset.palette = saved.palette || "orange";
+      document.documentElement.dataset.font = saved.font || "alexandria";
     } catch {}
   }, [userId]);
 
   function savePreferences(nextLocale: Locale) {
     setLocale(nextLocale);
-    const value = JSON.stringify({ locale: nextLocale, theme: "light" });
+    const previous = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}");
+    const value = JSON.stringify({ ...previous, locale: nextLocale });
     try {
       localStorage.setItem("khedmty-preferences-" + userId, value);
       localStorage.setItem("khedmty-public-preferences", value);
@@ -80,7 +83,10 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
     document.documentElement.lang = nextLocale;
     document.documentElement.dir = nextLocale === "ar" ? "rtl" : "ltr";
     document.documentElement.dataset.locale = nextLocale;
-    document.documentElement.dataset.theme = "light";
+    const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}");
+    document.documentElement.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.palette = saved.palette || "orange";
+    document.documentElement.dataset.font = saved.font || "alexandria";
     window.dispatchEvent(new Event("khedmty-preferences-change"));
   }
 
