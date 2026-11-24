@@ -66,7 +66,7 @@ async function main() {
   await prisma.$executeRawUnsafe('ALTER TYPE "OrderStatus" ADD VALUE IF NOT EXISTS \'DELIVERY_REVIEW\'');
 
   // Additive payment-review metadata; safe to run repeatedly on every build.
-  await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "transferReference" TEXT, ADD COLUMN IF NOT EXISTS "transferDate" TIMESTAMP(3)');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "transferReference" TEXT, ADD COLUMN IF NOT EXISTS "transferDate" TIMESTAMP(3), ADD COLUMN IF NOT EXISTS "aiReceiptStatus" TEXT, ADD COLUMN IF NOT EXISTS "aiReceiptAmount" INTEGER, ADD COLUMN IF NOT EXISTS "aiReceiptConfidence" INTEGER, ADD COLUMN IF NOT EXISTS "aiReceiptNotes" TEXT, ADD COLUMN IF NOT EXISTS "aiReceiptCheckedAt" TIMESTAMP(3)');
 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "OrderDeliveryFile" (
