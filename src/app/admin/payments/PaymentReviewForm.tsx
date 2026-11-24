@@ -2,26 +2,14 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-type AIAnalysis = {
-  status: string | null;
-  amount: number | null;
-  confidence: number | null;
-  notes: string | null;
-  checkedAt: string | null;
-};
-type Props = {
-  paymentId: string;
-  action: (formData: FormData) => void | Promise<void>;
-  aiAnalysis: AIAnalysis;
-  hasReceipt: boolean;
-};
+type Props = { paymentId: string; action: (formData: FormData) => void | Promise<void>; hasReceipt: boolean; };
 const aiLabels: Record<string, string> = {
   MATCH: "المبلغ الظاهر مطابق مبدئياً",
   MISMATCH: "المبلغ الظاهر لا يطابق المطلوب",
   NOT_RECEIPT: "الصورة لا تبدو إيصال تحويل",
   UNCLEAR: "النتيجة غير واضحة — مراجعة يدوية",
 };
-export default function PaymentReviewForm({ paymentId, action, aiAnalysis, hasReceipt }: Props) {
+export default function PaymentReviewForm({ paymentId, action, hasReceipt }: Props) {
   const router = useRouter();
   const [aiBusy, setAiBusy] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
@@ -64,12 +52,6 @@ export default function PaymentReviewForm({ paymentId, action, aiAnalysis, hasRe
         <div><h3 className="font-black text-slate-900">فحص الإيصال بالذكاء الاصطناعي</h3><p className="mt-1 text-xs leading-6 text-slate-600">يقرأ المبلغ والعملة والرقم المرجعي الظاهرين في الصورة. لا يتحقق من وصول التحويل فعلياً ولا يعتمد الدفع تلقائياً.</p></div>
         <button type="button" onClick={analyzeReceipt} disabled={aiBusy || !hasReceipt} className="rounded-xl bg-violet-700 px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{aiBusy ? "جاري التحليل..." : "تحليل الإيصال"}</button>
       </div>
-      {aiAnalysis.status && <div className="mt-3 rounded-lg bg-white p-3 text-sm">
-        <p className="font-black text-slate-900">{aiLabels[aiAnalysis.status] || aiAnalysis.status}</p>
-        <p className="mt-1 text-slate-600">المبلغ المقروء: {aiAnalysis.amount ?? "غير واضح"} EG — مستوى الثقة: {aiAnalysis.confidence ?? 0}%</p>
-        {aiAnalysis.notes && <p className="mt-2 leading-6 text-slate-600">{aiAnalysis.notes}</p>}
-        {aiAnalysis.checkedAt && <p className="mt-2 text-xs text-slate-400">آخر تحليل: {new Date(aiAnalysis.checkedAt).toLocaleString("en-GB")}</p>}
-      </div>}
       {aiMessage && <p role="status" aria-live="polite" className="mt-3 rounded-lg bg-white p-3 text-sm font-bold text-slate-700">{aiMessage}</p>}
       <p className="mt-2 text-xs text-slate-500">راجع التحويل في محفظة الاستلام بنفسك قبل الضغط على «تأكيد استلام المبلغ».</p>
     </section>
