@@ -90,9 +90,7 @@ export async function POST(request: Request) {
       return created;
     });
 
-    // Service numbers are internal identifiers and are never returned to providers.
-    const { serviceNo: _serviceNo, ...publicService } = service;
-    return NextResponse.json({ success: true, message: "تم إرسال الخدمة إلى الإدارة للمراجعة.", service: publicService }, { status: 201 });
+    return NextResponse.json({ success: true, message: "تم إرسال الخدمة إلى الإدارة للمراجعة.", service }, { status: 201 });
   } catch (error) {
     console.error("CREATE_SERVICE_ERROR:", error);
     return NextResponse.json({ success: false, message: "حدث خطأ أثناء إنشاء الخدمة." }, { status: 500 });
