@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "طلبك قيد المراجعة بالفعل." }, { status: 409 });
     }
     if (!storageReady()) return NextResponse.json({ message: "التخزين غير متاح حالياً. حاول لاحقاً." }, { status: 503 });
-    const portfolioFiles = await Promise.all(portfolioPaths.map(path => createStorageDownload("provider-verification", path, 300)));
+    const portfolioFiles = await Promise.all(portfolioPaths.map((path: string) => createStorageDownload("provider-verification", path, 300)));
     if (portfolioFiles.some(url => !url)) return NextResponse.json({ message: "تعذر العثور على أحد نماذج الأعمال. أعد رفع الملفات." }, { status: 400 });
 
     const encrypted = encryptProviderApplication({
