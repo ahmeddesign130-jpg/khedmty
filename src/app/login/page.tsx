@@ -7,6 +7,7 @@ const errors: Record<string, string> = {
   suspended: "هذا الحساب موقوف. تواصل مع إدارة خِدمتي.",
   server: "حصل خطأ أثناء تسجيل الدخول. حاول مرة أخرى بعد قليل.",
   google_not_configured: "تسجيل Google يحتاج إكمال إعداداته أولًا.",
+  google_disabled: "حساب الإدارة لا يستخدم تسجيل Google. ادخل بالبريد الإلكتروني وكلمة المرور.",
   google_failed: "تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى.",
   google_state: "انتهت جلسة Google أو لم تصل ملفات التحقق. جرّب مرة أخرى.",
   google_config: "إعدادات Google غير مكتملة في نسخة التجربة.",
