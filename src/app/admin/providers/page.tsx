@@ -35,7 +35,7 @@ async function reviewProvider(formData: FormData) {
     redirect("/admin/providers?review=not_found");
   }
   const application = latestRequest.details ? decryptProviderApplication(latestRequest.details) : null;
-  if (!application || !application.fullName || !application.profession || !application.bio || !application.portfolioPaths?.length) {
+  if (!application || !application.fullName || !application.profession || !application.bio) {
     redirect("/admin/providers?review=incomplete");
   }
 
