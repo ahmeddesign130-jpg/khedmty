@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
+import { calculateOrderPricing } from "@/lib/pricing.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -73,14 +74,7 @@ export async function POST(request: Request) {
 
     // The service price is the final customer price approved by the admin.
     // Never accept the price or either share from the browser.
-    const settings = await prisma.platformSettings.findUnique({ where: { id: "main" } });
-    const commissionRate = settings?.commissionRate ?? 20;
-    if (!Number.isInteger(commissionRate) || commissionRate < 0 || commissionRate > 50) {
-      return NextResponse.json({ success: false, message: "إعدادات عمولة المنصة غير صحيحة. راجع الإدارة." }, { status: 503 });
-    }
-    const total = service.price;
-    const commission = Math.round((total * commissionRate) / 100);
-    const providerNet = total - commission;
+    const pricing = calculateOrderPricing(service.price);
 
     const order = await prisma.$transaction(async (tx) => {
       const [completedCount, activeCount] = await Promise.all([
@@ -96,11 +90,7 @@ export async function POST(request: Request) {
           customerId: user.id,
           customerContact: validation.data.customerContact,
           providerId: service.providerId,
-          servicePrice: total,
-          commissionRate,
-          commission,
-          providerNet,
-          total,
+          ...pricing,
           status: "PENDING_PAYMENT",
         },
       });
