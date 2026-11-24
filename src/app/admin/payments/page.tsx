@@ -49,9 +49,9 @@ async function reviewPayment(formData: FormData) {
   if (
     !payment ||
     payment.status !== "PENDING_REVIEW" ||
-    payment.order.status !== "PAYMENT_REVIEW" ||
-    payment.amount !== payment.order.total
+    payment.order.status !== "PAYMENT_REVIEW"
   ) return;
+  if (status === "APPROVED" && payment.amount !== payment.order.total) return;
 
   try {
     await prisma.$transaction(async (tx) => {
