@@ -19,7 +19,7 @@ export default function ProviderVerificationForm() {
   const [dateOfBirth, setDateOfBirth] = useState("");
 
   function handleNationalId(value: string) {
-    const digits = value.replace(/\\D/g, "").slice(0, 14);
+    const digits = value.replace(/\D/g, "").slice(0, 14);
     setNationalId(digits);
     setDateOfBirth("");
     if (digits.length !== 14 || !/[23]/.test(digits[0])) return;
