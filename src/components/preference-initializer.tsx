@@ -499,21 +499,26 @@ export function PreferenceInitializer({ userId }: { userId: string }) {
   useEffect(() => {
     let locale: "ar" | "en" = "ar";
     try {
-      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string };
+      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string; palette?: string; font?: string };
       locale = saved.locale === "en" ? "en" : "ar";
+      root.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+      root.dataset.palette = saved.palette || "orange";
+      root.dataset.font = saved.font || "alexandria";
     } catch {}
     const root = document.documentElement;
     const apply = () => {
       root.lang = locale;
       root.dir = locale === "en" ? "ltr" : "rtl";
       root.dataset.locale = locale;
-      root.dataset.theme = "light";
       translateDocument(locale);
     };
     const refresh = () => {
       try {
-        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string };
+        const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string; palette?: string; font?: string };
         locale = saved.locale === "en" ? "en" : "ar";
+        root.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+        root.dataset.palette = saved.palette || "orange";
+        root.dataset.font = saved.font || "alexandria";
       } catch {}
       apply();
     };
