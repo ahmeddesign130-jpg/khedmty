@@ -431,7 +431,39 @@ const translations: Record<string, string> = {
   "اعثر على الخدمة": "Find a service",
   "كل طلباتك في مكان واحد: تابع التنفيذ، راجع الدفع، واعرف الخطوة الجاية.": "All your orders in one place: track progress, review payment, and see what's next.",
   "لسه ما طلبتش خدمة؟ ابدأ باكتشاف الخدمات المناسبة ليك.": "Haven't ordered a service yet? Explore options that fit your needs.",
-
+,
+  "لغة الموقع": "Website language",
+  "غيّر اللغة وسيتم تطبيقها على واجهة الموقع وحفظ اختيارك.": "Change the language across the website interface and save your choice.",
+  "الخط العربي": "Arabic font",
+  "اختر من 15 خطًا، ويتغير الخط على صفحات الموقع كلها.": "Choose from 15 fonts applied throughout the website.",
+  "معاينة: خِدمتي — مهارتك تستحق التميز": "Preview: Khedmty — Your skills deserve excellence",
+  "ألوان الموقع": "Website colors",
+  "7 لوحات ألوان متناسقة، ويمكنك تغيير اللون الأساسي في أي وقت.": "7 coordinated color palettes. Change the accent color at any time.",
+  "برتقالي": "Orange",
+  "أزرق": "Blue",
+  "أخضر": "Green",
+  "بنفسجي": "Purple",
+  "وردي": "Rose",
+  "فيروزي": "Teal",
+  "ذهبي": "Gold",
+  "المظهر": "Appearance",
+  "فاتح": "Light",
+  "داكن": "Dark",
+  "Alexandria": "Alexandria",
+  "Cairo": "Cairo",
+  "Tajawal": "Tajawal",
+  "IBM Plex Sans Arabic": "IBM Plex Sans Arabic",
+  "Noto Sans Arabic": "Noto Sans Arabic",
+  "Noto Kufi Arabic": "Noto Kufi Arabic",
+  "Almarai": "Almarai",
+  "Readex Pro": "Readex Pro",
+  "Changa": "Changa",
+  "El Messiri": "El Messiri",
+  "Amiri": "Amiri",
+  "Mada": "Mada",
+  "Harmattan": "Harmattan",
+  "Reem Kufi": "Reem Kufi",
+  "Baloo Bhaijaan 2": "Baloo Bhaijaan 2",
 };
 
 function translateText(value: string) {
@@ -498,6 +530,7 @@ function translateDocument(locale: "ar" | "en") {
 export function PreferenceInitializer({ userId }: { userId: string }) {
   useEffect(() => {
     let locale: "ar" | "en" = "ar";
+    const root = document.documentElement;
     try {
       const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}") as { locale?: string; theme?: string; palette?: string; font?: string };
       locale = saved.locale === "en" ? "en" : "ar";
@@ -505,7 +538,6 @@ export function PreferenceInitializer({ userId }: { userId: string }) {
       root.dataset.palette = saved.palette || "orange";
       root.dataset.font = saved.font || "alexandria";
     } catch {}
-    const root = document.documentElement;
     const apply = () => {
       root.lang = locale;
       root.dir = locale === "en" ? "ltr" : "rtl";
