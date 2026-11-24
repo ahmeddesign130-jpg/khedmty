@@ -2,9 +2,10 @@ const transitions = {
   PENDING_PAYMENT: ["PAYMENT_REVIEW", "CANCELLED"],
   PAYMENT_REVIEW: [],
   PAID: ["IN_PROGRESS"],
-  IN_PROGRESS: ["DELIVERED"],
+  IN_PROGRESS: [],
+  DELIVERY_REVIEW: [],
   DELIVERED: ["COMPLETED"],
-  REVISION_REQUESTED: ["IN_PROGRESS", "DELIVERED"],
+  REVISION_REQUESTED: ["IN_PROGRESS"],
   COMPLETED: [],
   CANCELLED: [],
   REJECTED: [],
@@ -12,7 +13,8 @@ const transitions = {
 
 /**
  * Enforces role-specific order transitions.
- * Payment approval is deliberately excluded: only the payment-review flow may mark an order PAID.
+ * Provider delivery is recorded only by the authenticated file-upload endpoint;
+ * this prevents bypassing the admin's delivery review.
  */
 export function canTransitionOrder(from, to, role) {
   if (!transitions[from]?.includes(to)) return false;
@@ -20,7 +22,7 @@ export function canTransitionOrder(from, to, role) {
     return ["CANCELLED", "COMPLETED"].includes(to);
   }
   if (role === "PROVIDER") {
-    return ["IN_PROGRESS", "DELIVERED"].includes(to);
+    return to === "IN_PROGRESS";
   }
   return false;
 }
