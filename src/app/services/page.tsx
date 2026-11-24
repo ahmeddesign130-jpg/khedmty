@@ -130,7 +130,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                   <div className="mt-5 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs text-gray-400">
-                        سعر الخدمة
+                        السعر النهائي للعميل
                       </p>
                       <p className="text-xl font-black text-orange-600">
                         {service.price.toLocaleString("en-US")} EG
