@@ -79,7 +79,7 @@ export default function ProviderVerificationForm() {
       const response = await fetch("/api/provider/verification", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName: form.get("fullName"), phone: form.get("phone"), dateOfBirth,
+          fullName: form.get("fullName"), phone: form.get("phone"), nationalId, dateOfBirth,
           profession: form.get("profession"), experience: form.get("experience"),
           bio: form.get("bio"), portfolioPaths,
         }),
