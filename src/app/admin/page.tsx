@@ -10,12 +10,14 @@ const management = [
   { title: "الطلبات", description: "تابع حالة الطلبات ومراحل تنفيذها بين الطرفين.", href: "/admin/orders", icon: "clipboard-list" as const, action: "فتح الطلبات", tag: "التشغيل" },
   { title: "المدفوعات", description: "راجع إثباتات التحويل وتأكد من المبالغ قبل الاعتماد.", href: "/admin/payments", icon: "wallet" as const, action: "مراجعة المدفوعات", tag: "المعاملات" },
   { title: "إعدادات المنصة", description: "تحكم في العمولة والخيارات الأساسية لخِدمتي.", href: "/admin/settings", icon: "settings" as const, action: "فتح الإعدادات", tag: "التحكم" },
+  { title: "الإشعارات", description: "تابع إشعارات الدفع ومراجعة التسليم وتحديثات الطلبات.", href: "/notifications", icon: "bell" as const, action: "عرض الإشعارات", tag: "التواصل" },
 ];
 
 const shortcuts = [
   { label: "مراجعة الحسابات", href: "/admin/providers", icon: "users" as const },
   { label: "فحص الخدمات", href: "/admin/services", icon: "search" as const },
   { label: "تأكيد التحويلات", href: "/admin/payments", icon: "badge-check" as const },
+  { label: "الإشعارات", href: "/notifications", icon: "bell" as const },
 ];
 
 export default async function AdminPage() {
