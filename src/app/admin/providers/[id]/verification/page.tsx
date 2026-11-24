@@ -37,12 +37,13 @@ export default async function ProviderVerificationReviewPage({ params }: { param
     <section className="mx-auto max-w-4xl">
       <Link href="/admin/providers" className="font-bold text-orange-600">← العودة لمراجعة مقدمي الخدمات</Link>
       <h1 className="mt-5 text-3xl font-black text-[#14213d]">ملف مقدم الخدمة</h1>
-      <p className="mt-2 text-sm leading-7 text-slate-600">مراجعة بيانات الحساب والخبرات ونماذج الأعمال. خِدمتي لا تطلب صورة بطاقة أو رقمًا قوميًا.</p>
+      <p className="mt-2 text-sm leading-7 text-slate-600">مراجعة بيانات الحساب والخبرات ونماذج الأعمال. يظهر تاريخ الميلاد المستخرج تلقائيًا، ولا يتم الاحتفاظ بالرقم القومي الكامل.</p>
       <article className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
         <h2 className="text-xl font-black">{data.fullName || provider.displayName}</h2>
         <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <p><b>البريد الإلكتروني:</b> {provider.email}</p>
           <p><b>رقم الهاتف:</b> <span dir="ltr">{data.phone}</span></p>
+          <p><b>تاريخ الميلاد:</b> {data.dateOfBirth || "غير متاح"}</p>
           <p><b>مجال العمل:</b> {data.profession}</p>
           <p><b>الخبرة:</b> {data.experience || "لم يذكر"}</p>
           <p className="sm:col-span-2"><b>النبذة:</b> {data.bio}</p>
@@ -53,7 +54,7 @@ export default async function ProviderVerificationReviewPage({ params }: { param
         <h2 className="text-xl font-black text-[#14213d]">نماذج الأعمال ({portfolio.length})</h2>
         {portfolio.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {portfolio.map((item,index)=><a key={item.path} href={item.url!} target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 p-4 font-bold text-orange-700 underline">فتح نموذج العمل {index+1}</a>)}
-        </div> : <p className="mt-3 text-sm leading-7 text-slate-600">هذا طلب قديم أُرسل قبل إضافة نماذج الأعمال. يمكنك مراجعة بياناته من هنا؛ لن نطلب مستندات هوية.</p>}
+        </div> : <p className="mt-3 text-sm leading-7 text-slate-600">هذا طلب قديم أُرسل قبل إضافة نماذج الأعمال. يمكنك مراجعة بياناته من هنا.</p>}
       </section>
       <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900">قرار القبول أو الرفض يتم من صفحة مراجعة مقدمي الخدمات. اكتب سبب الرفض عند اختيار الرفض حتى يعرف المتقدم ما الذي يحتاج إلى تعديله.</div>
       <Link href="/admin/providers" className="mt-5 inline-flex rounded-xl bg-orange-500 px-6 py-3 font-black text-white">العودة إلى قائمة الطلبات</Link>
