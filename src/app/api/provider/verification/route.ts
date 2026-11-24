@@ -18,10 +18,14 @@ export async function POST(request: NextRequest) {
     const profession = String(body.profession || "").trim();
     const experience = String(body.experience || "").trim();
     const bio = String(body.bio || "").trim();
+    const dateOfBirth = String(body.dateOfBirth || "").trim();
+    const birthMatch = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(dateOfBirth);
+    const birthDate = birthMatch ? new Date(Number(birthMatch[1]), Number(birthMatch[2]) - 1, Number(birthMatch[3])) : null;
+    const validBirthDate = !!birthMatch && !!birthDate && birthDate.getFullYear() === Number(birthMatch[1]) && birthDate.getMonth() === Number(birthMatch[2]) - 1 && birthDate.getDate() === Number(birthMatch[3]) && birthDate.getTime() < Date.now();
     const portfolioPaths = Array.isArray(body.portfolioPaths) ? body.portfolioPaths.map((p: unknown) => String(p)) : [];
     const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..");
     if (fullName.length < 3 || fullName.length > 100 || !/^01[0125][0-9]{8}$/.test(phone) ||
-        profession.length < 2 || profession.length > 80 || experience.length > 1000 ||
+        !validBirthDate || profession.length < 2 || profession.length > 80 || experience.length > 1000 ||
         bio.length < 30 || bio.length > 1500 || portfolioPaths.length < 1 || portfolioPaths.length > 5 ||
         !portfolioPaths.every(ownedPath) || new Set(portfolioPaths).size !== portfolioPaths.length) {
       return NextResponse.json({ message: "راجع الاسم والهاتف والمجال والنبذة، وارفع من 1 إلى 5 نماذج أعمال." }, { status: 400 });
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (portfolioFiles.some(url => !url)) return NextResponse.json({ message: "تعذر العثور على أحد نماذج الأعمال. أعد رفع الملفات." }, { status: 400 });
 
     const encrypted = encryptProviderApplication({
-      fullName, phone, nationalId: "", profession, experience, bio, portfolioPaths,
+      fullName, phone, nationalId: "", dateOfBirth, profession, experience, bio, portfolioPaths,
     });
     await prisma.auditLog.create({
       data: { actorId: user.id, targetId: user.id, action: "PROVIDER_APPLICATION_SUBMITTED", details: encrypted },
