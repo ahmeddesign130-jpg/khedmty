@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import "./site-preferences.css";
 import { SideNavigation } from "@/components/side-navigation";
 import { PreferenceInitializer } from "@/components/preference-initializer";
 import { getCurrentUser } from "@/lib/auth";
