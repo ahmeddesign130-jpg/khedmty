@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       where: { status: "APPROVED", ...(serviceNo ? { serviceNo: { equals: serviceNo } } : {}) },
       select: {
         id: true,
+        serviceNo: true,
         title: true,
         description: true,
         price: true,
