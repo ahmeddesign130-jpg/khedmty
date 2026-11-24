@@ -50,6 +50,15 @@ export default function PaymentSubmissionForm({ orderId, amount }: { orderId: st
         <h2 className="font-black text-[#14213d]">إرفاق إيصال التحويل</h2>
         <p className="mt-2 text-sm leading-6 text-slate-500">ارفع صورة واضحة يظهر فيها المبلغ وتاريخ التحويل ورقم العملية إن وُجد.</p>
         <label className="mt-4 block text-sm font-bold text-slate-700">
+          وسيلة التحويل
+          <select name="method" value={method} onChange={(event) => setMethod(event.target.value)} className="mt-2 block w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-[#14213d]">
+            <option value="INSTAPAY">InstaPay</option>
+            <option value="E_AND_MONEY">e&amp; money</option>
+            <option value="ETISALAT_CASH">Etisalat Cash</option>
+            <option value="OTHER">وسيلة أخرى</option>
+          </select>
+        </label>
+        <label className="mt-4 block text-sm font-bold text-slate-700">
           صورة الإيصال
           <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setFile(event.target.files?.[0] || null)} required className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm" />
         </label>
