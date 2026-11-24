@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { encryptProviderApplication } from "@/lib/provider-application";
+import { createStorageDownload, storageReady } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,13 @@ export async function POST(request: NextRequest) {
     if (latest?.action === "PROVIDER_APPLICATION_SUBMITTED") {
       return NextResponse.json({ message: "طلبك قيد المراجعة بالفعل." }, { status: 409 });
     }
+    if (!storageReady()) return NextResponse.json({ message: "التخزين غير متاح حالياً. حاول لاحقاً." }, { status: 503 });
+    const [front, back] = await Promise.all([
+      createStorageDownload("provider-verification", idFrontPath),
+      createStorageDownload("provider-verification", idBackPath),
+    ]);
+    if (!front || !back) return NextResponse.json({ message: "تعذر العثور على صور البطاقة المرفوعة. أعد رفع الصورتين." }, { status: 400 });
+
     const encrypted = encryptProviderApplication({ fullName, phone, nationalId, profession, experience, bio, dateOfBirth, idFrontPath, idBackPath });
     await prisma.auditLog.create({
       data: { actorId: user.id, targetId: user.id, action: "PROVIDER_APPLICATION_SUBMITTED", details: encrypted },

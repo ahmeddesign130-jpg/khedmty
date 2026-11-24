@@ -28,3 +28,12 @@ test("terminal orders cannot be reopened", () => {
   assert.equal(canTransitionOrder("COMPLETED", "IN_PROGRESS", "PROVIDER"), false);
   assert.equal(canTransitionOrder("CANCELLED", "PAID", "SUPER_ADMIN"), false);
 });
+
+test("provider cannot mark delivery complete without the delivery review flow", () => {
+  assert.equal(canTransitionOrder("IN_PROGRESS", "DELIVERED", "PROVIDER"), false);
+  assert.equal(canTransitionOrder("REVISION_REQUESTED", "DELIVERED", "PROVIDER"), false);
+  assert.equal(canTransitionOrder("IN_PROGRESS", "DELIVERY_REVIEW", "PROVIDER"), false);
+});
+test("provider can resume work after an admin requests delivery changes", () => {
+  assert.equal(canTransitionOrder("REVISION_REQUESTED", "IN_PROGRESS", "PROVIDER"), true);
+});

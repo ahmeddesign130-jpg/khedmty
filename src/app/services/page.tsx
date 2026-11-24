@@ -18,11 +18,13 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
       status: "APPROVED",
       ...(searchTerm ? { OR: [
         { title: { contains: searchTerm, mode: "insensitive" as const } },
+        { serviceNo: { contains: searchTerm, mode: "insensitive" as const } },
         { description: { contains: searchTerm, mode: "insensitive" as const } },
       ] } : {}),
     },
     select: {
       id: true,
+      serviceNo: true,
       title: true,
       description: true,
       price: true,
@@ -65,8 +67,8 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
           </p>
 
           <form action="/services" method="GET" className="mt-7 flex max-w-2xl flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 sm:flex-row">
-            <label htmlFor="serviceSearch" className="sr-only">اكتب اسم الخدمة أو المجال اللي محتاجه — مثل تصميم أو مونتاج — وهتلاقي الخيارات المتاحة.</label>
-            <input id="serviceSearch" name="q" defaultValue={searchTerm} placeholder="مثال: صنع فيديو، تصميم شعار، كتابة محتوى..." dir="rtl" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-4 py-3 text-right font-semibold text-[#14213d] outline-none placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-300" />
+            <label htmlFor="serviceSearch" className="sr-only">اكتب اسم الخدمة أو رقم الخدمة للعثور عليها بسرعة.</label>
+            <input id="serviceSearch" name="q" defaultValue={searchTerm} placeholder="ابحث باسم الخدمة أو رقمها — مثال: تصميم شعار أو KH-SRV-..." dir="rtl" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-4 py-3 text-right font-semibold text-[#14213d] outline-none placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-300" />
             <button type="submit" className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 font-black text-white shadow-lg transition hover:bg-orange-400">اعثر على الخدمة</button>
             {searchTerm && <Link href="/services" className="inline-flex items-center justify-center rounded-xl border border-white/30 px-4 py-3 font-bold text-white">عرض كل الخدمات</Link>}
           </form>
@@ -83,7 +85,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
           <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
             <div className="text-4xl">✦</div>
             <h2 className="mt-4 text-xl font-black text-[#14213d]">
-              {searchTerm ? `لم نعثر على خدمة باسم أو وصف يحتوي على «${searchTerm}».` : "لا توجد خدمات متاحة حاليًا"}
+              {searchTerm ? `لم نعثر على خدمة برقمها أو باسمها أو وصفها يحتوي على «${searchTerm}».` : "لا توجد خدمات متاحة حاليًا"}
             </h2>
             <p className="mt-3 text-gray-500">
               {searchTerm ? "جرّب كلمات بحث أخرى مثل صنع فيديو أو تصميم شعار." : "نعمل على إضافة خدمات جديدة قريبًا."}
@@ -108,9 +110,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
 
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-lg font-black text-[#14213d]">
-                      {service.title}
-                    </h2>
+                    <div className="min-w-0"><h2 className="text-lg font-black text-[#14213d]">{service.title}</h2><p className="mt-1 text-xs font-semibold text-slate-400">رقم الخدمة: {service.serviceNo}</p></div>
 
                   </div>
 
@@ -130,7 +130,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                   <div className="mt-5 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs text-gray-400">
-                        سعر الخدمة
+                        السعر النهائي للعميل
                       </p>
                       <p className="text-xl font-black text-orange-600">
                         {service.price.toLocaleString("en-US")} EG

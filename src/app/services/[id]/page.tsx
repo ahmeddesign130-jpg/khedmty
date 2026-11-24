@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateOrderPricing } from "@/lib/pricing.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -87,10 +88,7 @@ export default async function ServiceDetailsPage({
           where: { id: "main" },
           select: { commissionRate: true },
         });
-
-        const commissionRate = settings?.commissionRate ?? 100;
-        const servicePrice = currentService.price;
-        const commission = commissionRate;
+        const pricing = calculateOrderPricing(currentService.price, settings?.commissionRate ?? 20);
 
         const order = await tx.order.create({
           data: {
@@ -101,10 +99,7 @@ export default async function ServiceDetailsPage({
             customerId: user.id,
             customerContact,
             providerId: currentService.providerId,
-            servicePrice,
-            commissionRate,
-            commission,
-            total: servicePrice + commission,
+            ...pricing,
             status: "PENDING_PAYMENT",
           },
           select: { id: true },
@@ -125,14 +120,7 @@ export default async function ServiceDetailsPage({
     redirect(`/orders/${orderId}`);
   }
 
-  const commissionRateSetting = await prisma.platformSettings.findUnique({
-    where: { id: "main" },
-    select: { commissionRate: true },
-  });
-
-  const commissionRate = commissionRateSetting?.commissionRate ?? 100;
-  const commission = commissionRate;
-  const total = service.price + commission;
+  const total = service.price;
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f6f8]">
@@ -183,22 +171,6 @@ export default async function ServiceDetailsPage({
               </h2>
 
               <div className="mt-5 space-y-3 text-sm">
-                <div className="flex justify-between gap-3">
-                  <span className="text-slate-300">سعر الخدمة</span>
-                  <span className="font-bold">
-                    {service.price.toLocaleString("en-US")} EG
-                  </span>
-                </div>
-
-                <div className="flex justify-between gap-3">
-                  <span className="text-slate-300">
-                    عمولة المنصة الثابتة
-                  </span>
-                  <span className="font-bold">
-                    {commission.toLocaleString("en-US")} EG
-                  </span>
-                </div>
-
                 <div className="border-t border-white/20 pt-4">
                   <div className="flex justify-between gap-3">
                     <span className="font-bold">الإجمالي المطلوب</span>

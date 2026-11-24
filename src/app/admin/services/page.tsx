@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { calculateOrderPricing } from "@/lib/pricing.mjs";
 
 export default async function AdminServicesPage() {
   const admin = await getCurrentUser();
@@ -22,9 +23,11 @@ export default async function AdminServicesPage() {
     const id = String(formData.get("id") || "");
     const action = String(formData.get("action") || "");
     const reason = String(formData.get("reason") || "").trim();
+    const finalPrice = Number(formData.get("finalPrice"));
 
     if (!id || !["APPROVE", "REJECT"].includes(action)) return;
     if (action === "REJECT" && !reason) return;
+    if (action === "APPROVE" && (!Number.isSafeInteger(finalPrice) || finalPrice <= 0 || finalPrice > 100000000)) return;
 
     const service = await prisma.service.findUnique({
       where: { id },
@@ -39,6 +42,7 @@ export default async function AdminServicesPage() {
         data: {
           status: action === "APPROVE" ? "APPROVED" : "REJECTED",
           reviewNote: action === "REJECT" ? reason : null,
+          ...(action === "APPROVE" ? { price: finalPrice } : {}),
         },
       });
       if (updated.count !== 1) throw new Error("SERVICE_REVIEW_CONFLICT");
@@ -50,7 +54,7 @@ export default async function AdminServicesPage() {
           targetId: id,
           details: action === "REJECT"
             ? `سبب رفض الخدمة: ${reason}`
-            : "تمت الموافقة على الخدمة.",
+            : `تم اعتماد السعر النهائي للعميل: ${finalPrice} EG.` ,
         },
       });
     }).catch((error) => {
@@ -63,7 +67,7 @@ export default async function AdminServicesPage() {
     revalidatePath("/services");
   }
 
-  const services = await prisma.service.findMany({
+  const [services, settings] = await Promise.all([prisma.service.findMany({
     where: { status: "PENDING_REVIEW" },
     select: {
       id: true,
@@ -81,7 +85,8 @@ export default async function AdminServicesPage() {
       },
     },
     orderBy: { createdAt: "asc" },
-  });
+  }), prisma.platformSettings.findUnique({ where: { id: "main" }, select: { commissionRate: true } })]);
+  const commissionRate = Number.isInteger(settings?.commissionRate) && (settings?.commissionRate ?? -1) >= 0 && (settings?.commissionRate ?? 101) <= 50 ? settings!.commissionRate : 20;
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f6f8]">
@@ -118,8 +123,10 @@ export default async function AdminServicesPage() {
           </div>
         ) : (
           <div className="mt-6 grid gap-5">
-            {services.map((service) => (
-              <article key={service.id} className="rounded-2xl bg-white p-6 shadow-sm">
+            {services.map((service) => {
+              const suggestedFinalPrice = Math.ceil((service.price * 100) / (100 - commissionRate));
+              const suggestedSplit = calculateOrderPricing(suggestedFinalPrice, commissionRate);
+              return <article key={service.id} className="rounded-2xl bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-xl font-black text-[#14213d]">
                     {service.title}
@@ -137,7 +144,11 @@ export default async function AdminServicesPage() {
                 <div className="mt-4 grid gap-2 rounded-xl bg-gray-50 p-4 text-sm">
                   <p>مقدم الخدمة: {service.provider.displayName}</p>
                   <p>البريد: {service.provider.email}</p>
-                  <p>السعر: {service.price} EG</p>
+                  <p>السعر المقترح من مقدم الخدمة: {service.price.toLocaleString("en-US")} EG</p>
+                  <p>العمولة الحالية: {commissionRate}%</p>
+                  <p>السعر النهائي المقترح: {suggestedFinalPrice.toLocaleString("en-US")} EG</p>
+                  <p>صافي مقدم الخدمة المتوقع: {suggestedSplit.providerNet.toLocaleString("en-US")} EG</p>
+                  <p>حصة خِدمتي المتوقعة: {suggestedSplit.commission.toLocaleString("en-US")} EG</p>
                   <p>
                     تاريخ الإضافة: {service.createdAt.toLocaleDateString("en-GB")}
                   </p>
@@ -147,6 +158,19 @@ export default async function AdminServicesPage() {
                   <input type="hidden" name="id" value={service.id} />
 
                   <div>
+                    <label className="mb-2 block font-bold">
+                      السعر النهائي الذي سيدفعه العميل (EG)
+                    </label>
+                    <input
+                      type="number"
+                      name="finalPrice"
+                      min="1"
+                      max="100000000"
+                      step="1"
+                      required
+                      defaultValue={suggestedFinalPrice}
+                      className="mb-4 w-full rounded-xl border border-gray-300 p-3 outline-none focus:border-orange-500"
+                    />
                     <label className="mb-2 block font-bold">
                       سبب الرفض (مطلوب عند الرفض)
                     </label>
@@ -178,8 +202,8 @@ export default async function AdminServicesPage() {
                     </button>
                   </div>
                 </form>
-              </article>
-            ))}
+              </article>;
+            })}
           </div>
         )}
       </section>
