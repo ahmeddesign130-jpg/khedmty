@@ -42,7 +42,7 @@ export default async function ProviderServicesPage() {
             return (
               <article key={service.id} className="rounded-2xl bg-white p-5 shadow-sm">
                 <div className="flex flex-wrap justify-between gap-2">
-                  <strong>{service.title}</strong>
+                  <div className="min-w-0"><strong>{service.title}</strong><p className="mt-1 text-xs text-slate-400">رقم الخدمة: {service.serviceNo}</p></div>
                   <span className="text-sm font-bold text-orange-600">{status[service.status]}</span>
                 </div>
                 {service.reviewNote && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">ملاحظة الإدارة: {service.reviewNote}</p>}
