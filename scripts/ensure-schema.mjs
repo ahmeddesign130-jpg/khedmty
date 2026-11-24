@@ -9,6 +9,10 @@ async function main() {
     console.log("Skipping database schema compatibility repair in Vercel Preview.");
     return;
   }
+  if (process.env.VERCEL_ENV === "production" && process.env.SCHEMA_SYNC_ON_BUILD !== "true") {
+    console.log("Skipping production schema sync; the current schema is already applied. Set SCHEMA_SYNC_ON_BUILD=true for an intentional schema rollout.");
+    return;
+  }
 
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to apply the additive schema compatibility check.");
