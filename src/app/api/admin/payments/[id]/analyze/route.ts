@@ -18,7 +18,7 @@ const modelResultSchema = z.object({
   reference: z.string().max(120).nullable().optional(),
   transferDate: z.string().max(60).nullable().optional(),
   confidence: z.number().min(0).max(100),
-  notes: z.string().max(600),
+  notes: z.string().max(600).optional().default(""),
 });
 
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -59,7 +59,6 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
         model: MODEL,
         temperature: 0,
         max_tokens: 450,
-        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
