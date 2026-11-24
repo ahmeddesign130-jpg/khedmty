@@ -230,7 +230,13 @@ export default async function AdminPaymentsPage() {
                 )}
 
                 {payment.status === "PENDING_REVIEW" && (
-                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} />
+                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} hasReceipt={Boolean(payment.receiptUrl)} aiAnalysis={{
+                    status: payment.aiReceiptStatus,
+                    amount: payment.aiReceiptAmount,
+                    confidence: payment.aiReceiptConfidence,
+                    notes: payment.aiReceiptNotes,
+                    checkedAt: payment.aiReceiptCheckedAt?.toISOString() || null,
+                  }} />
                 )}
 
                 <p className="mt-4 text-xs text-slate-400">
