@@ -109,7 +109,16 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
     const result = parsed.data;
     const amount = result.amount !== null && Number.isSafeInteger(result.amount) ? result.amount : null;
-    const classification = classifyReceiptResult({ ...result, amount }, payment.order.total);
+    const normalizedResult = {
+      isTransferReceipt: result.isTransferReceipt,
+      amount,
+      currency: result.currency ?? null,
+      reference: result.reference ?? null,
+      transferDate: result.transferDate ?? null,
+      confidence: result.confidence,
+      notes: result.notes,
+    };
+    const classification = classifyReceiptResult(normalizedResult, payment.order.total);
     const reference = result.reference?.trim().slice(0, 120) || null;
     const parsedDate = result.transferDate ? new Date(result.transferDate) : null;
     const transferDate = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : null;
