@@ -12,6 +12,12 @@ const paymentStatus: Record<string, string> = {
   APPROVED: "تم قبول الدفع",
   REJECTED: "مرفوض",
 };
+const aiReceiptLabels: Record<string, string> = {
+  MATCH: "المبلغ الظاهر مطابق مبدئياً",
+  MISMATCH: "المبلغ الظاهر لا يطابق المطلوب",
+  NOT_RECEIPT: "الصورة لا تبدو إيصال تحويل",
+  UNCLEAR: "النتيجة غير واضحة — مراجعة يدوية",
+};
 const paymentMethods: Record<string, string> = {
   INSTAPAY: "InstaPay",
   E_AND_MONEY: "e& money",
@@ -228,15 +234,18 @@ export default async function AdminPaymentsPage() {
                     ملاحظة الإدارة: {payment.reviewNote}
                   </p>
                 )}
+                {payment.aiReceiptStatus && (
+                  <div className="mt-4 rounded-xl border border-violet-100 bg-violet-50/60 p-4 text-sm">
+                    <p className="font-black text-slate-900">نتيجة فحص الإيصال المساعد: {aiReceiptLabels[payment.aiReceiptStatus] || payment.aiReceiptStatus}</p>
+                    <p className="mt-1 text-slate-700">المبلغ المقروء: {payment.aiReceiptAmount ?? "غير واضح"} EG — مستوى الثقة: {payment.aiReceiptConfidence ?? 0}%</p>
+                    {payment.aiReceiptNotes && <p className="mt-2 leading-6 text-slate-600">{payment.aiReceiptNotes}</p>}
+                    {payment.aiReceiptCheckedAt && <p className="mt-2 text-xs text-slate-400">آخر تحليل: {payment.aiReceiptCheckedAt.toLocaleString("en-GB")}</p>}
+                    <p className="mt-2 text-xs font-bold text-violet-800">هذه نتيجة مساعدة فقط ولا تثبت وصول التحويل.</p>
+                  </div>
+                )}
 
                 {payment.status === "PENDING_REVIEW" && (
-                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} hasReceipt={Boolean(payment.receiptUrl)} aiAnalysis={{
-                    status: payment.aiReceiptStatus,
-                    amount: payment.aiReceiptAmount,
-                    confidence: payment.aiReceiptConfidence,
-                    notes: payment.aiReceiptNotes,
-                    checkedAt: payment.aiReceiptCheckedAt?.toISOString() || null,
-                  }} />
+                  <PaymentReviewForm paymentId={payment.id} action={reviewPayment} hasReceipt={Boolean(payment.receiptUrl)} />
                 )}
 
                 <p className="mt-4 text-xs text-slate-400">
