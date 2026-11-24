@@ -5,7 +5,6 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 
 export const dynamic = "force-dynamic";
 const PRODUCTION_HOST = "khedmty-swart.vercel.app";
-const PRIMARY_ADMIN_EMAIL = (process.env.PRIMARY_ADMIN_EMAIL || "ahmeddesign130@gmail.com").trim().toLowerCase();
 const googleJwks = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
 function googleRedirectUri(req: NextRequest) {
@@ -74,15 +73,12 @@ export async function GET(req: NextRequest) {
     const emailVerified = claims.email_verified === true || claims.email_verified === "true";
     if (!subject || !email || !emailVerified) return fail(req, "google_profile");
 
-    // Never let Google authenticate or promote the platform owner/admin account.
-    if (email === PRIMARY_ADMIN_EMAIL) return fail(req, "google_disabled");
-
     const account = await prisma.user.findFirst({
       where: { email: { equals: email, mode: "insensitive" } },
       select: { id: true, email: true, role: true, status: true, emailVerifiedAt: true },
     });
     if (!account) return fail(req, "google_account_required");
-    if (account.role === "SUPER_ADMIN" || account.status === "SUSPENDED") return fail(req, "google_disabled");
+    if (account.status === "SUSPENDED") return fail(req, "google_disabled");
 
     const verifiedAccount = !account.emailVerifiedAt || (account.role === "CUSTOMER" && account.status !== "ACTIVE")
       ? await prisma.user.update({
@@ -94,8 +90,8 @@ export async function GET(req: NextRequest) {
           select: { id: true, role: true, status: true },
         })
       : account;
-    const destination = verifiedAccount.role === "PROVIDER" && verifiedAccount.status === "PENDING"
-      ? "/register/provider-details"
+    const destination = verifiedAccount.role === "SUPER_ADMIN" ? "/admin"
+      : verifiedAccount.role === "PROVIDER" && verifiedAccount.status === "PENDING" ? "/register/provider-details"
       : verifiedAccount.role === "PROVIDER" ? "/provider" : "/services";
     const sessionToken = await createSession({ id: verifiedAccount.id, role: verifiedAccount.role, status: verifiedAccount.status });
     const response = NextResponse.redirect(new URL(destination, req.url));
