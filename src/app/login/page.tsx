@@ -28,7 +28,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </form>
         <p className="mt-7 text-center text-base text-slate-600">ليس لديك حساب؟ <Link href="/register" className="font-black text-orange-600">إنشاء حساب</Link></p>
         <Link href="/" className="mt-5 block text-center text-base font-bold text-slate-600">العودة للرئيسية</Link>
-        <p className="auth-creator-name mt-8 border-t border-slate-200/70 pt-5 text-center text-sm font-black tracking-[0.12em]">AHMED ZAKRAIA ALI</p>
       </section>
     </main>
   );
