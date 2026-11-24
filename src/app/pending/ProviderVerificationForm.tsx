@@ -15,6 +15,22 @@ export default function ProviderVerificationForm() {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
+  const [nationalId, setNationalId] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+
+  function handleNationalId(value: string) {
+    const digits = value.replace(/\\D/g, "").slice(0, 14);
+    setNationalId(digits);
+    setDateOfBirth("");
+    if (digits.length !== 14 || !/[23]/.test(digits[0])) return;
+    const year = (digits[0] === "2" ? 1900 : 2000) + Number(digits.slice(1, 3));
+    const month = Number(digits.slice(3, 5));
+    const day = Number(digits.slice(5, 7));
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
+      setDateOfBirth(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
+    }
+  }
 
   function nextStep() {
     setError("");
@@ -40,6 +56,7 @@ export default function ProviderVerificationForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError("");
+    if (nationalId.length !== 14 || !dateOfBirth) { setError("اكتب رقمًا قوميًا مصريًا صحيحًا من 14 رقمًا للتأكد من تاريخ الميلاد."); setStep(0); return; }
     if (files.length < 1 || files.length > 5) { setError("ارفع نموذج عمل واحدًا على الأقل وبحد أقصى 5 ملفات."); return; }
     for (const file of files) {
       const video = file.type.startsWith("video/");
@@ -62,7 +79,7 @@ export default function ProviderVerificationForm() {
       const response = await fetch("/api/provider/verification", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName: form.get("fullName"), phone: form.get("phone"),
+          fullName: form.get("fullName"), phone: form.get("phone"), dateOfBirth,
           profession: form.get("profession"), experience: form.get("experience"),
           bio: form.get("bio"), portfolioPaths,
         }),
@@ -78,7 +95,7 @@ export default function ProviderVerificationForm() {
   return <form id="provider-verification-form" onSubmit={submit} noValidate className="mt-6">
     <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4">
       <p className="font-black text-orange-900">استكمال طلب الانضمام كمقدم خدمة</p>
-      <p className="mt-1 text-sm leading-7 text-orange-800">كل حساب مقدم خدمة يخضع لمراجعة الإدارة قبل التفعيل. لا نطلب صورة بطاقة أو رقمًا قوميًا.</p>
+      <p className="mt-1 text-sm leading-7 text-orange-800">كل حساب مقدم خدمة يخضع لمراجعة الإدارة قبل التفعيل. نحتاج الرقم القومي لاستخراج تاريخ الميلاد تلقائيًا، ولا نحفظ الرقم القومي الكامل.</p>
     </div>
     <div className="mt-5 grid grid-cols-2 gap-2" aria-label="مراحل استكمال بيانات مقدم الخدمة">
       {steps.map((item,index)=><div key={item.title} className={`rounded-xl border p-3 text-center ${index===step?"border-orange-300 bg-orange-100 text-orange-900":index<step?"border-emerald-200 bg-emerald-50 text-emerald-800":"border-slate-200 bg-slate-50 text-slate-500"}`}>
@@ -96,6 +113,13 @@ export default function ProviderVerificationForm() {
         </label>
         <label className="text-sm font-bold text-slate-700">رقم الهاتف
           <input name="phone" type="tel" inputMode="numeric" required pattern="01[0125][0-9]{8}" maxLength={11} dir="ltr" autoComplete="tel" className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left" placeholder="01xxxxxxxxx"/>
+        </label>
+        <label className="text-sm font-bold text-slate-700 sm:col-span-2">الرقم القومي (14 رقمًا)
+          <input name="nationalId" type="text" inputMode="numeric" autoComplete="off" required value={nationalId} onChange={event=>handleNationalId(event.target.value)} pattern="[23][0-9]{13}" maxLength={14} dir="ltr" className="mt-2 w-full rounded-xl border border-slate-200 p-3 text-left tracking-widest" placeholder="اكتب الرقم القومي كاملًا — الأرقام ظاهرة أثناء الكتابة"/>
+          <span className="mt-1 block text-xs font-normal text-slate-500">الأرقام ظاهرة أمامك أثناء الكتابة. نستخدمه لاستخراج تاريخ الميلاد فقط ولا نحفظ الرقم كاملًا.</span>
+        </label>
+        <label className="text-sm font-bold text-slate-700">تاريخ الميلاد (يُستخرج تلقائيًا)
+          <input name="dateOfBirth" type="date" value={dateOfBirth} readOnly required className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-700"/>
         </label>
         <label className="text-sm font-bold text-slate-700 sm:col-span-2">مجال الخدمة أو المهنة
           <input name="profession" required minLength={2} maxLength={80} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="مثال: تصميم الجرافيك"/>
