@@ -7,7 +7,7 @@ const errors: Record<string, string> = {
   suspended: "هذا الحساب موقوف. تواصل مع إدارة خِدمتي.",
   server: "حصل خطأ أثناء تسجيل الدخول. حاول مرة أخرى بعد قليل.",
   google_not_configured: "تسجيل Google يحتاج إكمال إعداداته أولًا.",
-  google_disabled: "حساب الإدارة لا يستخدم تسجيل Google. ادخل بالبريد الإلكتروني وكلمة المرور.",
+  google_disabled: "لا يمكن تسجيل الدخول بهذا الحساب باستخدام Google. تواصل مع الإدارة إذا كنت تعتقد أن هذا خطأ.",
   google_failed: "تعذر تسجيل الدخول باستخدام Google. حاول مرة أخرى.",
   google_state: "انتهت جلسة Google أو لم تصل ملفات التحقق. جرّب مرة أخرى.",
   google_config: "إعدادات Google غير مكتملة في نسخة التجربة.",
@@ -33,7 +33,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <svg aria-hidden="true" viewBox="0 0 48 48" className="h-5 w-5"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 3.08 13.22l7.98 6.19C12.95 13.72 18.02 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.72 7.18l7.64 5.93c4.46-4.12 7.12-10.2 7.12-17.58z"/><path fill="#FBBC05" d="M11.06 28.59A14.5 14.5 0 0 1 10.3 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.88.93 7.55 3.08 10.78l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.87l-7.64-5.93c-2.12 1.42-4.84 2.26-8.26 2.26-5.98 0-11.05-4.22-12.94-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
           <span className="google-auth-label">المتابعة باستخدام Google</span>
         </a>
-        <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold leading-7 text-slate-700">يمكنك الدخول بحسابك المسجل أو باستخدام Google. دخول الإدارة يظل بالبريد وكلمة المرور فقط.</p>
+        <p className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-sm font-semibold leading-7 text-slate-700">يمكنك الدخول باستخدام Google أو البريد الإلكتروني وكلمة المرور. تظهر لك لوحة التحكم حسب صلاحية حسابك.</p>
         <div className="my-6 flex items-center gap-3 text-sm font-bold text-slate-600"><span className="h-px flex-1 bg-slate-100"/><span>أو بالبريد الإلكتروني</span><span className="h-px flex-1 bg-slate-100"/></div>
         <form action="/api/auth/login" method="POST" className="space-y-5">
           <div><label htmlFor="email" className="mb-2 block text-base font-bold text-slate-700">البريد الإلكتروني</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="name@example.com" className="w-full px-4 py-4 text-base text-left" dir="ltr"/></div>
