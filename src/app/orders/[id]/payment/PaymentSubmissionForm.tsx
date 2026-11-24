@@ -52,9 +52,9 @@ export default function PaymentSubmissionForm({ orderId, amount }: { orderId: st
         <label className="mt-4 block text-sm font-bold text-slate-700">
           وسيلة التحويل
           <select name="method" value={method} onChange={(event) => setMethod(event.target.value)} className="mt-2 block w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-[#14213d]">
-            <option value="INSTAPAY">InstaPay</option>
+            <option value="INSTAPAY">إنستاباي</option>
             <option value="E_AND_MONEY">e&amp; money</option>
-            <option value="ETISALAT_CASH">Etisalat Cash</option>
+            <option value="ETISALAT_CASH">اتصالات كاش</option>
             <option value="OTHER">وسيلة أخرى</option>
           </select>
         </label>
