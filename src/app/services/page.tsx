@@ -67,8 +67,8 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
           </p>
 
           <form action="/services" method="GET" className="mt-7 flex max-w-2xl flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 sm:flex-row">
-            <label htmlFor="serviceSearch" className="sr-only">اكتب اسم الخدمة أو المجال اللي محتاجه — مثل تصميم أو مونتاج — وهتلاقي الخيارات المتاحة.</label>
-            <input id="serviceSearch" name="q" defaultValue={searchTerm} placeholder="مثال: صنع فيديو، تصميم شعار، كتابة محتوى..." dir="rtl" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-4 py-3 text-right font-semibold text-[#14213d] outline-none placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-300" />
+            <label htmlFor="serviceSearch" className="sr-only">اكتب اسم الخدمة أو رقم الخدمة للعثور عليها بسرعة.</label>
+            <input id="serviceSearch" name="q" defaultValue={searchTerm} placeholder="ابحث باسم الخدمة أو رقمها — مثال: تصميم شعار أو KH-SRV-..." dir="rtl" autoComplete="off" className="min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-4 py-3 text-right font-semibold text-[#14213d] outline-none placeholder:text-slate-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-300" />
             <button type="submit" className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 font-black text-white shadow-lg transition hover:bg-orange-400">اعثر على الخدمة</button>
             {searchTerm && <Link href="/services" className="inline-flex items-center justify-center rounded-xl border border-white/30 px-4 py-3 font-bold text-white">عرض كل الخدمات</Link>}
           </form>
