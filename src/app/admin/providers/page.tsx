@@ -113,7 +113,7 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
     <section className="mx-auto max-w-5xl">
       <header className="mb-5"><Link href="/admin" className="font-bold text-orange-600">← لوحة الإدارة</Link></header>
       <h1 className="mt-5 text-3xl font-black text-[#14213d]">مراجعة مقدمي الخدمات</h1>
-      <p className="mt-2 leading-7 text-slate-600">كل طلب يحتاج مراجعة البيانات ونماذج الأعمال. لا يتم تفعيل أي مقدم خدمة قبل موافقة الإدارة، ولا نطلب صور بطاقات أو أرقامًا قومية.</p>
+      <p className="mt-2 leading-7 text-slate-600">كل طلب يحتاج مراجعة البيانات ونماذج الأعمال. لا يتم تفعيل أي مقدم خدمة قبل موافقة الإدارة، ويظهر تاريخ الميلاد المستخرج من الرقم القومي، ولا يتم الاحتفاظ بالرقم القومي الكامل.</p>
       {params.review === "approved" && <p role="status" className="mt-4 rounded-xl bg-green-50 p-4 font-bold text-green-800">تمت الموافقة وتفعيل حساب مقدم الخدمة بنجاح.</p>}
       {params.review === "rejected" && <p role="status" className="mt-4 rounded-xl bg-amber-50 p-4 font-bold text-amber-900">تم رفض الطلب وحفظ سبب الرفض. الحساب لم يتم تفعيله.</p>}
       {params.review === "invalid" && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 font-bold text-red-800">اكتب سبب رفض لا يقل عن 5 أحرف، أو راجع الإجراء.</p>}
@@ -132,6 +132,7 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
             </div>
             <div className="mt-5 grid gap-3 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
               <p><b>رقم الهاتف:</b> <span dir="ltr">{data.phone}</span></p>
+              <p><b>تاريخ الميلاد:</b> {data.dateOfBirth || "غير متاح"}</p>
               <p><b>مجال العمل:</b> {data.profession}</p>
               <p><b>الخبرة:</b> {data.experience || "لم يذكر"}</p>
               <p><b>نماذج الأعمال:</b> {data.portfolioPaths?.length || 0} ملفات</p>
