@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     const profession = String(body.profession || "").trim();
     const experience = String(body.experience || "").trim();
     const bio = String(body.bio || "").trim();
-    const nationalId = String(body.nationalId || "").replace(/\\D/g, "");
+    const nationalId = String(body.nationalId || "").replace(/\D/g, "");
     const dateOfBirth = String(body.dateOfBirth || "").trim();
-    const birthMatch = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(dateOfBirth);
+    const birthMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateOfBirth);
     const birthDate = birthMatch ? new Date(Number(birthMatch[1]), Number(birthMatch[2]) - 1, Number(birthMatch[3])) : null;
     const idYear = nationalId.length === 14 && /^[23]/.test(nationalId) ? (nationalId[0] === "2" ? 1900 : 2000) + Number(nationalId.slice(1, 3)) : 0;
     const idMonth = Number(nationalId.slice(3, 5));
