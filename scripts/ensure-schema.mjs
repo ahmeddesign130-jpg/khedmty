@@ -106,6 +106,7 @@ async function main() {
     )
   `);
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Notification_userId_createdAt_idx" ON "Notification"("userId", "createdAt")');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Notification" ADD COLUMN IF NOT EXISTS "href" TEXT');
 
 
   // Additive marketplace taxonomy and order requirement answers.
