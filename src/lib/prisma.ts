@@ -128,6 +128,13 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."PlatformSettings"
          ALTER COLUMN "commissionRate" SET DEFAULT 20`
       );
+      // Payment-review compatibility: preserve legacy rows while adding all fields used by the current workflow.
+      await basePrisma.$executeRawUnsafe("ALTER TABLE IF EXISTS public.\"Payment\" ADD COLUMN IF NOT EXISTS \"method\" TEXT NOT NULL DEFAULT 'OTHER', ADD COLUMN IF NOT EXISTS \"receiptUrl\" TEXT, ADD COLUMN IF NOT EXISTS \"amount\" INTEGER, ADD COLUMN IF NOT EXISTS \"reviewNote\" TEXT, ADD COLUMN IF NOT EXISTS \"reviewedAt\" TIMESTAMPTZ, ADD COLUMN IF NOT EXISTS \"transferReference\" TEXT, ADD COLUMN IF NOT EXISTS \"transferDate\" TIMESTAMPTZ, ADD COLUMN IF NOT EXISTS \"aiReceiptStatus\" TEXT, ADD COLUMN IF NOT EXISTS \"aiReceiptAmount\" INTEGER, ADD COLUMN IF NOT EXISTS \"aiReceiptConfidence\" INTEGER, ADD COLUMN IF NOT EXISTS \"aiReceiptNotes\" TEXT, ADD COLUMN IF NOT EXISTS \"aiReceiptCheckedAt\" TIMESTAMPTZ");
+      await basePrisma.$executeRawUnsafe("UPDATE public.\"Payment\" AS p SET \"amount\" = o.\"total\" FROM public.\"Order\" AS o WHERE p.\"orderId\" = o.\"id\" AND p.\"amount\" IS NULL");
+      await basePrisma.$executeRawUnsafe("UPDATE public.\"Payment\" SET \"amount\" = 0 WHERE \"amount\" IS NULL");
+      await basePrisma.$executeRawUnsafe("ALTER TABLE public.\"Payment\" ALTER COLUMN \"amount\" SET DEFAULT 0");
+      await basePrisma.$executeRawUnsafe("ALTER TABLE public.\"Payment\" ALTER COLUMN \"amount\" SET NOT NULL");
+
       await basePrisma.$executeRawUnsafe(
         `UPDATE public."Service"
          SET "serviceNo" = 'KH-SRV-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12))
