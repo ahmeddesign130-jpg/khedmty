@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isValidServiceCategory } from "@/lib/service-categories";
+import { getStorageObjectInfo } from "@/lib/storage-security";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,7 @@ function generateServiceNo() {
 
 export async function GET(request: NextRequest) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ success: false, message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") return NextResponse.json({ success: false, message: "تصفح الخدمات متاح للعملاء النشطين فقط." }, { status: 403 });
@@ -60,6 +63,7 @@ export async function POST(request: Request) {
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
     if (user.role !== "PROVIDER" || user.status !== "ACTIVE") return NextResponse.json({ success: false, message: "هذه الخاصية لمقدمي الخدمات المعتمدين فقط." }, { status: 403 });
+    if (!await enforceRateLimit(request, "service-create", user.id, 10, 3600)) return NextResponse.json({ success: false, message: "تجاوزت عدد محاولات إضافة الخدمات. حاول لاحقًا." }, { status: 429 });
     const validation = serviceSchema.safeParse(await request.json());
     if (!validation.success) return NextResponse.json({ success: false, message: "راجع بيانات الخدمة المدخلة.", errors: validation.error.flatten() }, { status: 400 });
     if (!isValidServiceCategory(validation.data.category, validation.data.subcategory)) return NextResponse.json({ success: false, message: "اختار تخصصًا صحيحًا من القائمة." }, { status: 400 });
