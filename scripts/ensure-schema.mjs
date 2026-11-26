@@ -120,6 +120,11 @@ async function main() {
 
   // Additive marketplace taxonomy and order requirement answers.
   await prisma.$executeRawUnsafe(`ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "category" TEXT NOT NULL DEFAULT 'أخرى', ADD COLUMN IF NOT EXISTS "subcategory" TEXT NOT NULL DEFAULT 'عام', ADD COLUMN IF NOT EXISTS "requirements" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`);
+  // Public service references are required by the production database.
+  await prisma.$executeRawUnsafe('ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "publicCode" TEXT');
+  await prisma.$executeRawUnsafe(`UPDATE "Service" SET "publicCode" = 'KH-PUB-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12)) WHERE "publicCode" IS NULL`);
+  await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "Service_publicCode_key" ON "Service"("publicCode")');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Service" ALTER COLUMN "publicCode" SET NOT NULL');
   await prisma.$executeRawUnsafe('ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "requirementsAnswers" TEXT');
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Service_status_category_subcategory_idx" ON "Service"("status", "category", "subcategory")');
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Service_status_price_idx" ON "Service"("status", "price")');
