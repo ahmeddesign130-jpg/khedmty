@@ -99,6 +99,7 @@ model Profile {
 model Service {
   id          String        @id @default(cuid())
   serviceNo   String        @unique
+  publicCode  String        @unique @default(cuid())
   title       String
   description String
   category    String        @default("أخرى")
