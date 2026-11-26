@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";\nimport { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 export const dynamic="force-dynamic";
 const go=(req:NextRequest,path:string)=>NextResponse.redirect(new URL(path,req.url),303);
 const hash=(id:string,code:string)=>createHash("sha256").update(`${process.env.AUTH_SECRET}:${id}:${code}`).digest("hex");
