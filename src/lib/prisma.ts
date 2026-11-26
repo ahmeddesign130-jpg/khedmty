@@ -148,7 +148,7 @@ async function ensureCompatibilitySchema() {
         END IF;
       END
       $audit_log_compat$;
-      );
+      `);
       // Payment-review compatibility: preserve legacy rows while adding all fields used by the current workflow.
       await basePrisma.$executeRawUnsafe("ALTER TABLE IF EXISTS public.\"Payment\" ADD COLUMN IF NOT EXISTS \"method\" TEXT NOT NULL DEFAULT 'OTHER', ADD COLUMN IF NOT EXISTS \"receiptUrl\" TEXT, ADD COLUMN IF NOT EXISTS \"amount\" INTEGER, ADD COLUMN IF NOT EXISTS \"reviewNote\" TEXT, ADD COLUMN IF NOT EXISTS \"reviewedAt\" TIMESTAMPTZ, ADD COLUMN IF NOT EXISTS \"transferReference\" TEXT, ADD COLUMN IF NOT EXISTS \"transferDate\" TIMESTAMPTZ, ADD COLUMN IF NOT EXISTS \"aiReceiptStatus\" TEXT, ADD COLUMN IF NOT EXISTS \"aiReceiptAmount\" INTEGER, ADD COLUMN IF NOT EXISTS \"aiReceiptConfidence\" INTEGER, ADD COLUMN IF NOT EXISTS \"aiReceiptNotes\" TEXT, ADD COLUMN IF NOT EXISTS \"aiReceiptCheckedAt\" TIMESTAMPTZ, ADD COLUMN IF NOT EXISTS \"createdAt\" TIMESTAMPTZ NOT NULL DEFAULT NOW()");
       await basePrisma.$executeRawUnsafe("UPDATE public.\"Payment\" AS p SET \"amount\" = o.\"total\" FROM public.\"Order\" AS o WHERE p.\"orderId\" = o.\"id\" AND p.\"amount\" IS NULL");
