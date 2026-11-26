@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit, enforceSameOrigin, privateNoStoreHeaders } from "@/lib/security";
+import { getStorageObjectInfo } from "@/lib/storage-security";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +25,7 @@ export async function GET() {
       } } },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ payments });
+    return NextResponse.json({ payments }, { headers: privateNoStoreHeaders() });
   } catch (error) {
     console.error("Payments GET error:", error);
     return NextResponse.json({ message: "حدث خطأ أثناء تحميل المدفوعات." }, { status: 500 });
@@ -32,8 +34,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
+    if (!await enforceRateLimit(request, "payment-submit-user", user.id, 8, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات إرسال إثبات الدفع. حاول لاحقًا." }, { status: 429 });
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") return NextResponse.json({ message: "هذه الخدمة متاحة لحسابات العملاء المفعلة فقط." }, { status: 403 });
 
     const parsed = paymentSchema.safeParse(await request.json());
@@ -42,10 +46,14 @@ export async function POST(request: NextRequest) {
     const { orderId, receiptUrl, amount, method } = parsed.data;
     const walletConfigured = Boolean((process.env.PAYMENT_WALLET_NUMBER || process.env.ETISALAT_CASH_NUMBER || "").trim());
     if (!walletConfigured) return NextResponse.json({ message: "محفظة الاستقبال غير مفعّلة حاليًا." }, { status: 503 });
-    if (!receiptUrl.startsWith(`${user.id}/`) || receiptUrl.includes("..") || receiptUrl.startsWith("/")) {
+    if (!receiptUrl.startsWith(`${user.id}/`) || receiptUrl.includes("..") || receiptUrl.startsWith("/") || receiptUrl.includes("\\\\")) {
       return NextResponse.json({ message: "مسار صورة الإيصال غير صحيح." }, { status: 400 });
     }
 
+    const receiptInfo = await getStorageObjectInfo("payment-receipts", receiptUrl);
+    if (!receiptInfo || !["image/jpeg", "image/png", "image/webp"].includes(receiptInfo.mimeType) || receiptInfo.size > 8 * 1024 * 1024) {
+      return NextResponse.json({ message: "ملف الإيصال غير موجود أو نوعه/حجمه غير مسموح." }, { status: 400 });
+    }
     const order = await prisma.order.findUnique({ where: { id: orderId }, include: { payments: true } });
     if (!order) return NextResponse.json({ message: "الطلب غير موجود." }, { status: 404 });
     if (order.customerId !== user.id) return NextResponse.json({ message: "هذا الطلب لا يخص حسابك." }, { status: 403 });
