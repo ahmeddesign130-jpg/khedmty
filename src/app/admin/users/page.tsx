@@ -13,10 +13,11 @@ async function deleteAccount(formData: FormData) {
   if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/users?deleteError=1");
+  let deleted = false;
   try {
     const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true, email: true } });
     if (!target || target.role === "SUPER_ADMIN" || target.email.endsWith("@deleted.khedmty.invalid")) {
-      redirect("/admin/users?deleteError=1");
+      throw new Error("ACCOUNT_NOT_ELIGIBLE_FOR_DELETION");
     }
     const deletedEmail = `deleted-${target.id}@deleted.khedmty.invalid`;
     await prisma.$transaction(async (tx) => {
@@ -34,16 +35,17 @@ async function deleteAccount(formData: FormData) {
         data: { actorId: admin.id, action: "USER_PERSONAL_DATA_DELETED", targetId: id, details: "تم إخفاء البيانات الشخصية وتعطيل الحساب مع الاحتفاظ بسجلات الطلبات والمدفوعات." },
       });
     });
-    revalidatePath("/admin/users");
-    revalidatePath("/admin/providers");
-    revalidatePath("/admin/orders");
-    revalidatePath("/admin/payments");
-    revalidatePath("/services");
-    redirect("/admin/users?deleted=1");
+    deleted = true;
   } catch (error) {
     console.error("ADMIN_DELETE_ACCOUNT_ERROR:", error);
-    redirect("/admin/users?deleteError=1");
   }
+  if (!deleted) redirect("/admin/users?deleteError=1");
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/providers");
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin/payments");
+  revalidatePath("/services");
+  redirect("/admin/users?deleted=1");
 }
 
 async function changeAccess(formData: FormData) {
