@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { createStorageDownload } from "@/lib/storage";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!enforceSameOrigin(req)) return NextResponse.json({ error: "الطلب غير مسموح." }, { status: 403 });
     const admin = await getCurrentUser();
 
     if (!admin || admin.role !== "SUPER_ADMIN") {
@@ -19,6 +21,7 @@ export async function POST(
       );
     }
 
+    if (!await enforceRateLimit(req, "provider-review-admin", admin.id, 60, 60)) return NextResponse.json({ error: "طلبات مراجعة كثيرة جدًا. حاول لاحقًا." }, { status: 429 });
     const { id } = await context.params;
     const body = await req.json();
     const action = String(body.action || "");

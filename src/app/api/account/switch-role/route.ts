@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
+  if (!enforceSameOrigin(request)) return NextResponse.redirect(new URL("/account", request.url), 303);
   const user = await getCurrentUser();
   if (!user) return NextResponse.redirect(new URL("/login", request.url), 303);
   if (user.role === "SUPER_ADMIN") return NextResponse.redirect(new URL("/admin", request.url), 303);

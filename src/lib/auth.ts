@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -34,15 +35,18 @@ function getSecret() {
 }
 
 export async function createSession(user: SessionUser): Promise<string> {
-  const token = await new SignJWT({ id: user.id })
+  const account = await prisma.user.findUnique({ where: { id: user.id }, select: { sessionVersion: true } });
+  if (!account) throw new Error("Cannot create a session for a missing account.");
+  const token = await new SignJWT({ id: user.id, sv: account.sessionVersion })
     .setProtectedHeader({ alg: "HS256" })
+    .setJti(randomUUID())
     .setIssuedAt()
     .setExpirationTime("7d")
     .sign(getSecret());
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview",
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_DURATION,
@@ -53,7 +57,7 @@ export async function createSession(user: SessionUser): Promise<string> {
 export const SESSION_COOKIE_NAME = COOKIE_NAME;
 export const SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview",
   sameSite: "lax" as const,
   path: "/",
   maxAge: SESSION_DURATION,
@@ -76,8 +80,10 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   }
 
   let userId: string;
+  let tokenSessionVersion = 0;
   try {
-    const { payload } = await jwtVerify(token, getSecret());
+    const { payload } = await jwtVerify(token, getSecret(), { algorithms: ["HS256"] });
+    tokenSessionVersion = typeof payload.sv === "number" ? payload.sv : 0;
     if (typeof payload.id !== "string") {
       console.warn("[auth-session] invalid_payload");
       return null;
@@ -93,10 +99,14 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   try {
     const account = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, role: true, status: true },
+      select: { id: true, email: true, role: true, status: true, sessionVersion: true },
     });
     if (!account) {
       console.warn("[auth-session] user_not_found");
+      return null;
+    }
+    if (tokenSessionVersion !== account.sessionVersion) {
+      console.warn("[auth-session] session_revoked");
       return null;
     }
     const user = await ensurePrimaryAdmin(account);
@@ -118,7 +128,7 @@ export async function clearSession() {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview",
     sameSite: "lax",
     path: "/",
     maxAge: 0,

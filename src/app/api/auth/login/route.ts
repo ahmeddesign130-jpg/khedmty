@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSession, ensurePrimaryAdmin } from "@/lib/auth";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +12,13 @@ function redirect303(req: NextRequest, path: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!enforceSameOrigin(req)) return redirect303(req, "/login?error=invalid");
     const form = await req.formData();
     const email = String(form.get("email") || "").trim().toLowerCase();
     const password = String(form.get("password") || "");
-    if (!email || !password) return redirect303(req, "/login?error=missing");
+    if (!email || !password || email.length > 254 || password.length > 72) return redirect303(req, "/login?error=invalid");
+    const [ipAllowed, accountAllowed] = await Promise.all([enforceRateLimit(req, "login-ip", "all", 20, 900), enforceRateLimit(req, "login-account", email, 8, 900)]);
+    if (!ipAllowed || !accountAllowed) return redirect303(req, "/login?error=rate_limited");
 
     const account = await prisma.user.findUnique({ where: { email } });
     if (!account) return redirect303(req, "/login?error=invalid");

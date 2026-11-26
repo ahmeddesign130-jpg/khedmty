@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 const reviewSchema = z.object({
   status: z.enum(["APPROVED", "REJECTED"]),
@@ -15,11 +16,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user || user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ message: "هذه العملية متاحة للإدارة فقط." }, { status: 403 });
     }
 
+    if (!await enforceRateLimit(request, "payment-review-admin", user.id, 60, 60)) return NextResponse.json({ message: "طلبات مراجعة كثيرة جدًا. حاول لاحقًا." }, { status: 429 });
     const { id } = await params;
     const parsed = reviewSchema.safeParse(await request.json());
     if (!parsed.success) {

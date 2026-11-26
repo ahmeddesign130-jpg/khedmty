@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canTransitionOrder, type OrderStatus } from "@/lib/order-workflow.mjs";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 const statusSchema = z.object({
   status: z.enum([
@@ -16,6 +17,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
@@ -24,6 +26,7 @@ export async function PATCH(
       return NextResponse.json({ message: "حسابك غير مفعل." }, { status: 403 });
     }
 
+    if (!await enforceRateLimit(request, "order-status-user", user.id, 40, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات تعديل الطلبات. حاول لاحقًا." }, { status: 429 });
     const parsed = statusSchema.safeParse(await request.json());
     if (!parsed.success) {
       return NextResponse.json({ message: "حالة الطلب غير صحيحة." }, { status: 400 });

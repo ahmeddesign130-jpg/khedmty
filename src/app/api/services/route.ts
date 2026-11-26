@@ -3,6 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isValidServiceCategory } from "@/lib/service-categories";
+import { getStorageObjectInfo } from "@/lib/storage-security";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,7 @@ function generateServiceNo() {
 
 export async function GET(request: NextRequest) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ success: false, message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") return NextResponse.json({ success: false, message: "تصفح الخدمات متاح للعملاء النشطين فقط." }, { status: 403 });
@@ -57,9 +60,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ success: false, message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
     if (user.role !== "PROVIDER" || user.status !== "ACTIVE") return NextResponse.json({ success: false, message: "هذه الخاصية لمقدمي الخدمات المعتمدين فقط." }, { status: 403 });
+    if (!await enforceRateLimit(request, "service-create", user.id, 10, 3600) || !await enforceRateLimit(request, "service-create-ip", "all", 30, 3600)) return NextResponse.json({ success: false, message: "تجاوزت عدد محاولات إضافة الخدمات. حاول لاحقًا." }, { status: 429 });
     const validation = serviceSchema.safeParse(await request.json());
     if (!validation.success) return NextResponse.json({ success: false, message: "راجع بيانات الخدمة المدخلة.", errors: validation.error.flatten() }, { status: 400 });
     if (!isValidServiceCategory(validation.data.category, validation.data.subcategory)) return NextResponse.json({ success: false, message: "اختار تخصصًا صحيحًا من القائمة." }, { status: 400 });
@@ -68,11 +73,20 @@ export async function POST(request: Request) {
     if (validation.data.mediaUrls.length > 0) {
       if (!storageBase) return NextResponse.json({ success: false, message: "إعداد التخزين غير مكتمل." }, { status: 503 });
       const expectedPrefix = `${storageBase}/storage/v1/object/public/service-media/${user.id}/`;
-      const ownedMedia = validation.data.mediaUrls.every((rawUrl) => {
-        try { const url = new URL(rawUrl); return url.origin === new URL(storageBase).origin && rawUrl.startsWith(expectedPrefix) && !url.pathname.includes(".."); }
-        catch { return false; }
-      });
-      if (!ownedMedia) return NextResponse.json({ success: false, message: "ملفات الخدمة يجب أن تكون مرفوعة من حسابك إلى تخزين خِدمتي." }, { status: 400 });
+      const mediaChecks = await Promise.all(validation.data.mediaUrls.map(async (rawUrl) => {
+        try {
+          const url = new URL(rawUrl);
+          if (url.origin !== new URL(storageBase).origin || !rawUrl.startsWith(expectedPrefix) || url.pathname.includes("..")) return false;
+          const encodedPath = url.pathname.split("/storage/v1/object/public/service-media/")[1] || "";
+          const objectPath = encodedPath.split("/").map((part) => decodeURIComponent(part)).join("/");
+          if (!objectPath.startsWith(`${user.id}/`)) return false;
+          const info = await getStorageObjectInfo("service-media", objectPath);
+          if (!info) return false;
+          if (["image/jpeg", "image/png", "image/webp"].includes(info.mimeType)) return info.size <= 8 * 1024 * 1024;
+          return ["video/mp4", "video/webm", "video/quicktime"].includes(info.mimeType) && info.size <= 40 * 1024 * 1024;
+        } catch { return false; }
+      }));
+      if (mediaChecks.some((ok) => !ok)) return NextResponse.json({ success: false, message: "أحد ملفات الخدمة غير موجود أو نوعه/حجمه غير مسموح." }, { status: 400 });
     }
 
     const { mediaUrls, ...details } = validation.data;

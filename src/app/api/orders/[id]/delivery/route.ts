@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createStorageDownload, storageReady } from "@/lib/storage";
+import { getStorageObjectInfo } from "@/lib/storage-security";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 const fileSchema = z.object({
@@ -15,10 +17,12 @@ const bodySchema = z.object({ files: z.array(fileSchema).min(1).max(10) });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user || user.role !== "PROVIDER" || user.status !== "ACTIVE") {
       return NextResponse.json({ message: "هذه العملية لمقدم الخدمة المعتمد فقط." }, { status: 403 });
     }
+    if (!await enforceRateLimit(request, "delivery-submit-user", user.id, 15, 3600) || !await enforceRateLimit(request, "delivery-submit-ip", "all", 50, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات رفع التسليم. حاول لاحقًا." }, { status: 429 });
     const { id } = await params;
     const parsed = bodySchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ message: "بيانات الملفات غير صحيحة." }, { status: 400 });
@@ -44,6 +48,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ message: "أحد الملفات لا يطابق شروط التسليم الآمن." }, { status: 400 });
     }
 
+    const metadata = await Promise.all(files.map((file) => getStorageObjectInfo("order-deliveries", file.objectPath)));
+    if (metadata.some((info, index) => !info || info.size !== files[index].sizeBytes || info.size > 50 * 1024 * 1024 || info.mimeType !== files[index].mimeType)) {
+      return NextResponse.json({ message: "تعذر التحقق من محتوى أحد الملفات أو حجمه." }, { status: 400 });
+    }
     const existingFiles = await Promise.all(files.map((file) => createStorageDownload("order-deliveries", file.objectPath)));
     if (existingFiles.some((url) => !url)) return NextResponse.json({ message: "لم يتم العثور على أحد الملفات المرفوعة. أعد رفع الملف وحاول مرة أخرى." }, { status: 400 });
 

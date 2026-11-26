@@ -54,6 +54,7 @@ model User {
   status          UserStatus @default(ACTIVE)
   displayName     String     @default("مستخدم")
   emailVerifiedAt DateTime?
+  sessionVersion  Int        @default(0)
   termsAcceptedAt DateTime?
   termsVersion    String?
   createdAt       DateTime   @default(now())

@@ -2,13 +2,14 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/auth";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
 function hashOtp(userId: string, code: string) {
-  return createHash("sha256")
-    .update(`${process.env.AUTH_SECRET || "khedmty"}:${userId}:${code}`)
-    .digest("hex");
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 32) throw new Error("AUTH_SECRET must be at least 32 characters.");
+  return createHash("sha256").update(`${secret}:${userId}:${code}`).digest("hex");
 }
 function redirect(req: NextRequest, path: string) {
   return NextResponse.redirect(new URL(path, req.url), 303);
@@ -16,6 +17,8 @@ function redirect(req: NextRequest, path: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!enforceSameOrigin(req)) return redirect(req, "/verify-email?error=invalid");
+    if (!await enforceRateLimit(req, "verify-email-ip", "all", 30, 900)) return redirect(req, "/verify-email?error=rate_limited");
     const form = await req.formData();
     const email = String(form.get("email") || "").trim().toLowerCase();
     const code = String(form.get("code") || "").trim();

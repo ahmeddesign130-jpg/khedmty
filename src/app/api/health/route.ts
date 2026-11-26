@@ -35,19 +35,19 @@ export async function GET() {
     const schemaReady = missingTables.length === 0;
     if (!schemaReady) {
       return NextResponse.json(
-        { status: "degraded", database: "schema_incomplete", missingTables },
-        { status: 503 }
+        { status: "degraded" },
+        { status: 503, headers: { "Cache-Control": "no-store" } }
       );
     }
 
     return NextResponse.json(
-      { status: "ok", database: "connected", schema: "ready" },
-      { status: 200 }
+      { status: "ok" },
+      { status: 200, headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
     console.error("Health check failed:", error);
     return NextResponse.json(
-      { status: "degraded", database: "unavailable" },
+      { status: "degraded" },
       { status: 503 }
     );
   }

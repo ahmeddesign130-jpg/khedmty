@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 const reviewSchema = z.object({
   action: z.enum(["APPROVE", "REJECT"]),
@@ -15,6 +16,7 @@ type RouteContext = {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ success: false, message: "الطلب غير مسموح." }, { status: 403 });
     const admin = await getCurrentUser();
 
     if (!admin || admin.role !== "SUPER_ADMIN") {
@@ -24,6 +26,7 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
+    if (!await enforceRateLimit(request, "service-review-admin", admin.id, 60, 60)) return NextResponse.json({ success: false, message: "طلبات مراجعة كثيرة جدًا. حاول لاحقًا." }, { status: 429 });
     const { id } = await context.params;
     const body = await request.json();
     const validation = reviewSchema.safeParse(body);
