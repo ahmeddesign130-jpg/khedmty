@@ -120,6 +120,25 @@ async function main() {
 
   // Additive marketplace taxonomy and order requirement answers.
   await prisma.$executeRawUnsafe(`ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "category" TEXT NOT NULL DEFAULT 'أخرى', ADD COLUMN IF NOT EXISTS "subcategory" TEXT NOT NULL DEFAULT 'عام', ADD COLUMN IF NOT EXISTS "requirements" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`);
+  // Legacy deployments may still have a required categoryId column from the old
+  // relational taxonomy. Current services store category/subcategory as text.
+  // Keep the legacy column and all existing values, but allow new text-taxonomy
+  // services to leave it NULL.
+  await prisma.$executeRawUnsafe(`
+    DO $service_category_compat$
+    BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Service'
+          AND column_name = 'categoryId'
+          AND is_nullable = 'NO'
+      ) THEN
+        ALTER TABLE public."Service" ALTER COLUMN "categoryId" DROP NOT NULL;
+      END IF;
+    END
+    $service_category_compat$;
+  `);
   // Public service references are required by the production database.
   await prisma.$executeRawUnsafe('ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "publicCode" TEXT');
   await prisma.$executeRawUnsafe(`UPDATE "Service" SET "publicCode" = 'KH-PUB-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12)) WHERE "publicCode" IS NULL`);

@@ -15,9 +15,8 @@ async function changePassword(formData: FormData) {
   const currentPassword = String(formData.get("currentPassword") || "");
   const newPassword = String(formData.get("newPassword") || "");
   const confirmPassword = String(formData.get("confirmPassword") || "");
-  const validPassword = newPassword.length >= 10 && newPassword.length <= 72 &&
-    /[A-Z]/.test(newPassword) && /[a-z]/.test(newPassword) &&
-    /[0-9]/.test(newPassword) && /[^A-Za-z0-9]/.test(newPassword);
+  // Keep password-change rules consistent with registration: 10–72 characters.
+  const validPassword = newPassword.length >= 10 && newPassword.length <= 72;
   if (!validPassword || newPassword !== confirmPassword) redirect("/settings?error=password_invalid");
   const account = await prisma.user.findUnique({ where: { id: session.id }, select: { passwordHash: true } });
   if (!account || !(await bcrypt.compare(currentPassword, account.passwordHash))) redirect("/settings?error=password_current");
