@@ -38,19 +38,21 @@ export async function PUT(request: NextRequest) {
     const experience = String(body.experience || "").slice(0, 1000);
     const bio = String(body.bio || "").slice(0, 1500);
     const dateOfBirth = String(body.dateOfBirth || "").slice(0, 10);
+    const previous = await prisma.auditLog.findFirst({
+      where: { targetId: user.id, action: "PROVIDER_APPLICATION_DRAFT_SAVED" },
+      orderBy: { createdAt: "desc" }, select: { id: true, details: true },
+    });
+    const { decryptProviderApplication } = await import("@/lib/provider-application");
+    const oldDraft = previous?.details ? decryptProviderApplication(previous.details) : null;
     const portfolioPaths = Array.isArray(body.portfolioPaths)
       ? body.portfolioPaths.map((p: unknown) => String(p)).slice(0, 5)
-      : [];
+      : oldDraft?.portfolioPaths || [];
     const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..");
     if (portfolioPaths.some((path: string) => !ownedPath(path)) || new Set(portfolioPaths).size !== portfolioPaths.length) {
       return NextResponse.json({ message: "ملفات نماذج الأعمال غير صالحة." }, { status: 400 });
     }
     const encrypted = encryptProviderApplication({
       fullName, phone, nationalId: "", dateOfBirth, profession, experience, bio, portfolioPaths,
-    });
-    const previous = await prisma.auditLog.findFirst({
-      where: { targetId: user.id, action: "PROVIDER_APPLICATION_DRAFT_SAVED" },
-      orderBy: { createdAt: "desc" }, select: { id: true },
     });
     if (previous) {
       await prisma.auditLog.update({ where: { id: previous.id }, data: { actorId: user.id, details: encrypted } });
