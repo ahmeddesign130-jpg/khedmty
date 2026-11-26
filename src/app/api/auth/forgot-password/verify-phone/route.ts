@@ -1,6 +1,6 @@
 import { NextRequest,NextResponse } from "next/server";
 import { jwtVerify,SignJWT } from "jose";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";\nimport { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 export const dynamic="force-dynamic";
 const go=(req:NextRequest,path:string)=>NextResponse.redirect(new URL(path,req.url),303);
 export async function POST(req:NextRequest){
@@ -8,7 +8,7 @@ export async function POST(req:NextRequest){
   const secret=process.env.AUTH_SECRET;if(!secret||secret.length<32)throw new Error("AUTH_SECRET missing");
   const proof=req.cookies.get("khedmty_reset_email")?.value;if(!proof)return go(req,"/forgot-password?error=restart");
   const {payload}=await jwtVerify(proof,new TextEncoder().encode(secret));
-  if(payload.purpose!=="password-reset-email-verified"||!payload.sub)return go(req,"/forgot-password?error=restart");
+  if(payload.purpose!=="password-reset-email-verified"||!payload.sub)return go(req,"/forgot-password?error=restart");\n  if(!await enforceRateLimit(req,"password-reset-phone-user",payload.sub,5,900)) return go(req,"/forgot-password?error=rate_limited");
   const form=await req.formData();const phone=String(form.get("phone")||"").replace(/[\s-]/g,"");
   if(!/^01[0125]\d{8}$/.test(phone))return go(req,"/forgot-password?step=phone&error=phone");
   const user=await prisma.user.findUnique({where:{id:payload.sub},include:{profile:{select:{phone:true}}}});
