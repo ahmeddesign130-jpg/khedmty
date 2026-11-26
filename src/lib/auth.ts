@@ -55,7 +55,7 @@ export async function createSession(user: SessionUser): Promise<string> {
 export const SESSION_COOKIE_NAME = COOKIE_NAME;
 export const SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview",
   sameSite: "lax" as const,
   path: "/",
   maxAge: SESSION_DURATION,
@@ -120,7 +120,7 @@ export async function clearSession() {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview",
     sameSite: "lax",
     path: "/",
     maxAge: 0,
