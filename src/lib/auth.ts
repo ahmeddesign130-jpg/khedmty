@@ -103,9 +103,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       console.warn("[auth-session] user_not_found");
       return null;
     }
-    const tokenSessionVersion = typeof (await jwtVerify(token, getSecret(), { algorithms: ["HS256"] })).payload.sv === "number"
-      ? (await jwtVerify(token, getSecret(), { algorithms: ["HS256"] })).payload.sv as number
-      : 0;
+    const tokenSessionVersion = typeof payload.sv === "number" ? payload.sv : 0;
     if (tokenSessionVersion !== account.sessionVersion) {
       console.warn("[auth-session] session_revoked");
       return null;
