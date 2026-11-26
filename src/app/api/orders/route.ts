@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
 import { calculateOrderPricing } from "@/lib/pricing.mjs";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -54,12 +55,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ success: false, message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ success: false, message: "يجب تسجيل الدخول أولاً" }, { status: 401 });
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") {
       return NextResponse.json({ success: false, message: "هذه الخاصية للعملاء النشطين فقط" }, { status: 403 });
     }
 
+    if (!await enforceRateLimit(request, "order-create", user.id, 15, 3600) || !await enforceRateLimit(request, "order-create-ip", "all", 50, 3600)) return NextResponse.json({ success: false, message: "تجاوزت عدد محاولات إنشاء الطلبات. حاول لاحقًا." }, { status: 429 });
     const validation = orderSchema.safeParse(await request.json());
     if (!validation.success) return NextResponse.json({ success: false, message: "بيانات الطلب غير صحيحة" }, { status: 400 });
 
