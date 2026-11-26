@@ -17,11 +17,23 @@ export async function createStorageUpload(bucket: string, objectPath: string) {
     cache: "no-store",
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.token || !data.signedURL) {
-    console.error("SUPABASE_SIGN_UPLOAD_ERROR", response.status, data);
+  // Supabase Storage may return the signed path as "url" (older response)
+  // or "signedURL"/"signedUrl" depending on the API version.
+  const signedPath = [data.signedURL, data.signedUrl, data.url].find(
+    (value): value is string => typeof value === "string" && value.length > 0,
+  );
+  if (!response.ok || !data.token || !signedPath) {
+    // Never log the response body: it can contain a live signed upload token.
+    console.error("SUPABASE_SIGN_UPLOAD_ERROR", response.status, {
+      message: typeof data.message === "string" ? data.message : undefined,
+      error: typeof data.error === "string" ? data.error : undefined,
+      statusCode: data.statusCode,
+    });
     throw new Error("Could not create signed upload URL.");
   }
-  const uploadUrl = data.signedURL.startsWith("http") ? data.signedURL : `${url}${data.signedURL.startsWith("/") ? "" : "/"}${data.signedURL}`;
+  const uploadUrl = signedPath.startsWith("http")
+    ? signedPath
+    : `${url}${signedPath.startsWith("/storage/v1/") ? "" : "/storage/v1"}${signedPath.startsWith("/") ? "" : "/"}${signedPath}`;
   return { uploadUrl, token: data.token, objectPath };
 }
 export async function createStorageDownload(bucket: string, objectPath: string, expiresIn = 3600) {
