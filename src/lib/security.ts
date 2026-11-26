@@ -71,7 +71,7 @@ export async function enforceRateLimit(
         ELSE current_limit."hits" + 1
       END,
       "windowStartedAt" = CASE
-        WHEN public."SecurityRateLimit"."windowStartedAt" < NOW() - (${windowSeconds} * INTERVAL '1 second') THEN NOW()
+        WHEN current_limit."windowStartedAt" < NOW() - (${windowSeconds} * INTERVAL '1 second') THEN NOW()
         ELSE public."SecurityRateLimit"."windowStartedAt"
       END,
       "updatedAt" = NOW()
