@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 
 let tableReady: Promise<void> | undefined;
+let lastCleanupAt = 0;
 
 async function ensureRateLimitTable() {
   if (!tableReady) {
@@ -12,7 +13,10 @@ async function ensureRateLimitTable() {
         "windowStartedAt" TIMESTAMPTZ NOT NULL,
         "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
-    `).then(() => undefined).catch((error) => {
+    `).then(async () => {
+      await prisma.$executeRawUnsafe(`ALTER TABLE public.\"SecurityRateLimit\" ENABLE ROW LEVEL SECURITY`);
+      await prisma.$executeRawUnsafe(`REVOKE ALL ON TABLE public.\"SecurityRateLimit\" FROM anon, authenticated`);
+    }).catch((error) => {
       tableReady = undefined;
       throw error;
     });
@@ -54,6 +58,10 @@ export async function enforceRateLimit(
   await ensureRateLimitTable();
   const identity = scope.endsWith("-ip") ? `ip:${clientIp(request)}` : `subject:${subject.trim().toLowerCase().slice(0, 254)}`;
   const key = digest(`${scope}:${identity}`);
+  if (Date.now() - lastCleanupAt > 6 * 60 * 60 * 1000) {
+    lastCleanupAt = Date.now();
+    await prisma.$executeRaw`DELETE FROM public.\"SecurityRateLimit\" WHERE \"updatedAt\" < NOW() - INTERVAL '2 days'`;
+  }
   const rows = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
     INSERT INTO public."SecurityRateLimit" AS current_limit ("key", "hits", "windowStartedAt", "updatedAt")
     VALUES (${key}, 1, NOW(), NOW())
