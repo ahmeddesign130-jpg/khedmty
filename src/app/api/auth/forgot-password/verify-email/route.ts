@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const form = await req.formData();
     const email = String(form.get("email") || "").trim().toLowerCase();
     const code = String(form.get("code") || "").trim();
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || email.length > 254 || !/^\\d{6}$/.test(code)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 || !/^\d{6}$/.test(code)) {
       return go(req, `/forgot-password?step=verify&email=${encodeURIComponent(email)}&error=code`);
     }
     const user = await prisma.user.findUnique({ where: { email }, include: { emailOtp: true } });
