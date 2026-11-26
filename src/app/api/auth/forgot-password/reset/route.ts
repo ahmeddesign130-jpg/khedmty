@@ -1,7 +1,7 @@
 import { NextRequest,NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";\nimport { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 export const dynamic="force-dynamic";
 const go=(req:NextRequest,path:string)=>NextResponse.redirect(new URL(path,req.url),303);
 export async function POST(req:NextRequest){
