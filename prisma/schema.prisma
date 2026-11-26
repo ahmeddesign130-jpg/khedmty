@@ -170,6 +170,7 @@ model AuditLog {
   id        String   @id @default(cuid())
   actorId   String
   action    String
+  targetType String @default("USER")
   targetId  String
   details   String?
   createdAt DateTime @default(now())
