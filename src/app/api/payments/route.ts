@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
-    if (!await enforceRateLimit(request, "payment-submit-user", user.id, 8, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات إرسال إثبات الدفع. حاول لاحقًا." }, { status: 429 });
+    if (!await enforceRateLimit(request, "payment-submit-user", user.id, 8, 3600) || !await enforceRateLimit(request, "payment-submit-ip", "all", 20, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات إرسال إثبات الدفع. حاول لاحقًا." }, { status: 429 });
     if (user.role !== "CUSTOMER" || user.status !== "ACTIVE") return NextResponse.json({ message: "هذه الخدمة متاحة لحسابات العملاء المفعلة فقط." }, { status: 403 });
 
     const parsed = paymentSchema.safeParse(await request.json());
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const { orderId, receiptUrl, amount, method } = parsed.data;
     const walletConfigured = Boolean((process.env.PAYMENT_WALLET_NUMBER || process.env.ETISALAT_CASH_NUMBER || "").trim());
     if (!walletConfigured) return NextResponse.json({ message: "محفظة الاستقبال غير مفعّلة حاليًا." }, { status: 503 });
-    if (!receiptUrl.startsWith(`${user.id}/`) || receiptUrl.includes("..") || receiptUrl.startsWith("/") || receiptUrl.includes("\\\\")) {
+    if (!receiptUrl.startsWith(`${user.id}/`) || receiptUrl.includes("..") || receiptUrl.startsWith("/") || receiptUrl.includes("\\")) {
       return NextResponse.json({ message: "مسار صورة الإيصال غير صحيح." }, { status: 400 });
     }
 
