@@ -69,7 +69,18 @@ async function main() {
   // Additive order workflow state; safe to run repeatedly on every build.
   await prisma.$executeRawUnsafe('ALTER TYPE "OrderStatus" ADD VALUE IF NOT EXISTS \'DELIVERY_REVIEW\'');
 
+  // Restore the required payment amount column on legacy databases without losing payment rows.
+  // Existing non-null amounts are preserved; missing values are derived from the linked order total.
+  await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "amount" INTEGER');
+  await prisma.$executeRawUnsafe('UPDATE "Payment" AS p SET "amount" = o."total" FROM "Order" AS o WHERE p."orderId" = o."id" AND p."amount" IS NULL');
+  await prisma.$executeRawUnsafe('UPDATE "Payment" SET "amount" = 0 WHERE "amount" IS NULL');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ALTER COLUMN "amount" SET DEFAULT 0');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ALTER COLUMN "amount" SET NOT NULL');
+
   // Additive payment-review metadata; safe to run repeatedly on every build.
+  // Legacy production databases may not yet have the payment method field.
+  // Preserve existing payments and give older rows a neutral method value.
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "method" TEXT NOT NULL DEFAULT 'OTHER'`);
   await prisma.$executeRawUnsafe('ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "transferReference" TEXT, ADD COLUMN IF NOT EXISTS "transferDate" TIMESTAMP(3), ADD COLUMN IF NOT EXISTS "aiReceiptStatus" TEXT, ADD COLUMN IF NOT EXISTS "aiReceiptAmount" INTEGER, ADD COLUMN IF NOT EXISTS "aiReceiptConfidence" INTEGER, ADD COLUMN IF NOT EXISTS "aiReceiptNotes" TEXT, ADD COLUMN IF NOT EXISTS "aiReceiptCheckedAt" TIMESTAMP(3)');
 
   await prisma.$executeRawUnsafe(`
@@ -103,9 +114,16 @@ async function main() {
     )
   `);
   await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Notification_userId_createdAt_idx" ON "Notification"("userId", "createdAt")');
+  await prisma.$executeRawUnsafe('ALTER TABLE "Notification" ADD COLUMN IF NOT EXISTS "href" TEXT');
 
 
-  console.log("Khedmty email-auth, payment-review and delivery schema compatibility check completed.");
+  // Additive marketplace taxonomy and order requirement answers.
+  await prisma.$executeRawUnsafe(`ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "category" TEXT NOT NULL DEFAULT 'أخرى', ADD COLUMN IF NOT EXISTS "subcategory" TEXT NOT NULL DEFAULT 'عام', ADD COLUMN IF NOT EXISTS "requirements" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]`);
+  await prisma.$executeRawUnsafe('ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "requirementsAnswers" TEXT');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Service_status_category_subcategory_idx" ON "Service"("status", "category", "subcategory")');
+  await prisma.$executeRawUnsafe('CREATE INDEX IF NOT EXISTS "Service_status_price_idx" ON "Service"("status", "price")');
+
+  console.log("Khedmty marketplace taxonomy and requirements schema compatibility check completed.");
 }
 
 main()

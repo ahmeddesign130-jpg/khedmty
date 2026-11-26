@@ -1,0 +1,30 @@
+@import url("https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800;900&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Almarai:wght@400;700;800&family=Readex+Pro:wght@400;500;600;700&family=Changa:wght@400;500;600;700;800&family=El+Messiri:wght@400;500;600;700&family=Amiri:wght@400;700&family=Mada:wght@400;500;600;700;800;900&family=Harmattan:wght@400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap");
+:root { --khedmty-accent:#f47721; --khedmty-accent-strong:#df6415; --khedmty-accent-soft:#fff3e9; --khedmty-accent-contrast:#fff; }
+html[data-font="alexandria"] body { font-family:"Alexandria","DM Sans",sans-serif!important; }
+html[data-font="cairo"] body { font-family:"Cairo","DM Sans",sans-serif!important; }
+html[data-font="tajawal"] body { font-family:"Tajawal","DM Sans",sans-serif!important; }
+html[data-font="ibm-plex"] body { font-family:"IBM Plex Sans Arabic","DM Sans",sans-serif!important; }
+html[data-font="noto-sans"] body { font-family:"Noto Sans Arabic","DM Sans",sans-serif!important; }
+html[data-font="noto-kufi"] body { font-family:"Noto Kufi Arabic","DM Sans",sans-serif!important; }
+html[data-font="almarai"] body { font-family:"Almarai","DM Sans",sans-serif!important; }
+html[data-font="readex"] body { font-family:"Readex Pro","DM Sans",sans-serif!important; }
+html[data-font="changa"] body { font-family:"Changa","DM Sans",sans-serif!important; }
+html[data-font="el-messiri"] body { font-family:"El Messiri","DM Sans",sans-serif!important; }
+html[data-font="amiri"] body { font-family:"Amiri","DM Sans",serif!important; }
+html[data-font="mada"] body { font-family:"Mada","DM Sans",sans-serif!important; }
+html[data-font="harmattan"] body { font-family:"Harmattan","DM Sans",sans-serif!important; }
+html[data-font="reem-kufi"] body { font-family:"Reem Kufi","DM Sans",sans-serif!important; }
+html[data-font="baloo"] body { font-family:"Baloo Bhaijaan 2","DM Sans",sans-serif!important; }
+html[data-locale="en"] body { font-family:"DM Sans",Arial,sans-serif!important; }
+html[data-palette="ocean"] { --khedmty-accent:#168aad; --khedmty-accent-strong:#126782; --khedmty-accent-soft:#e7f6fb; }
+html[data-palette="emerald"] { --khedmty-accent:#15966b; --khedmty-accent-strong:#0e7653; --khedmty-accent-soft:#e8f8f1; }
+html[data-palette="violet"] { --khedmty-accent:#7954c8; --khedmty-accent-strong:#603eaa; --khedmty-accent-soft:#f1edfb; }
+html[data-palette="rose"] { --khedmty-accent:#d94b78; --khedmty-accent-strong:#b93460; --khedmty-accent-soft:#fff0f4; }
+html[data-palette="teal"] { --khedmty-accent:#0d9488; --khedmty-accent-strong:#0b756d; --khedmty-accent-soft:#e7f8f6; }
+html[data-palette="amber"] { --khedmty-accent:#c58a12; --khedmty-accent-strong:#9c6b0b; --khedmty-accent-soft:#fff7e4; }
+html[data-palette="ocean"] .bg-orange-500,html[data-palette="emerald"] .bg-orange-500,html[data-palette="violet"] .bg-orange-500,html[data-palette="rose"] .bg-orange-500,html[data-palette="teal"] .bg-orange-500,html[data-palette="amber"] .bg-orange-500 { background-color:var(--khedmty-accent)!important; }
+html[data-palette="ocean"] .text-orange-500,html[data-palette="emerald"] .text-orange-500,html[data-palette="violet"] .text-orange-500,html[data-palette="rose"] .text-orange-500,html[data-palette="teal"] .text-orange-500,html[data-palette="amber"] .text-orange-500 { color:var(--khedmty-accent)!important; }
+html[data-palette="ocean"] .text-orange-600,html[data-palette="emerald"] .text-orange-600,html[data-palette="violet"] .text-orange-600,html[data-palette="rose"] .text-orange-600,html[data-palette="teal"] .text-orange-600,html[data-palette="amber"] .text-orange-600 { color:var(--khedmty-accent-strong)!important; }
+html[data-palette="ocean"] .border-orange-200,html[data-palette="emerald"] .border-orange-200,html[data-palette="violet"] .border-orange-200,html[data-palette="rose"] .border-orange-200,html[data-palette="teal"] .border-orange-200,html[data-palette="amber"] .border-orange-200 { border-color:color-mix(in srgb,var(--khedmty-accent) 30%,white)!important; }
+html[data-palette="ocean"] .bg-orange-50,html[data-palette="emerald"] .bg-orange-50,html[data-palette="violet"] .bg-orange-50,html[data-palette="rose"] .bg-orange-50,html[data-palette="teal"] .bg-orange-50,html[data-palette="amber"] .bg-orange-50 { background-color:var(--khedmty-accent-soft)!important; }
+html[data-palette="ocean"] button:hover,html[data-palette="emerald"] button:hover,html[data-palette="violet"] button:hover,html[data-palette="rose"] button:hover,html[data-palette="teal"] button:hover,html[data-palette="amber"] button:hover { --tw-ring-color:var(--khedmty-accent); }

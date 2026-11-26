@@ -28,6 +28,11 @@ export async function POST(request: Request) {
       if (!IMAGE_TYPES.has(mimeType) && !VIDEO_TYPES.has(mimeType)) return NextResponse.json({ message: "الصيغ المسموحة: JPG وPNG وWEBP وMP4 وWEBM وMOV." }, { status: 400 });
       maxSize = VIDEO_TYPES.has(mimeType) ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
       bucket = "service-media";
+    } else if (kind === "provider-portfolio") {
+      if (!((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) return NextResponse.json({ message: "رفع نماذج الأعمال متاح للمتقدمين فقط." }, { status: 403 });
+      if (!IMAGE_TYPES.has(mimeType) && !VIDEO_TYPES.has(mimeType)) return NextResponse.json({ message: "الصيغ المسموحة: JPG وPNG وWEBP وMP4 وWEBM وMOV." }, { status: 400 });
+      maxSize = VIDEO_TYPES.has(mimeType) ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+      bucket = "provider-verification";
     } else if (kind === "provider-verification") {
       if (!((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) return NextResponse.json({ message: "رفع مستندات التحقق متاح للمتقدمين المؤهلين فقط." }, { status: 403 });
       if (!IMAGE_TYPES.has(mimeType)) return NextResponse.json({ message: "مستند التحقق يجب أن يكون صورة JPG أو PNG أو WEBP." }, { status: 400 });
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
     } else return NextResponse.json({ message: "نوع الرفع غير صحيح." }, { status: 400 });
     if (size > maxSize) return NextResponse.json({ message: `حجم الملف أكبر من الحد المسموح (${Math.round(maxSize/1024/1024)} MB).` }, { status: 413 });
     const extension = mimeType === "image/jpeg" ? "jpg" : mimeType === "video/quicktime" ? "mov" : mimeType.split("/")[1];
-    const folder = kind === "provider-verification" ? "verification/" : "";
+    const folder = kind === "provider-verification" ? "verification/" : kind === "provider-portfolio" ? "portfolio/" : "";
     const objectPath = kind === "delivery" ? `${objectFolder}${Date.now()}-${crypto.randomUUID()}.${extension}` : `${user.id}/${folder}${Date.now()}-${crypto.randomUUID()}.${extension}`;
     const signed = await createStorageUpload(bucket, objectPath);
     return NextResponse.json({ ...signed, bucket, mimeType, maxSize, publicUrl: kind === "service" ? serviceMediaPublicUrl(objectPath) : null });

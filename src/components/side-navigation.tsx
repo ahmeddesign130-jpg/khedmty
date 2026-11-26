@@ -60,19 +60,22 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || "{}");
+      const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}");
       const nextLocale: Locale = saved.locale === "en" ? "en" : "ar";
       setLocale(nextLocale);
       document.documentElement.lang = nextLocale;
       document.documentElement.dir = nextLocale === "ar" ? "rtl" : "ltr";
       document.documentElement.dataset.locale = nextLocale;
-      document.documentElement.dataset.theme = "light";
+      document.documentElement.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+      document.documentElement.dataset.palette = saved.palette || "orange";
+      document.documentElement.dataset.font = saved.font || "alexandria";
     } catch {}
   }, [userId]);
 
   function savePreferences(nextLocale: Locale) {
     setLocale(nextLocale);
-    const value = JSON.stringify({ locale: nextLocale, theme: "light" });
+    const previous = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}");
+    const value = JSON.stringify({ ...previous, locale: nextLocale });
     try {
       localStorage.setItem("khedmty-preferences-" + userId, value);
       localStorage.setItem("khedmty-public-preferences", value);
@@ -80,7 +83,10 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
     document.documentElement.lang = nextLocale;
     document.documentElement.dir = nextLocale === "ar" ? "rtl" : "ltr";
     document.documentElement.dataset.locale = nextLocale;
-    document.documentElement.dataset.theme = "light";
+    const saved = JSON.parse(localStorage.getItem("khedmty-preferences-" + userId) || localStorage.getItem("khedmty-public-preferences") || "{}");
+    document.documentElement.dataset.theme = saved.theme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.palette = saved.palette || "orange";
+    document.documentElement.dataset.font = saved.font || "alexandria";
     window.dispatchEvent(new Event("khedmty-preferences-change"));
   }
 
@@ -92,8 +98,6 @@ export function SideNavigation({ role, userId }: { role: Role | null; userId: st
 
   return (
     <>
-      {role === "CUSTOMER" && <a href="/provider/apply" aria-label="التبديل إلى مقدم الخدمة" title="التبديل إلى مقدم الخدمة" className="fixed right-[4.25rem] top-3 z-[50] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-white text-orange-600 shadow-lg transition hover:-translate-y-0.5 hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"><UiIcon name="repeat" size={23}/></a>}
-      {role === "PROVIDER" && <form action="/api/account/switch-role" method="POST" className="fixed right-[4.25rem] top-3 z-[50]"><button type="submit" aria-label="العودة إلى حساب العميل" title="العودة إلى حساب العميل" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-white text-orange-600 shadow-lg transition hover:-translate-y-0.5 hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"><UiIcon name="repeat" size={23}/></button></form>}
       <button ref={triggerRef} type="button" aria-label={locale === "en" ? "Open Khedmty menu" : "فتح قائمة خِدمتي"} aria-expanded={open} aria-controls="khedmty-side-menu" aria-hidden={open} tabIndex={open ? -1 : 0}
           onClick={() => setOpen(true)}
           className={`khedmty-menu-trigger fixed right-3 top-3 z-[50] inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-[0_8px_24px_rgba(234,105,24,0.32)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:from-orange-600 hover:to-orange-700 hover:shadow-[0_12px_28px_rgba(234,105,24,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 ${open ? "invisible pointer-events-none opacity-0" : ""}`}>

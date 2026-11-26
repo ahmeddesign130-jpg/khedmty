@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { decryptProviderApplication } from "@/lib/provider-application";
@@ -14,102 +13,51 @@ export default async function ProviderVerificationReviewPage({ params }: { param
   const { id } = await params;
   const provider = await prisma.user.findFirst({
     where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] },
-    select: { id: true, email: true, displayName: true, createdAt: true, profile: { select: { phone: true } } },
+    select: { id: true, email: true, displayName: true, createdAt: true },
   });
   if (!provider) notFound();
+
   const submission = await prisma.auditLog.findFirst({
     where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
-    orderBy: { createdAt: "desc" },
-    select: { details: true, createdAt: true },
+    orderBy: { createdAt: "desc" }, select: { details: true, createdAt: true },
   });
   const latestReview = await prisma.auditLog.findFirst({
     where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
     orderBy: { createdAt: "desc" }, select: { createdAt: true },
   });
-  if (!submission || (latestReview && latestReview.createdAt > submission.createdAt)) {
-    return <main dir="rtl" className="min-h-screen bg-slate-50 p-6"><section className="mx-auto max-w-3xl rounded-2xl bg-white p-7"><Link href="/admin/providers" className="font-bold text-orange-600">العودة لمقدمي الخدمات</Link><h1 className="mt-6 text-2xl font-black">لا توجد بيانات تحقق حديثة</h1><p className="mt-3 leading-8 text-slate-600">لا يمكن اعتماد هذا الحساب قبل أن يرسل مقدم الخدمة نموذج التحقق وصور البطاقة.</p></section></main>;
-  }
+  if (!submission || (latestReview && latestReview.createdAt > submission.createdAt)) notFound();
   const data = submission.details ? decryptProviderApplication(submission.details) : null;
-  if (!data) return <main dir="rtl" className="p-8">تعذر فك تشفير بيانات الطلب. لا تعتمد الحساب.</main>;
-  const frontPath = data.idFrontPath && data.idFrontPath.startsWith(id + "/verification/") ? data.idFrontPath : "";
-  const backPath = data.idBackPath && data.idBackPath.startsWith(id + "/verification/") ? data.idBackPath : "";
-  const [frontUrl, backUrl] = await Promise.all([
-    frontPath ? createStorageDownload("provider-verification", frontPath, 900) : null,
-    backPath ? createStorageDownload("provider-verification", backPath, 900) : null,
-  ]);
+  if (!data) return <main dir="rtl" className="min-h-screen bg-slate-50 p-6"><section className="mx-auto max-w-3xl rounded-2xl bg-white p-7">تعذر قراءة بيانات الطلب بأمان. لم يتم إجراء أي تغيير على الحساب.</section></main>;
 
-  const documentsComplete = Boolean(frontUrl && backUrl && data.idFrontPath && data.idBackPath && data.dateOfBirth);
-
-  async function review(formData: FormData) {
-    "use server";
-    const currentAdmin = await getCurrentUser();
-    if (!currentAdmin || currentAdmin.role !== "SUPER_ADMIN") redirect("/login");
-    const action = String(formData.get("action") || "");
-    const reason = String(formData.get("reason") || "").trim();
-    if (!["APPROVE", "REJECT"].includes(action) || (action === "REJECT" && reason.length > 1000)) redirect("/admin/providers/" + id + "/verification?error=invalid");
-    const latestRequest = await prisma.auditLog.findFirst({
-      where: { targetId: id, action: "PROVIDER_APPLICATION_SUBMITTED" },
-      orderBy: { createdAt: "desc" }, select: { details: true, createdAt: true },
-    });
-    const latestDecision = await prisma.auditLog.findFirst({
-      where: { targetId: id, action: { in: ["PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
-      orderBy: { createdAt: "desc" }, select: { createdAt: true },
-    });
-    if (!latestRequest || (latestDecision && latestDecision.createdAt > latestRequest.createdAt)) redirect("/admin/providers?review=not_found");
-    const reviewedData = latestRequest.details ? decryptProviderApplication(latestRequest.details) : null;
-    if (!reviewedData?.dateOfBirth || !reviewedData.idFrontPath?.startsWith(id + "/verification/") || !reviewedData.idBackPath?.startsWith(id + "/verification/")) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
-    const [verifiedFront, verifiedBack] = await Promise.all([
-      reviewedData.idFrontPath ? createStorageDownload("provider-verification", reviewedData.idFrontPath, 300) : null,
-      reviewedData.idBackPath ? createStorageDownload("provider-verification", reviewedData.idBackPath, 300) : null,
-    ]);
-    if (!verifiedFront || !verifiedBack) redirect("/admin/providers/" + id + "/verification?error=missing-documents");
-    await prisma.$transaction(async tx => {
-      if (action === "APPROVE") {
-        const changed = await tx.user.updateMany({ where: { id, OR: [{ role: "PROVIDER", status: "PENDING" }, { role: "CUSTOMER", status: "ACTIVE" }] }, data: { status: "ACTIVE", role: "PROVIDER" } });
-        if (changed.count !== 1) throw new Error("PROVIDER_REVIEW_CONFLICT");
-
-      }
-      await tx.auditLog.create({
-        data: { actorId: currentAdmin.id, targetId: id, action: action === "APPROVE" ? "PROVIDER_APPLICATION_APPROVED" : "PROVIDER_APPLICATION_REJECTED", details: action === "REJECT" ? (reason || "تم رفض الطلب بواسطة الإدارة دون إضافة سبب.") : "تمت الموافقة بعد مراجعة بيانات التحقق." },
-      });
-    });
-    revalidatePath("/admin/providers");
-    revalidatePath("/pending");
-    revalidatePath("/provider");
-    redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
-  }
+  const paths = (data.portfolioPaths || []).filter(path => path.startsWith(id + "/portfolio/"));
+  const portfolioUrls = await Promise.all(paths.map(path => createStorageDownload("provider-verification", path, 900)));
+  const portfolio = portfolioUrls.map((url, index) => ({ url, path: paths[index] })).filter(item => item.url);
 
   return <main dir="rtl" className="min-h-screen bg-slate-50 p-5 md:p-8">
     <section className="mx-auto max-w-4xl">
-      <Link href="/admin/providers" className="font-bold text-orange-600">← مراجعة مقدمي الخدمات</Link>
-      <h1 className="mt-5 text-3xl font-black text-[#14213d]">ملف التحقق الخاص بمقدم الخدمة</h1>
-      <p className="mt-2 text-sm leading-7 text-slate-600">هذه الصفحة متاحة للأدمن فقط. روابط صور الهوية مؤقتة وتنتهي بعد 15 دقيقة.</p>
+      <Link href="/admin/providers" className="font-bold text-orange-600">← العودة لمراجعة مقدمي الخدمات</Link>
+      <h1 className="mt-5 text-3xl font-black text-[#14213d]">ملف مقدم الخدمة</h1>
+      <p className="mt-2 text-sm leading-7 text-slate-600">مراجعة بيانات الحساب والخبرات ونماذج الأعمال. يظهر تاريخ الميلاد المستخرج تلقائيًا، ولا يتم الاحتفاظ بالرقم القومي الكامل.</p>
       <article className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-black">{data.fullName}</h2>
+        <h2 className="text-xl font-black">{data.fullName || provider.displayName}</h2>
         <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-          <p><b>البريد:</b> {provider.email}</p>
-          <p><b>الهاتف:</b> <span dir="ltr">{data.phone}</span></p>
-          <p><b>تاريخ الميلاد:</b> {data.dateOfBirth || "غير متوفر"}</p>
-          <p><b>الرقم القومي:</b> <span dir="ltr">{data.nationalId}</span></p>
-          <p><b>مجال الخدمة:</b> {data.profession}</p>
+          <p><b>البريد الإلكتروني:</b> {provider.email}</p>
+          <p><b>رقم الهاتف:</b> <span dir="ltr">{data.phone}</span></p>
+          <p><b>تاريخ الميلاد:</b> {data.dateOfBirth || "غير متاح"}</p>
+          <p><b>مجال العمل:</b> {data.profession}</p>
           <p><b>الخبرة:</b> {data.experience || "لم يذكر"}</p>
           <p className="sm:col-span-2"><b>النبذة:</b> {data.bio}</p>
           <p className="text-xs text-slate-500 sm:col-span-2">تاريخ إرسال الطلب: {submission.createdAt.toLocaleString("en-GB")}</p>
         </div>
       </article>
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <article className="rounded-2xl bg-white p-4 shadow-sm"><h2 className="mb-3 font-black">البطاقة — الوجه الأمامي</h2>{frontUrl ? <a href={frontUrl} target="_blank" rel="noreferrer" className="font-bold text-orange-600 underline">فتح الصورة الخاصة</a> : <p className="text-sm text-red-700">الصورة غير متاحة</p>}</article>
-        <article className="rounded-2xl bg-white p-4 shadow-sm"><h2 className="mb-3 font-black">البطاقة — الوجه الخلفي</h2>{backUrl ? <a href={backUrl} target="_blank" rel="noreferrer" className="font-bold text-orange-600 underline">فتح الصورة الخاصة</a> : <p className="text-sm text-red-700">الصورة غير متاحة</p>}</article>
-      </div>
-      {documentsComplete ? <form action={review} className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-        <label className="block text-sm font-bold">سبب الرفض (اختياري)
-          <textarea name="reason" maxLength={1000} rows={3} className="mt-2 w-full rounded-xl border border-slate-200 p-3"/>
-        </label>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button name="action" value="APPROVE" className="rounded-xl bg-green-600 px-6 py-3 font-bold text-white">اعتماد مقدم الخدمة</button>
-          <button name="action" value="REJECT" formNoValidate className="rounded-xl bg-red-600 px-6 py-3 font-bold text-white">رفض الطلب</button>
-        </div>
-      </form> : <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 leading-7 text-amber-900">لا يمكن اعتماد هذا الطلب؛ يجب إعادة إرسال تاريخ الميلاد وصور البطاقة الأمامية والخلفية بشكل صحيح.</div>}
+      <section className="mt-5 rounded-2xl bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-black text-[#14213d]">نماذج الأعمال ({portfolio.length})</h2>
+        {portfolio.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {portfolio.map((item,index)=><a key={item.path} href={item.url!} target="_blank" rel="noreferrer" className="rounded-xl border border-slate-200 p-4 font-bold text-orange-700 underline">فتح نموذج العمل {index+1}</a>)}
+        </div> : <p className="mt-3 text-sm leading-7 text-slate-600">هذا طلب قديم أُرسل قبل إضافة نماذج الأعمال. يمكنك مراجعة بياناته من هنا.</p>}
+      </section>
+      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900">قرار القبول أو الرفض يتم من صفحة مراجعة مقدمي الخدمات. اكتب سبب الرفض عند اختيار الرفض حتى يعرف المتقدم ما الذي يحتاج إلى تعديله.</div>
+      <Link href="/admin/providers" className="mt-5 inline-flex rounded-xl bg-orange-500 px-6 py-3 font-black text-white">العودة إلى قائمة الطلبات</Link>
     </section>
   </main>;
 }
