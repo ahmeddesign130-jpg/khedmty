@@ -168,10 +168,6 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."Service" ALTER COLUMN "serviceNo" SET NOT NULL`
       );
     })().catch((error) => {
-      await basePrisma.$executeRawUnsafe(`ALTER TABLE IF EXISTS public."Service" ADD COLUMN IF NOT EXISTS "publicCode" TEXT`);
-      await basePrisma.$executeRawUnsafe(`UPDATE public."Service" SET "publicCode" = 'KH-PUB-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12)) WHERE "publicCode" IS NULL`);
-      await basePrisma.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "Service_publicCode_key" ON public."Service" ("publicCode")`);
-      await basePrisma.$executeRawUnsafe(`ALTER TABLE IF EXISTS public."Service" ALTER COLUMN "publicCode" SET NOT NULL`);
       compatibilitySchemaPromise = undefined;
       throw error;
     });
