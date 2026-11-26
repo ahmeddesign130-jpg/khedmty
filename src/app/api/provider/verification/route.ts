@@ -3,15 +3,19 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { encryptProviderApplication } from "@/lib/provider-application";
 import { createStorageDownload, storageReady } from "@/lib/storage";
+import { getStorageObjectInfo } from "@/lib/storage-security";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user || !((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) {
       return NextResponse.json({ message: "استكمال طلب الانضمام متاح للحسابات المؤهلة فقط." }, { status: 403 });
     }
+    if (!await enforceRateLimit(request, "provider-verification-user", user.id, 5, 3600) || !await enforceRateLimit(request, "provider-verification-ip", "all", 15, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات إرسال طلب التحقق. حاول لاحقًا." }, { status: 429 });
     const body = await request.json();
     const fullName = String(body.fullName || "").trim();
     const phone = String(body.phone || "").trim();
@@ -44,6 +48,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "طلبك قيد المراجعة بالفعل." }, { status: 409 });
     }
     if (!storageReady()) return NextResponse.json({ message: "التخزين غير متاح حالياً. حاول لاحقاً." }, { status: 503 });
+    const portfolioInfo = await Promise.all(portfolioPaths.map((path: string) => getStorageObjectInfo("provider-verification", path)));
+    if (portfolioInfo.some((info) => !info || !(["image/jpeg", "image/png", "image/webp"].includes(info.mimeType) ? info.size > 8 * 1024 * 1024 : !["video/mp4", "video/webm", "video/quicktime"].includes(info.mimeType) || info.size > 40 * 1024 * 1024))) return NextResponse.json({ message: "أحد نماذج الأعمال غير صالح أو حجمه أكبر من المسموح." }, { status: 400 });
     const portfolioFiles = await Promise.all(portfolioPaths.map((path: string) => createStorageDownload("provider-verification", path, 300)));
     if (portfolioFiles.some(url => !url)) return NextResponse.json({ message: "تعذر العثور على أحد نماذج الأعمال. أعد رفع الملفات." }, { status: 400 });
 
