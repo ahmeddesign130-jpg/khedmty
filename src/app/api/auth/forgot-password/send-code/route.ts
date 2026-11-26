@@ -2,6 +2,7 @@ import { createHash, randomInt } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendKhedmtyCode } from "@/lib/email";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 const hash = (id: string, code: string) => createHash("sha256").update(`${process.env.AUTH_SECRET}:${id}:${code}`).digest("hex");
