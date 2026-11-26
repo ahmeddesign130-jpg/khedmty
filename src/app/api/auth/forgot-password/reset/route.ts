@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       /[a-z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password);
     if (!valid || password !== confirm) return go(req, "/forgot-password?step=new&error=password");
     const passwordHash = await bcrypt.hash(password, 12);
-    await prisma.user.update({ where: { id: payload.sub }, data: { passwordHash } });
+    await prisma.user.update({ where: { id: payload.sub }, data: { passwordHash, sessionVersion: { increment: 1 } } });
     const secure = process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview";
     const response = go(req, "/login?reset=1");
     response.cookies.set("khedmty_reset_authorized", "", { httpOnly: true, secure, sameSite: "lax", path: "/", maxAge: 0 });
