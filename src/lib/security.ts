@@ -52,14 +52,15 @@ export async function enforceRateLimit(
   windowSeconds: number,
 ) {
   await ensureRateLimitTable();
-  const key = digest(`${scope}:ip:${clientIp(request)}:subject:${subject.trim().toLowerCase().slice(0, 254)}`);
+  const identity = scope.endsWith("-ip") ? `ip:${clientIp(request)}` : `subject:${subject.trim().toLowerCase().slice(0, 254)}`;
+  const key = digest(`${scope}:${identity}`);
   const rows = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
-    INSERT INTO public."SecurityRateLimit" ("key", "hits", "windowStartedAt", "updatedAt")
+    INSERT INTO public."SecurityRateLimit" AS current_limit ("key", "hits", "windowStartedAt", "updatedAt")
     VALUES (${key}, 1, NOW(), NOW())
     ON CONFLICT ("key") DO UPDATE SET
       "hits" = CASE
-        WHEN public."SecurityRateLimit"."windowStartedAt" < NOW() - (${windowSeconds} * INTERVAL '1 second') THEN 1
-        ELSE public."SecurityRateLimit"."hits" + 1
+        WHEN current_limit."windowStartedAt" < NOW() - (${windowSeconds} * INTERVAL '1 second') THEN 1
+        ELSE current_limit."hits" + 1
       END,
       "windowStartedAt" = CASE
         WHEN public."SecurityRateLimit"."windowStartedAt" < NOW() - (${windowSeconds} * INTERVAL '1 second') THEN NOW()
