@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createStorageDownload, storageReady } from "@/lib/storage";
 import { getStorageObjectInfo } from "@/lib/storage-security";
-import { enforceSameOrigin } from "@/lib/security";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 const fileSchema = z.object({
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!user || user.role !== "PROVIDER" || user.status !== "ACTIVE") {
       return NextResponse.json({ message: "هذه العملية لمقدم الخدمة المعتمد فقط." }, { status: 403 });
     }
+    if (!await enforceRateLimit(request, "delivery-submit-user", user.id, 15, 3600) || !await enforceRateLimit(request, "delivery-submit-ip", "all", 50, 3600)) return NextResponse.json({ message: "تجاوزت عدد محاولات رفع التسليم. حاول لاحقًا." }, { status: 429 });
     const { id } = await params;
     const parsed = bodySchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ message: "بيانات الملفات غير صحيحة." }, { status: 400 });
