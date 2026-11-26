@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type FocusEvent, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type FocusEvent, type ChangeEvent } from "react";
 
 const steps = [
   { title: "بياناتك الأساسية", hint: "معلومات التواصل والتعريف بنفسك" },
@@ -25,6 +25,7 @@ export default function ProviderVerificationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [draftStatus, setDraftStatus] = useState("");
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -90,6 +91,13 @@ export default function ProviderVerificationForm() {
     } catch {
       setDraftStatus("تعذر حفظ المسودة الآن. اترك الصفحة مفتوحة وحاول مرة أخرى.");
     }
+  }
+
+  function handleChange(event: ChangeEvent<HTMLFormElement>) {
+    if (!draftLoaded || submitted) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    const form = event.currentTarget;
+    saveTimer.current = setTimeout(() => { void persistDraft(form); }, 800);
   }
 
   function handleBlur(event: FocusEvent<HTMLFormElement>) {
@@ -195,7 +203,7 @@ export default function ProviderVerificationForm() {
 
   if (submitted) return <section role="status" aria-live="polite" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-3xl font-black text-emerald-700">✓</div><h2 className="mt-4 text-xl font-black text-emerald-900">تم إرسال طلبك بنجاح</h2><p className="mt-3 leading-8 text-emerald-800">وصلت بياناتك ونماذج أعمالك إلى الإدارة للمراجعة. لن يتم تفعيل حساب مقدم الخدمة إلا بعد موافقة الأدمن. لا تحتاج إلى إرسال الطلب مرة أخرى.</p><p className="mt-3 text-sm font-bold text-emerald-700">يمكنك العودة إلى الرئيسية بأمان.</p></section>;
 
-  return <form id="provider-verification-form" onSubmit={submit} onBlur={handleBlur} noValidate className="mt-6">
+  return <form id="provider-verification-form" onSubmit={submit} onChange={handleChange} onBlur={handleBlur} noValidate className="mt-6">
     <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4">
       <p className="font-black text-orange-900">استكمال طلب الانضمام كمقدم خدمة</p>
       <p className="mt-1 text-sm leading-7 text-orange-800">كل حساب مقدم خدمة يخضع لمراجعة الإدارة قبل التفعيل. نستخدم الرقم القومي لاستخراج تاريخ الميلاد فقط ولا نحفظ الرقم القومي الكامل.</p>
