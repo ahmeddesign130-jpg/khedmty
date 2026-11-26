@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     const { mediaUrls, ...details } = validation.data;
     const service = await prisma.$transaction(async (tx) => {
-      const created = await tx.service.create({ data: { ...details, mediaUrls, serviceNo: generateServiceNo(), providerId: user.id, status: "PENDING_REVIEW" } });
+      const created = await tx.service.create({ data: { ...details, mediaUrls, serviceNo: generateServiceNo(), publicCode: `KH-PUB-${crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`, providerId: user.id, status: "PENDING_REVIEW" } });
       await tx.auditLog.create({ data: { actorId: user.id, action: "SERVICE_SUBMITTED", targetId: created.id, details: `تم إرسال الخدمة ${created.serviceNo} للمراجعة` } });
       return created;
     });
