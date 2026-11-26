@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";\nimport { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
