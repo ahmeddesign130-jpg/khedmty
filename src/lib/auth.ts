@@ -35,7 +35,9 @@ function getSecret() {
 }
 
 export async function createSession(user: SessionUser): Promise<string> {
-  const token = await new SignJWT({ id: user.id })
+  const account = await prisma.user.findUnique({ where: { id: user.id }, select: { sessionVersion: true } });
+  if (!account) throw new Error("Cannot create a session for a missing account.");
+  const token = await new SignJWT({ id: user.id, sv: account.sessionVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setJti(randomUUID())
     .setIssuedAt()
@@ -95,10 +97,17 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   try {
     const account = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, role: true, status: true },
+      select: { id: true, email: true, role: true, status: true, sessionVersion: true },
     });
     if (!account) {
       console.warn("[auth-session] user_not_found");
+      return null;
+    }
+    const tokenSessionVersion = typeof (await jwtVerify(token, getSecret(), { algorithms: ["HS256"] })).payload.sv === "number"
+      ? (await jwtVerify(token, getSecret(), { algorithms: ["HS256"] })).payload.sv as number
+      : 0;
+    if (tokenSessionVersion !== account.sessionVersion) {
+      console.warn("[auth-session] session_revoked");
       return null;
     }
     const user = await ensurePrimaryAdmin(account);
