@@ -20,6 +20,8 @@ function safeTokenMatch(provided: string, expected: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!enforceSameOrigin(req)) return redirect(req, "invalid");
+    if (!await enforceRateLimit(req, "admin-emergency-reset-ip", "all", 3, 3600)) return redirect(req, "invalid");
     const expectedToken = process.env.ADMIN_RESET_TOKEN;
     if (!expectedToken || expectedToken.length < 32) return redirect(req, "invalid");
 
