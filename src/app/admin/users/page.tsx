@@ -12,28 +12,38 @@ async function deleteAccount(formData: FormData) {
   const admin = await getCurrentUser();
   if (!admin || admin.role !== "SUPER_ADMIN") redirect("/login");
   const id = String(formData.get("id") || "");
-  if (!id) return;
-  const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true, email: true } });
-  if (!target || target.role === "SUPER_ADMIN" || target.email.endsWith("@deleted.khedmty.invalid")) return;
-  const deletedEmail = `deleted-${target.id}@deleted.khedmty.invalid`;
-  await prisma.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id },
-      data: { email: deletedEmail, displayName: "حساب محذوف", passwordHash: randomBytes(48).toString("hex"), status: "SUSPENDED" },
+  if (!id) redirect("/admin/users?deleteError=1");
+  try {
+    const target = await prisma.user.findUnique({ where: { id }, select: { id: true, role: true, email: true } });
+    if (!target || target.role === "SUPER_ADMIN" || target.email.endsWith("@deleted.khedmty.invalid")) {
+      redirect("/admin/users?deleteError=1");
+    }
+    const deletedEmail = `deleted-${target.id}@deleted.khedmty.invalid`;
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id },
+        data: { email: deletedEmail, displayName: "حساب محذوف", passwordHash: randomBytes(48).toString("hex"), status: "SUSPENDED" },
+      });
+      await tx.profile.updateMany({
+        where: { userId: id },
+        data: { displayName: null, bio: null, avatarUrl: null, phone: null, skills: [] },
+      });
+      await tx.emailOtp.deleteMany({ where: { userId: id } });
+      await tx.service.updateMany({ where: { providerId: id }, data: { status: "PAUSED" } });
+      await tx.auditLog.create({
+        data: { actorId: admin.id, action: "USER_PERSONAL_DATA_DELETED", targetId: id, details: "تم إخفاء البيانات الشخصية وتعطيل الحساب مع الاحتفاظ بسجلات الطلبات والمدفوعات." },
+      });
     });
-    await tx.profile.updateMany({
-      where: { userId: id },
-      data: { displayName: null, bio: null, avatarUrl: null, phone: null, skills: [] },
-    });
-    await tx.emailOtp.deleteMany({ where: { userId: id } });
-    await tx.service.updateMany({ where: { providerId: id }, data: { status: "PAUSED" } });
-    await tx.auditLog.deleteMany({ where: { targetId: id } });
-  });
-  revalidatePath("/admin/users");
-  revalidatePath("/admin/providers");
-  revalidatePath("/admin/orders");
-  revalidatePath("/admin/payments");
-  revalidatePath("/services");
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/providers");
+    revalidatePath("/admin/orders");
+    revalidatePath("/admin/payments");
+    revalidatePath("/services");
+    redirect("/admin/users?deleted=1");
+  } catch (error) {
+    console.error("ADMIN_DELETE_ACCOUNT_ERROR:", error);
+    redirect("/admin/users?deleteError=1");
+  }
 }
 
 async function changeAccess(formData: FormData) {
@@ -63,11 +73,11 @@ async function changeAccess(formData: FormData) {
   revalidatePath("/admin");
 }
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ deleted?: string; deleteError?: string }> }) {
   const admin = await getCurrentUser();
   if (!admin) redirect("/login");
   if (admin.role !== "SUPER_ADMIN") redirect("/account");
-  const users = await prisma.user.findMany({
+  const params = await searchParams;\n  const users = await prisma.user.findMany({
     where: { role: { in: ["CUSTOMER", "PROVIDER"] }, NOT: { email: { endsWith: "@deleted.khedmty.invalid" } } },
     select: { id: true, displayName: true, email: true, role: true, status: true, createdAt: true },
     orderBy: { createdAt: "desc" },
@@ -76,7 +86,7 @@ export default async function AdminUsersPage() {
     <div className="mx-auto max-w-5xl">
       <Link href="/admin" className="font-bold text-orange-600">← العودة للوحة الإدارة</Link>
       <h1 className="mt-6 text-3xl font-black text-slate-900">إدارة العملاء ومقدمي الخدمات</h1>
-      <p className="mt-2 text-slate-600">يمكنك حظر الحساب أو إعادة تفعيله أو حذف بيانات الحساب الشخصية. تظل الطلبات والمدفوعات محفوظة في السجل المالي.</p>
+      <p className="mt-2 text-slate-600">يمكنك حظر الحساب أو إعادة تفعيله أو حذف بيانات الحساب الشخصية. تظل الطلبات والمدفوعات محفوظة في السجل المالي.</p>\n      {params.deleted === "1" && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 font-bold text-green-800">تم حذف البيانات الشخصية وتعطيل الحساب، مع الاحتفاظ بسجلات الطلبات والمدفوعات.</p>}\n      {params.deleteError === "1" && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 font-bold text-red-800">تعذر حذف الحساب. لم يتم اعتماد التغيير؛ راجع سجل الأخطاء وحاول مرة أخرى.</p>}
       <div className="mt-6 space-y-3">
         {users.map((u) => <article key={u.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
