@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendKhedmtyCode } from "@/lib/email";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,8 @@ function hashOtp(userId: string, code: string) {
 export async function POST(req: NextRequest) {
   let createdUserId: string | null = null;
   try {
+    if (!enforceSameOrigin(req)) return redirect303(req, "/register?error=invalid");
+    if (!await enforceRateLimit(req, "register-ip", "all", 5, 3600)) return redirect303(req, "/register?error=rate_limited");
     const form = await req.formData();
     const displayName = String(form.get("displayName") || "").trim();
     const email = String(form.get("email") || "").trim().toLowerCase();
@@ -28,6 +31,7 @@ export async function POST(req: NextRequest) {
     const termsAccepted = form.get("termsAccepted") === "yes";
 
     if (!termsAccepted) return redirect303(req, "/register?error=terms_required");
+    if (!await enforceRateLimit(req, "register-email", email, 3, 3600)) return redirect303(req, "/register?error=rate_limited");
     if (displayName.length < 2 || displayName.length > 70 ||
         email.length < 5 || email.length > 254 ||
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
