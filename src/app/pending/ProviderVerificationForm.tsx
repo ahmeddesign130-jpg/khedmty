@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 
 const steps = [
   { title: "بياناتك الأساسية", hint: "معلومات التواصل والتعريف بنفسك" },
@@ -9,7 +8,6 @@ const steps = [
 ];
 
 export default function ProviderVerificationForm() {
-  const router = useRouter();
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
@@ -17,6 +15,7 @@ export default function ProviderVerificationForm() {
   const [error, setError] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   function handleNationalId(value: string) {
     const digits = value.replace(/\D/g, "").slice(0, 14);
@@ -58,6 +57,16 @@ export default function ProviderVerificationForm() {
     event.preventDefault(); setError("");
     if (nationalId.length !== 14 || !dateOfBirth) { setError("اكتب رقمًا قوميًا مصريًا صحيحًا من 14 رقمًا للتأكد من تاريخ الميلاد."); setStep(0); return; }
     if (files.length < 1 || files.length > 5) { setError("ارفع نموذج عمل واحدًا على الأقل وبحد أقصى 5 ملفات."); return; }
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const fullName = String(form.get("fullName") || "").trim();
+    const phone = String(form.get("phone") || "").trim();
+    const profession = String(form.get("profession") || "").trim();
+    const bio = String(form.get("bio") || "").trim();
+    if (fullName.length < 3) { setError("اكتب اسمك بالكامل (3 أحرف على الأقل)."); setStep(0); return; }
+    if (!/^01[0125][0-9]{8}$/.test(phone)) { setError("اكتب رقم هاتف مصري صحيح مكوّنًا من 11 رقمًا."); setStep(0); return; }
+    if (profession.length < 2) { setError("اكتب مجال الخدمة أو المهنة."); setStep(0); return; }
+    if (bio.length < 10) { setError("النبذة قصيرة جدًا. اكتب 10 أحرف على الأقل عن نفسك والخدمات التي تقدمها."); setStep(1); return; }
     for (const file of files) {
       const video = file.type.startsWith("video/");
       if (video ? file.size > 40 * 1024 * 1024 : file.size > 8 * 1024 * 1024) {
@@ -69,7 +78,6 @@ export default function ProviderVerificationForm() {
     }
     setBusy(true);
     try {
-      const form = new FormData(event.currentTarget);
       const portfolioPaths: string[] = [];
       for (let i = 0; i < files.length; i++) {
         setProgress(`جاري رفع نموذج العمل ${i + 1} من ${files.length}...`);
@@ -86,11 +94,13 @@ export default function ProviderVerificationForm() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "تعذر إرسال الطلب.");
-      router.refresh();
+      setSubmitted(true);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "حدث خطأ غير متوقع.");
     } finally { setBusy(false); setProgress(""); }
   }
+
+  if (submitted) return <section role="status" aria-live="polite" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-3xl font-black text-emerald-700">✓</div><h2 className="mt-4 text-xl font-black text-emerald-900">تم إرسال طلبك بنجاح</h2><p className="mt-3 leading-8 text-emerald-800">وصلت بياناتك ونماذج أعمالك إلى الإدارة للمراجعة. لن يتم تفعيل حساب مقدم الخدمة إلا بعد موافقة الأدمن. لا تحتاج إلى إرسال الطلب مرة أخرى.</p><p className="mt-3 text-sm font-bold text-emerald-700">يمكنك العودة إلى الرئيسية بأمان.</p></section>;
 
   return <form id="provider-verification-form" onSubmit={submit} noValidate className="mt-6">
     <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4">
@@ -130,7 +140,8 @@ export default function ProviderVerificationForm() {
           <textarea name="experience" maxLength={1000} rows={3} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="اكتب خبراتك ومشروعاتك السابقة"/>
         </label>
         <label className="text-sm font-bold text-slate-700">نبذة عنك وعن الخدمات التي تقدمها
-          <textarea name="bio" required minLength={30} maxLength={1500} rows={5} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="عرّفنا بنفسك ومهاراتك وطريقة عملك"/>
+          <textarea name="bio" required minLength={10} maxLength={1500} rows={5} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="عرّفنا بنفسك ومهاراتك وطريقة عملك"/>
+          <span className="mt-1 block text-xs font-normal text-slate-500">اكتب 10 أحرف على الأقل عن خبرتك والخدمات التي تقدمها.</span>
         </label>
         <label className="block text-sm font-bold text-slate-700">نماذج من أعمالك (مطلوب من 1 إلى 5 ملفات)
           <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple required onChange={event=>setFiles(Array.from(event.target.files||[]))} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/>
