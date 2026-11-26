@@ -79,7 +79,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
   const admin = await getCurrentUser();
   if (!admin) redirect("/login");
   if (admin.role !== "SUPER_ADMIN") redirect("/account");
-  const params = await searchParams;\n  const users = await prisma.user.findMany({
+  const params = await searchParams;
+  const users = await prisma.user.findMany({
     where: { role: { in: ["CUSTOMER", "PROVIDER"] }, NOT: { email: { endsWith: "@deleted.khedmty.invalid" } } },
     select: { id: true, displayName: true, email: true, role: true, status: true, createdAt: true },
     orderBy: { createdAt: "desc" },
@@ -88,7 +89,9 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
     <div className="mx-auto max-w-5xl">
       <Link href="/admin" className="font-bold text-orange-600">← العودة للوحة الإدارة</Link>
       <h1 className="mt-6 text-3xl font-black text-slate-900">إدارة العملاء ومقدمي الخدمات</h1>
-      <p className="mt-2 text-slate-600">يمكنك حظر الحساب أو إعادة تفعيله أو حذف بيانات الحساب الشخصية. تظل الطلبات والمدفوعات محفوظة في السجل المالي.</p>\n      {params.deleted === "1" && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 font-bold text-green-800">تم حذف البيانات الشخصية وتعطيل الحساب، مع الاحتفاظ بسجلات الطلبات والمدفوعات.</p>}\n      {params.deleteError === "1" && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 font-bold text-red-800">تعذر حذف الحساب. لم يتم اعتماد التغيير؛ راجع سجل الأخطاء وحاول مرة أخرى.</p>}
+      <p className="mt-2 text-slate-600">يمكنك حظر الحساب أو إعادة تفعيله أو حذف بيانات الحساب الشخصية. تظل الطلبات والمدفوعات محفوظة في السجل المالي.</p>
+      {params.deleted === "1" && <p role="status" className="mt-4 rounded-xl bg-green-50 p-3 font-bold text-green-800">تم حذف البيانات الشخصية وتعطيل الحساب، مع الاحتفاظ بسجلات الطلبات والمدفوعات.</p>}
+      {params.deleteError === "1" && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 font-bold text-red-800">تعذر حذف الحساب. لم يتم اعتماد التغيير؛ راجع سجل الأخطاء وحاول مرة أخرى.</p>}
       <div className="mt-6 space-y-3">
         {users.map((u) => <article key={u.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
