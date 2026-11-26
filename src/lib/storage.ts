@@ -46,11 +46,24 @@ export async function createStorageDownload(bucket: string, objectPath: string, 
     cache: "no-store",
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.signedURL) {
-    console.error("SUPABASE_SIGN_DOWNLOAD_ERROR", response.status, data);
+  const signedPath = [data.signedURL, data.signedUrl, data.url].find(
+    (value): value is string => typeof value === "string" && value.length > 0,
+  );
+  if (!response.ok || !signedPath) {
+    // Do not log the response body: signed URLs may contain access tokens.
+    console.error("SUPABASE_SIGN_DOWNLOAD_ERROR", response.status, {
+      message: typeof data.message === "string" ? data.message : undefined,
+      error: typeof data.error === "string" ? data.error : undefined,
+      statusCode: data.statusCode,
+    });
     return null;
   }
-  return data.signedURL.startsWith("http") ? data.signedURL : `${url}${data.signedURL.startsWith("/") ? "" : "/"}${data.signedURL}`;
+  if (signedPath.startsWith("http://") || signedPath.startsWith("https://")) return signedPath;
+  const normalizedPath = signedPath.startsWith("/") ? signedPath : `/${signedPath}`;
+  const storagePath = normalizedPath.startsWith("/storage/v1/")
+    ? normalizedPath
+    : `/storage/v1${normalizedPath}`;
+  return `${url}${storagePath}`;
 }
 export function serviceMediaPublicUrl(objectPath: string) {
   const { url } = config();
