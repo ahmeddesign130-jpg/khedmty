@@ -34,7 +34,14 @@ export async function createStorageUpload(bucket: string, objectPath: string) {
   const uploadUrl = signedPath.startsWith("http")
     ? signedPath
     : `${url}${signedPath.startsWith("/storage/v1/") ? "" : "/storage/v1"}${signedPath.startsWith("/") ? "" : "/"}${signedPath}`;
-  return { uploadUrl, token: data.token, objectPath };
+  // Supabase signed-upload endpoints require the one-time token on the upload URL.
+  // The server response also exposes it separately as data.token; returning a URL
+  // without this query parameter makes the browser's PUT request fail.
+  const signedUploadUrl = new URL(uploadUrl);
+  if (!signedUploadUrl.searchParams.has("token")) {
+    signedUploadUrl.searchParams.set("token", data.token);
+  }
+  return { uploadUrl: signedUploadUrl.toString(), token: data.token, objectPath };
 }
 export async function createStorageDownload(bucket: string, objectPath: string, expiresIn = 3600) {
   const { url, key } = config();
