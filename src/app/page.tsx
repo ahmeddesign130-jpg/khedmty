@@ -77,7 +77,7 @@ export default function HomePage() {
           <Link href="/services" className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-orange-500 px-7 py-3 font-black text-white transition hover:bg-orange-600">اكتشف الخدمات</Link>
         </div>
       </section>
-      <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500"><p>خِدمتي — مهارتك تستحق التميز</p><p className="mt-2 text-xs">© 2026 — جميع الحقوق محفوظة.</p></footer>
+      <footer className="border-t border-slate-200 bg-white px-5 py-8 text-center text-sm text-slate-500"><p>خِدمتي — مهارتك تستحق التميز</p><nav aria-label="روابط قانونية" className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3"><Link href="/terms" className="font-semibold text-slate-600 underline-offset-4 hover:text-orange-600 hover:underline">الشروط والأحكام</Link><Link href="/pricing" className="font-semibold text-slate-600 underline-offset-4 hover:text-orange-600 hover:underline">الأسعار والرسوم</Link></nav><p className="mt-4 text-xs">© 2026 — جميع الحقوق محفوظة.</p></footer>
     </main>
   );
 }
