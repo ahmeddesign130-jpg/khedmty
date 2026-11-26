@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("prompt", "select_account");
 
   const response = NextResponse.redirect(url);
-  const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/api/auth/google/callback", maxAge: 600 };
+  const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview", sameSite: "lax" as const, path: "/api/auth/google/callback", maxAge: 600 };
   response.cookies.set("khedmty_google_state", state, cookieOptions);
   response.cookies.set("khedmty_google_verifier", verifier, cookieOptions);
   return response;
