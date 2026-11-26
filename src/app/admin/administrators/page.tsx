@@ -17,9 +17,10 @@ async function addAdministrator(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   if (!email || email.length > 254) redirect("/admin/administrators?error=email");
 
-  const target = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true, role: true, status: true } });
+  const target = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true, role: true, status: true, emailVerifiedAt: true } });
   if (!target) redirect("/admin/administrators?error=not_found");
   if (target.status !== "ACTIVE" || target.role === "SUPER_ADMIN") redirect("/admin/administrators?error=not_eligible");
+  if (!target.emailVerifiedAt) redirect("/admin/administrators?error=email_unverified");
 
   const changed = await prisma.user.updateMany({
     where: { id: target.id, role: { in: ["CUSTOMER", "PROVIDER"] }, status: "ACTIVE" },
@@ -28,7 +29,7 @@ async function addAdministrator(formData: FormData) {
   if (changed.count !== 1) redirect("/admin/administrators?error=conflict");
 
   await prisma.auditLog.create({
-    data: { actorId: actor.id, action: "ADMINISTRATOR_ADDED", targetId: target.id, details: "تمت ترقية الحساب إلى مسؤول." },
+    data: { actorId: actor.id, action: "ADMINISTRATOR_ADDED", targetType: "USER", targetId: target.id, details: "تمت ترقية الحساب إلى مسؤول." },
   });
   revalidatePath("/admin/administrators");
   revalidatePath("/admin");
@@ -53,7 +54,7 @@ async function removeAdministrator(formData: FormData) {
   if (changed.count !== 1) redirect("/admin/administrators?error=protected");
 
   await prisma.auditLog.create({
-    data: { actorId: actor.id, action: "ADMINISTRATOR_REMOVED", targetId: target.id, details: "تم إلغاء صلاحيات المسؤول وإعادته إلى حساب عميل." },
+    data: { actorId: actor.id, action: "ADMINISTRATOR_REMOVED", targetType: "USER", targetId: target.id, details: "تم إلغاء صلاحيات المسؤول وإعادته إلى حساب عميل." },
   });
   revalidatePath("/admin/administrators");
   revalidatePath("/admin");
@@ -64,6 +65,7 @@ const messages: Record<string, string> = {
   email: "اكتب بريدًا إلكترونيًا صحيحًا.",
   not_found: "لا يوجد حساب بهذا البريد. يجب أن ينشئ الشخص حسابًا أولًا.",
   not_eligible: "لا يمكن ترقية هذا الحساب؛ تأكد أنه نشط وليس مسؤولًا بالفعل.",
+  email_unverified: "لا يمكن إضافة الحساب كمسؤول قبل تأكيد بريده الإلكتروني. اطلب منه إكمال تأكيد البريد ثم أعد المحاولة.",
   conflict: "تغيرت بيانات الحساب أثناء العملية. حدّث الصفحة وحاول مرة أخرى.",
   self: "لا يمكنك إزالة صلاحيات حسابك الحالي.",
   not_admin: "هذا الحساب ليس مسؤولًا حاليًا.",
