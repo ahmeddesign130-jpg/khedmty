@@ -18,12 +18,8 @@ export function PasswordChangeFields({ action }: PasswordChangeFieldsProps) {
 
   const rules = useMemo(() => ({
     length: newPassword.length >= 10 && newPassword.length <= 72,
-    upper: /[A-Z]/.test(newPassword),
-    lower: /[a-z]/.test(newPassword),
-    number: /[0-9]/.test(newPassword),
-    symbol: /[^A-Za-z0-9]/.test(newPassword),
   }), [newPassword]);
-  const valid = Object.values(rules).every(Boolean);
+  const valid = rules.length;
   const matches = confirmPassword.length > 0 && newPassword === confirmPassword;
 
   const Eye = ({ visible }: { visible: boolean }) => visible
@@ -77,11 +73,7 @@ export function PasswordChangeFields({ action }: PasswordChangeFieldsProps) {
       <div>
         <EyeField label="كلمة المرور الجديدة" name="newPassword" value={newPassword} onChange={setNewPassword} visible={showNew} setVisible={setShowNew} autoComplete="new-password" inputRef={newRef}/>
         <div aria-live="polite" className="mt-2 grid gap-1 text-xs leading-5">
-          {rule(rules.length, "10 أحرف على الأقل")}
-          {rule(rules.upper, "حرف كبير واحد (A)")}
-          {rule(rules.lower, "حرف صغير واحد (a)")}
-          {rule(rules.number, "رقم واحد على الأقل (0–9)")}
-          {rule(rules.symbol, "رمز خاص مثل # أو *")}
+          {rule(rules.length, "من 10 إلى 72 حرفًا أو رقمًا")}
         </div>
       </div>
       <div>
