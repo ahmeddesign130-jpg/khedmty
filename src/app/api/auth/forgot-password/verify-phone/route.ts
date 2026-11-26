@@ -22,12 +22,12 @@ export async function POST(req: NextRequest) {
       return go(req, "/forgot-password?error=rate_limited");
     }
     const form = await req.formData();
-    const phone = String(form.get("phone") || "").replace(/[\\s-]/g, "");
-    if (!/^01[0125]\\d{8}$/.test(phone)) return go(req, "/forgot-password?step=phone&error=phone");
+    const phone = String(form.get("phone") || "").replace(/[\s-]/g, "");
+    if (!/^01[0125]\d{8}$/.test(phone)) return go(req, "/forgot-password?step=phone&error=phone");
     const user = await prisma.user.findUnique({ where: { id: payload.sub }, include: { profile: { select: { phone: true } } } });
-    const stored = (user?.profile?.phone || "").replace(/[\\s-]/g, "");
+    const stored = (user?.profile?.phone || "").replace(/[\s-]/g, "");
     if (!user || !stored || stored !== phone) return go(req, "/forgot-password?step=phone&error=mismatch");
-    const reset = await new SignJWT({ purpose: "password-reset-authorized" })
+    const reset = await new SignJWT({ purpose: "password-reset-authorized", sv: user.sessionVersion })
       .setProtectedHeader({ alg: "HS256" })
       .setSubject(user.id)
       .setIssuedAt()
