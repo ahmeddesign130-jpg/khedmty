@@ -63,6 +63,19 @@ async function reviewProvider(formData: FormData) {
   redirect(action === "APPROVE" ? "/admin/providers?review=approved" : "/admin/providers?review=rejected");
 }
 
+
+async function approveProvider(formData: FormData) {
+  "use server";
+  formData.set("action", "APPROVE");
+  await reviewProvider(formData);
+}
+
+async function rejectProvider(formData: FormData) {
+  "use server";
+  formData.set("action", "REJECT");
+  await reviewProvider(formData);
+}
+
 export default async function AdminProvidersPage({ searchParams }: { searchParams: Promise<{ review?: string }> }) {
   const params = await searchParams;
   const admin = await getCurrentUser();
@@ -146,8 +159,8 @@ export default async function AdminProvidersPage({ searchParams }: { searchParam
                 <textarea name="reason" minLength={5} maxLength={1000} rows={2} placeholder="اكتب سبب الرفض بوضوح ليظهر لصاحب الطلب..." className="mt-2 w-full rounded-xl border border-slate-200 p-3"/>
               </label>
               <div className="flex flex-wrap gap-3">
-                <button name="action" value="APPROVE" className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">قبول وتفعيل الحساب</button>
-                <button name="action" value="REJECT" className="rounded-xl bg-red-600 px-6 py-3 font-bold text-white">رفض الطلب</button>
+                <button type="submit" formAction={approveProvider} className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white">قبول وتفعيل الحساب</button>
+                <button type="submit" formAction={rejectProvider} className="rounded-xl bg-red-600 px-6 py-3 font-bold text-white">رفض الطلب</button>
               </div>
             </form>
           </article>;
