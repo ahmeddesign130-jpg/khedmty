@@ -125,11 +125,36 @@ export default function ProviderVerificationForm() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ kind: "provider-portfolio", name: file.name, mimeType: file.type, size: file.size }),
     });
-    const signed = await signedResponse.json();
-    if (!signedResponse.ok) throw new Error(signed.message || "تعذر تجهيز رفع نموذج العمل.");
-    const response = await fetch(signed.uploadUrl, { method: "PUT", headers: { "Content-Type": file.type }, body: file });
-    if (!response.ok) throw new Error("فشل رفع أحد الملفات. حاول مرة أخرى.");
-    return String(signed.objectPath);
+    const signed = await signedResponse.json().catch(() => null);
+    if (!signedResponse.ok) {
+      throw new Error(signed?.message || `تعذر تجهيز رفع الملف (HTTP ${signedResponse.status}).`);
+    }
+    if (typeof signed?.uploadUrl !== "string" || typeof signed?.objectPath !== "string") {
+      throw new Error("خدمة التخزين لم تُرجع رابط رفع صالحًا. حاول مرة أخرى.");
+    }
+    let response: Response;
+    try {
+      response = await fetch(signed.uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type, "x-upsert": "false" },
+        body: file,
+        cache: "no-store",
+      });
+    } catch {
+      throw new Error("تعذر الاتصال بمخزن الملفات. تحقق من اتصال الإنترنت وإعدادات CORS في Supabase.");
+    }
+    if (!response.ok) {
+      const details = await response.text().catch(() => "");
+      let reason = "";
+      try {
+        const parsed = JSON.parse(details);
+        reason = String(parsed.message || parsed.error || parsed.statusCode || "");
+      } catch {
+        reason = details.replace(/<[^>]*>/g, " ").replace(/\\s+/g, " ").trim().slice(0, 180);
+      }
+      throw new Error(`فشل رفع الملف إلى التخزين (HTTP ${response.status})${reason ? `: ${reason}` : ""}. لم يتم حفظ هذا الملف.`);
+    }
+    return signed.objectPath;
   }
 
   async function handleFiles(event: ChangeEvent<HTMLInputElement>) {
