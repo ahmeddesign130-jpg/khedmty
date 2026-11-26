@@ -12,9 +12,9 @@ function redirect303(req: NextRequest, path: string) {
 }
 
 function hashOtp(userId: string, code: string) {
-  return createHash("sha256")
-    .update(`${process.env.AUTH_SECRET || "khedmty"}:${userId}:${code}`)
-    .digest("hex");
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 32) throw new Error("AUTH_SECRET must be at least 32 characters.");
+  return createHash("sha256").update(`${secret}:${userId}:${code}`).digest("hex");
 }
 
 export async function POST(req: NextRequest) {
