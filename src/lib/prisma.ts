@@ -41,6 +41,10 @@ async function ensureCompatibilitySchema() {
         `ALTER TABLE IF EXISTS public."User"
          ADD COLUMN IF NOT EXISTS "emailVerifiedAt" TIMESTAMPTZ`
       );
+      await basePrisma.$executeRawUnsafe(
+        `ALTER TABLE IF EXISTS public."User"
+         ADD COLUMN IF NOT EXISTS "sessionVersion" INTEGER NOT NULL DEFAULT 0`
+      );
       // Existing accounts predate email OTP and remain usable; new registrations
       // explicitly keep this column NULL until the submitted code is verified.
       await basePrisma.$executeRawUnsafe(
