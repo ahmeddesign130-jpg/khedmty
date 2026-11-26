@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
     const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..");
     if (fullName.length < 3 || fullName.length > 100 || !/^01[0125][0-9]{8}$/.test(phone) ||
         !validBirthDate || profession.length < 2 || profession.length > 80 || experience.length > 1000 ||
-        bio.length < 30 || bio.length > 1500 || portfolioPaths.length < 1 || portfolioPaths.length > 5 ||
+        bio.length < 10 || bio.length > 1500 || portfolioPaths.length < 1 || portfolioPaths.length > 5 ||
         !portfolioPaths.every(ownedPath) || new Set(portfolioPaths).size !== portfolioPaths.length) {
-      return NextResponse.json({ message: "راجع الاسم والهاتف والمجال والنبذة، وارفع من 1 إلى 5 نماذج أعمال." }, { status: 400 });
+      return NextResponse.json({ message: "راجع الاسم والهاتف وتاريخ الميلاد والمجال والنبذة (10 أحرف على الأقل)، وارفع من 1 إلى 5 نماذج أعمال." }, { status: 400 });
     }
     const latest = await prisma.auditLog.findFirst({
       where: { targetId: user.id, action: { in: ["PROVIDER_APPLICATION_SUBMITTED", "PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
