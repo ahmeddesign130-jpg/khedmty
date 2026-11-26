@@ -5,11 +5,17 @@ import { sendKhedmtyCode } from "@/lib/email";
 import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
-const hash = (id: string, code: string) => createHash("sha256").update(`${process.env.AUTH_SECRET}:${id}:${code}`).digest("hex");
+const hash = (id: string, code: string) => {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 32) throw new Error("AUTH_SECRET missing");
+  return createHash("sha256").update(`${secret}:${id}:${code}`).digest("hex");
+};
 const go = (req: NextRequest, path: string) => NextResponse.redirect(new URL(path, req.url), 303);
 
 export async function POST(req: NextRequest) {
   try {
+    if (!enforceSameOrigin(req)) return go(req, "/forgot-password?error=invalid");
+    if (!await enforceRateLimit(req, "password-reset-request-ip", "all", 10, 3600)) return go(req, "/forgot-password?error=rate_limited");
     const form = await req.formData();
     const email = String(form.get("email") || "").trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return go(req, "/forgot-password?error=email");
