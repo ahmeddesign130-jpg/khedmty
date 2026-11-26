@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
-    if (!await enforceRateLimit(request, "upload-sign-user", user.id, 40, 3600)) return NextResponse.json({ message: "تجاوزت الحد المسموح لطلبات رفع الملفات. حاول لاحقًا." }, { status: 429 });
+    if (!await enforceRateLimit(request, "upload-sign-user", user.id, 40, 3600) || !await enforceRateLimit(request, "upload-sign-ip", "all", 100, 3600)) return NextResponse.json({ message: "تجاوزت الحد المسموح لطلبات رفع الملفات. حاول لاحقًا." }, { status: 429 });
     if (!storageReady()) return NextResponse.json({ message: "التخزين غير مهيأ بعد. أضف إعدادات Supabase في Vercel." }, { status: 503 });
     const body = await request.json();
     const kind = body?.kind;
