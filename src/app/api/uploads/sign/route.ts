@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createStorageUpload, serviceMediaPublicUrl, storageReady } from "@/lib/storage";
+import { enforceRateLimit, enforceSameOrigin } from "@/lib/security";
 export const dynamic = "force-dynamic";
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 40 * 1024 * 1024;
@@ -11,8 +12,10 @@ const VIDEO_TYPES = new Set(["video/mp4","video/webm","video/quicktime"]);
 const DELIVERY_TYPES = new Set([...IMAGE_TYPES, ...VIDEO_TYPES, "application/pdf", "application/zip", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]);
 export async function POST(request: Request) {
   try {
+    if (!enforceSameOrigin(request)) return NextResponse.json({ message: "الطلب غير مسموح." }, { status: 403 });
     const user = await getCurrentUser();
     if (!user) return NextResponse.json({ message: "يجب تسجيل الدخول أولاً." }, { status: 401 });
+    if (!await enforceRateLimit(request, "upload-sign-user", user.id, 40, 3600)) return NextResponse.json({ message: "تجاوزت الحد المسموح لطلبات رفع الملفات. حاول لاحقًا." }, { status: 429 });
     if (!storageReady()) return NextResponse.json({ message: "التخزين غير مهيأ بعد. أضف إعدادات Supabase في Vercel." }, { status: 503 });
     const body = await request.json();
     const kind = body?.kind;
