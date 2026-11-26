@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
     if (!storageReady()) return NextResponse.json({ message: "التخزين غير متاح حالياً. حاول لاحقاً." }, { status: 503 });
     const portfolioInfo = await Promise.all(portfolioPaths.map((path: string) => getStorageObjectInfo("provider-verification", path)));
-    if (portfolioInfo.some((info) => !info || !(["image/jpeg", "image/png", "image/webp"].includes(info.mimeType) ? info.size > 8 * 1024 * 1024 : !["video/mp4", "video/webm", "video/quicktime"].includes(info.mimeType) || info.size > 40 * 1024 * 1024))) return NextResponse.json({ message: "أحد نماذج الأعمال غير صالح أو حجمه أكبر من المسموح." }, { status: 400 });
+    if (portfolioInfo.some((info) => !info || !["image/jpeg", "image/png", "image/webp"].includes(info.mimeType) || info.size > 8 * 1024 * 1024)) return NextResponse.json({ message: "أحد نماذج الأعمال غير صالح أو حجمه أكبر من المسموح." }, { status: 400 });
     const portfolioFiles = await Promise.all(portfolioPaths.map((path: string) => createStorageDownload("provider-verification", path, 300)));
     if (portfolioFiles.some(url => !url)) return NextResponse.json({ message: "تعذر العثور على أحد نماذج الأعمال. أعد رفع الملفات." }, { status: 400 });
 
