@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
@@ -36,13 +37,14 @@ function getSecret() {
 export async function createSession(user: SessionUser): Promise<string> {
   const token = await new SignJWT({ id: user.id })
     .setProtectedHeader({ alg: "HS256" })
+    .setJti(randomUUID())
     .setIssuedAt()
     .setExpirationTime("7d")
     .sign(getSecret());
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "preview",
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_DURATION,
@@ -77,7 +79,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 
   let userId: string;
   try {
-    const { payload } = await jwtVerify(token, getSecret());
+    const { payload } = await jwtVerify(token, getSecret(), { algorithms: ["HS256"] });
     if (typeof payload.id !== "string") {
       console.warn("[auth-session] invalid_payload");
       return null;
