@@ -80,8 +80,10 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   }
 
   let userId: string;
+  let tokenSessionVersion = 0;
   try {
     const { payload } = await jwtVerify(token, getSecret(), { algorithms: ["HS256"] });
+    tokenSessionVersion = typeof payload.sv === "number" ? payload.sv : 0;
     if (typeof payload.id !== "string") {
       console.warn("[auth-session] invalid_payload");
       return null;
@@ -103,7 +105,6 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       console.warn("[auth-session] user_not_found");
       return null;
     }
-    const tokenSessionVersion = typeof payload.sv === "number" ? payload.sv : 0;
     if (tokenSessionVersion !== account.sessionVersion) {
       console.warn("[auth-session] session_revoked");
       return null;
