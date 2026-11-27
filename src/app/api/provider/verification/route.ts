@@ -46,8 +46,8 @@ export async function PUT(request: NextRequest) {
     const oldDraft = previous?.details ? decryptProviderApplication(previous.details) : null;
     const portfolioPaths = Array.isArray(body.portfolioPaths)
       ? body.portfolioPaths.map((p: unknown) => String(p)).slice(0, 5)
-      : oldDraft?.portfolioPaths || [];
-    const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..");
+      : (oldDraft?.portfolioPaths || []).filter((path: string) => /\.(jpg|jpeg|png|webp)$/i.test(path));
+    const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..") && /\.(jpg|jpeg|png|webp)$/i.test(path);
     if (portfolioPaths.some((path: string) => !ownedPath(path)) || new Set(portfolioPaths).size !== portfolioPaths.length) {
       return NextResponse.json({ message: "ملفات نماذج الأعمال غير صالحة." }, { status: 400 });
     }
@@ -92,12 +92,12 @@ export async function POST(request: NextRequest) {
     const idDateIsValid = !!idDate && idDate.getFullYear() === idYear && idDate.getMonth() === idMonth - 1 && idDate.getDate() === idDay;
     const validBirthDate = nationalId.length === 14 && idDateIsValid && dateOfBirth === `${idYear}-${String(idMonth).padStart(2, "0")}-${String(idDay).padStart(2, "0")}` && !!birthMatch && !!birthDate && birthDate.getFullYear() === Number(birthMatch[1]) && birthDate.getMonth() === Number(birthMatch[2]) - 1 && birthDate.getDate() === Number(birthMatch[3]) && birthDate.getTime() < Date.now();
     const portfolioPaths = Array.isArray(body.portfolioPaths) ? body.portfolioPaths.map((p: unknown) => String(p)) : [];
-    const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..");
+    const ownedPath = (path: string) => path.startsWith(user.id + "/portfolio/") && path.length <= 500 && !path.includes("..") && /\.(jpg|jpeg|png|webp)$/i.test(path);
     if (fullName.length < 3 || fullName.length > 100 || !/^01[0125][0-9]{8}$/.test(phone) ||
         !validBirthDate || profession.length < 2 || profession.length > 80 || experience.length > 1000 ||
         bio.length < 10 || bio.length > 1500 || portfolioPaths.length < 1 || portfolioPaths.length > 5 ||
         !portfolioPaths.every(ownedPath) || new Set(portfolioPaths).size !== portfolioPaths.length) {
-      return NextResponse.json({ message: "راجع الاسم والهاتف وتاريخ الميلاد والمجال والنبذة (10 أحرف على الأقل)، وارفع من 1 إلى 5 نماذج أعمال." }, { status: 400 });
+      return NextResponse.json({ message: "راجع الاسم والهاتف وتاريخ الميلاد والمجال والنبذة (10 أحرف على الأقل)، وارفع من 1 إلى 5 صور لنماذج أعمالك." }, { status: 400 });
     }
     const latest = await prisma.auditLog.findFirst({
       where: { targetId: user.id, action: { in: ["PROVIDER_APPLICATION_SUBMITTED", "PROVIDER_APPLICATION_REJECTED", "PROVIDER_APPLICATION_APPROVED"] } },
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     await prisma.auditLog.create({
       data: { actorId: user.id, targetId: user.id, action: "PROVIDER_APPLICATION_SUBMITTED", details: encrypted },
     });
-    return NextResponse.json({ success: true, message: "تم إرسال طلب الانضمام ونماذج الأعمال للإدارة للمراجعة." }, { status: 201 });
+    return NextResponse.json({ success: true, message: "تم إرسال طلب الانضمام وصور نماذج الأعمال للإدارة للمراجعة." }, { status: 201 });
   } catch (error) {
     console.error("PROVIDER_APPLICATION_SUBMIT_ERROR", error);
     return NextResponse.json({ message: "تعذر إرسال طلب الانضمام حاليًا." }, { status: 500 });
