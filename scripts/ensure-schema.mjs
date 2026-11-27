@@ -139,6 +139,25 @@ async function main() {
     END
     $service_category_compat$;
   `);
+  // Older database versions may still contain a required priceMinor column.
+  // The current Prisma Service model stores price in whole EG units and does not
+  // use priceMinor. Keep legacy values intact while allowing current inserts.
+  await prisma.$executeRawUnsafe(`
+    DO $service_price_compat$
+    BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Service'
+          AND column_name = 'priceMinor'
+          AND is_nullable = 'NO'
+      ) THEN
+        ALTER TABLE public."Service" ALTER COLUMN "priceMinor" DROP NOT NULL;
+      END IF;
+    END
+    $service_price_compat$;
+  `);
+
   // Public service references are required by the production database.
   await prisma.$executeRawUnsafe('ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "publicCode" TEXT');
   await prisma.$executeRawUnsafe(`UPDATE "Service" SET "publicCode" = 'KH-PUB-' || UPPER(SUBSTRING(MD5("id") FROM 1 FOR 12)) WHERE "publicCode" IS NULL`);
