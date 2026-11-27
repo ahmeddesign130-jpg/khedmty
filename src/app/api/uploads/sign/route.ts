@@ -30,8 +30,8 @@ export async function POST(request: Request) {
       bucket = "service-media";
     } else if (kind === "provider-portfolio") {
       if (!((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) return NextResponse.json({ message: "رفع نماذج الأعمال متاح للمتقدمين فقط." }, { status: 403 });
-      if (!IMAGE_TYPES.has(mimeType) && !VIDEO_TYPES.has(mimeType)) return NextResponse.json({ message: "الصيغ المسموحة: JPG وPNG وWEBP وMP4 وWEBM وMOV." }, { status: 400 });
-      maxSize = VIDEO_TYPES.has(mimeType) ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+      if (!IMAGE_TYPES.has(mimeType)) return NextResponse.json({ message: "نماذج أعمال مقدم الخدمة تقبل الصور فقط بصيغ JPG وPNG وWEBP." }, { status: 400 });
+      maxSize = MAX_IMAGE_BYTES;
       bucket = "provider-verification";
     } else if (kind === "provider-verification") {
       if (!((user.role === "PROVIDER" && user.status === "PENDING") || (user.role === "CUSTOMER" && user.status === "ACTIVE"))) return NextResponse.json({ message: "رفع مستندات التحقق متاح للمتقدمين المؤهلين فقط." }, { status: 403 });
