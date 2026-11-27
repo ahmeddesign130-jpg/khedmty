@@ -142,6 +142,25 @@ async function main() {
   // Older database versions may still contain a required priceMinor column.
   // The current Prisma Service model stores price in whole EG units and does not
   // use priceMinor. Keep legacy values intact while allowing current inserts.
+  // Some legacy production Service tables still require deliveryDays, although
+  // the current marketplace form does not collect that field. Preserve existing
+  // values and allow new services to omit this retired column.
+  await prisma.$executeRawUnsafe(`
+    DO $service_delivery_days_compat$
+    BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'Service'
+          AND column_name = 'deliveryDays'
+          AND is_nullable = 'NO'
+      ) THEN
+        ALTER TABLE public."Service" ALTER COLUMN "deliveryDays" DROP NOT NULL;
+      END IF;
+    END
+    $service_delivery_days_compat$;
+  `);
+
   await prisma.$executeRawUnsafe(`
     DO $service_price_compat$
     BEGIN
