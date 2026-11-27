@@ -42,7 +42,7 @@ export default function ProviderVerificationForm() {
           if (field && typeof value === "string") field.value = value;
         }
         if (typeof draft.dateOfBirth === "string") setDateOfBirth(draft.dateOfBirth);
-        if (Array.isArray(draft.portfolioPaths)) setPortfolioPaths(draft.portfolioPaths.slice(0, 5));
+        if (Array.isArray(draft.portfolioPaths)) setPortfolioPaths(draft.portfolioPaths.filter(path => /\.(jpg|jpeg|png|webp)$/i.test(path)).slice(0, 5));
         setDraftStatus("استعدنا بياناتك المحفوظة. أكمل من حيث توقفت. لأسباب أمنية، أعد إدخال الرقم القومي لاستخراج تاريخ الميلاد عند الإرسال.");
       })
       .catch(() => { if (active) setDraftStatus("لم نتمكن من تحميل المسودة؛ يمكنك متابعة الكتابة وسيتم حفظها."); })
@@ -162,12 +162,11 @@ export default function ProviderVerificationForm() {
     if (!selected.length) return;
     if (portfolioPaths.length + selected.length > 5) { setError("يمكن حفظ 5 نماذج أعمال كحد أقصى."); event.target.value = ""; return; }
     for (const file of selected) {
-      const video = file.type.startsWith("video/");
-      if (video ? file.size > 40 * 1024 * 1024 : file.size > 8 * 1024 * 1024) {
-        setError("حجم الصورة حتى 8 MB والفيديو حتى 40 MB."); event.target.value = ""; return;
+      if (file.size > 8 * 1024 * 1024) {
+        setError("حجم الصورة يجب ألا يتجاوز 8 MB."); event.target.value = ""; return;
       }
-      if (!["image/jpeg","image/png","image/webp","video/mp4","video/webm","video/quicktime"].includes(file.type)) {
-        setError("الصيغ المسموحة: JPG وPNG وWEBP وMP4 وWEBM وMOV."); event.target.value = ""; return;
+      if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
+        setError("رفع نماذج الأعمال بالصور فقط: JPG وPNG وWEBP. الفيديو غير متاح."); event.target.value = ""; return;
       }
     }
     setError("");
@@ -183,7 +182,7 @@ export default function ProviderVerificationForm() {
       setPortfolioPaths(updated);
       const form = document.getElementById("provider-verification-form") as HTMLFormElement | null;
       if (form) await persistDraft(form, updated);
-      setDraftStatus("تم رفع وحفظ نماذج أعمالك. ستجدها عند العودة لحسابك.");
+      setDraftStatus("تم رفع وحفظ صور نماذج أعمالك. ستجدها عند العودة لحسابك.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "تعذر رفع نماذج الأعمال.");
     } finally {
@@ -196,7 +195,7 @@ export default function ProviderVerificationForm() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError("");
     if (nationalId.length !== 14 || !dateOfBirth) { setError("أعد إدخال رقم قومي مصري صحيح من 14 رقمًا للتأكد من تاريخ الميلاد."); setStep(0); return; }
-    if (uploading || portfolioPaths.length < 1 || portfolioPaths.length > 5) { setError("ارفع نموذج عمل واحدًا على الأقل (حتى 5 ملفات) وانتظر اكتمال الرفع."); return; }
+    if (uploading || portfolioPaths.length < 1 || portfolioPaths.length > 5) { setError("ارفع صورة واحدة على الأقل من نماذج أعمالك (حتى 5 صور) وانتظر اكتمال الرفع."); return; }
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const fullName = String(form.get("fullName") || "").trim();
@@ -226,7 +225,7 @@ export default function ProviderVerificationForm() {
     } finally { setBusy(false); setProgress(""); }
   }
 
-  if (submitted) return <section role="status" aria-live="polite" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-3xl font-black text-emerald-700">✓</div><h2 className="mt-4 text-xl font-black text-emerald-900">تم إرسال طلبك بنجاح</h2><p className="mt-3 leading-8 text-emerald-800">وصلت بياناتك ونماذج أعمالك إلى الإدارة للمراجعة. لن يتم تفعيل حساب مقدم الخدمة إلا بعد موافقة الأدمن. لا تحتاج إلى إرسال الطلب مرة أخرى.</p><p className="mt-3 text-sm font-bold text-emerald-700">يمكنك العودة إلى الرئيسية بأمان.</p></section>;
+  if (submitted) return <section role="status" aria-live="polite" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-3xl font-black text-emerald-700">✓</div><h2 className="mt-4 text-xl font-black text-emerald-900">تم إرسال طلبك بنجاح</h2><p className="mt-3 leading-8 text-emerald-800">وصلت بياناتك وصور نماذج أعمالك إلى الإدارة للمراجعة. لن يتم تفعيل حساب مقدم الخدمة إلا بعد موافقة الأدمن. لا تحتاج إلى إرسال الطلب مرة أخرى.</p><p className="mt-3 text-sm font-bold text-emerald-700">يمكنك العودة إلى الرئيسية بأمان.</p></section>;
 
   return <form id="provider-verification-form" onSubmit={submit} onChange={handleChange} onBlur={handleBlur} noValidate className="mt-6">
     <div className="rounded-2xl border border-orange-100 bg-orange-50 p-4">
@@ -269,12 +268,12 @@ export default function ProviderVerificationForm() {
           <textarea name="bio" required minLength={10} maxLength={1500} rows={5} className="mt-2 w-full rounded-xl border border-slate-200 p-3" placeholder="عرّفنا بنفسك ومهاراتك وطريقة عملك"/>
           <span className="mt-1 block text-xs font-normal text-slate-500">اكتب 10 أحرف على الأقل عن خبرتك والخدمات التي تقدمها.</span>
         </label>
-        <label className="block text-sm font-bold text-slate-700">نماذج من أعمالك (مطلوب من 1 إلى 5 ملفات)
-          <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" multiple onChange={handleFiles} disabled={uploading || portfolioPaths.length >= 5} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/>
-          <span className="mt-1 block text-xs font-normal text-slate-500">صور JPG/PNG/WEBP حتى 8 MB، أو فيديو MP4/WEBM/MOV حتى 40 MB. يتم رفع الملفات وحفظها فور اختيارها.</span>
+        <label className="block text-sm font-bold text-slate-700">صور من أعمالك (مطلوب من 1 إلى 5 صور)
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleFiles} disabled={uploading || portfolioPaths.length >= 5} className="mt-2 block w-full rounded-xl border border-slate-200 p-3 text-sm"/>
+          <span className="mt-1 block text-xs font-normal text-slate-500">الصور فقط بصيغ JPG وPNG وWEBP، بحد أقصى 8 MB للصورة. لا يمكن رفع فيديوهات في طلب التسجيل. يتم رفع الصور وحفظها فور اختيارها.</span>
         </label>
         {files.length>0&&<p className="text-sm font-bold text-slate-600">تم اختيار {files.length} ملف في هذه الجلسة</p>}
-        {portfolioPaths.length>0&&<p className="rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-800">نماذج أعمال محفوظة: {portfolioPaths.length} من 5 — ستظل موجودة عند العودة لحسابك.</p>}
+        {portfolioPaths.length>0&&<p className="rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-800">صور محفوظة: {portfolioPaths.length} من 5 — ستظل موجودة عند العودة لحسابك.</p>}
       </fieldset>
     </div>
     {draftStatus&&<p role="status" aria-live="polite" className="mt-3 rounded-xl bg-blue-50 p-3 text-sm font-bold text-blue-800">{draftStatus}</p>}
